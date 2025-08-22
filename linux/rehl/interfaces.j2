@@ -58,7 +58,10 @@ nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname 
 {%-      if interface.custom_field_data.get("auto_config", false)  %}
 {%-        if interface.type != "virtual" and interface.type != "bridge" and interface.type != "lag" %}
 {%-          set inter_type = "ethernet" %}
+{%-        if interface.lag == None %}
 nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} 
+{%-        elif interface.lag == None %}
+nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} master {{ interface.lag.name }}
 {%-        endif  %}
 {%-      endif %}
 {%-    endfor %}
