@@ -1,6 +1,6 @@
 
 {%-    if device.interfaces %}
-{%-        include "base.j2" %}
+{%-        include "cisco/iosxr/ncs/base.j2" %}
 {%-        if bridge_groups %}
 l2vpn
 {%-            for bg, bds in bridge_groups.items() %}
