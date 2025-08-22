@@ -1,6 +1,7 @@
 {%-  if device.interfaces != None %}
 test 1
-
+{#   ########################################################################   #}
+{#   deltion of bond interfaces #}
 {%-    for interface in device.interfaces.all() %}
 test 2
 {%-        if interface.custom_field_data.get("auto_config", false)  %}
