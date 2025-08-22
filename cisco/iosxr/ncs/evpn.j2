@@ -1,5 +1,4 @@
-{% extends './base.j2' %}
-
+{% extends 'cisco/iosxr/ncs/base.j2' %}
 
 {%- if device.interfaces %}
 {%- set ns = namespace(found=false) %}
