@@ -1,8 +1,4 @@
-test 1
-{% extends 'cisco/iosxr/ncs/evpn.j2' %}
-test 2
-{{ bridge_groups }}
-test 3
+{%- set bridge_groups = build_bridge_groups(device) %}
 
 {%- if bridge_groups %}
 l2vpn
