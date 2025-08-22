@@ -1,55 +1,57 @@
 {% if device.interfaces != None %} 
-{%- for interface in device.interfaces.all() %}
+{%-   for interface in device.interfaces.all() %}
+{%-     if interface.custom_field_data.get("auto_config", false)  % }
 interface {{ interface.name }} {{ "l2transport" if interface.custom_field_data.get("l2transport") else "" }}
-{%- if interface.lag != none %}
+{%-         if interface.lag != none %}
   bundle id {% for char in interface.lag.name if char.isdigit() %}{{ char }}{% endfor %} {{ 
     "mode " ~ interface.custom_field_data.get("lacp_mode") if interface.custom_field_data.get("lacp_mode") else "" }}
-{%- endif %}
-{%- if interface.description != "" %}
+{%-         endif %}
+{%-         if interface.description != "" %}
   description {{ interface.description }}
-{%- endif %}
-{%- if interface.lag == none %}
-{%- if interface.mtu != None %}
+{%-         endif %}
+{%-         if interface.lag == none %}
+{%-             if interface.mtu != None %}
   mtu {{ interface.mtu}}
-{%- endif %}
-{%- for sp_type in ["input", "output"] %}
-{%- if interface.custom_field_data.get("service_policy_" ~ sp_type) %}
+{%-             endif %}
+{%-             for sp_type in ["input", "output"] %}
+{%-                 if interface.custom_field_data.get("service_policy_" ~ sp_type) %}
   service-policy {{sp_type}} {{interface.custom_field_data.get("service_policy_" ~ sp_type)}}
-{%- endif %}
-{%- endfor %}
-{%- if interface.mac_address != None %}
-  {%- if interface.type.value == lag %}
-  {% set raw_mac = interface.mac_address | lower | replace(":", "") | replace("-", "") | replace(".", "") %}{% set groups = [ raw_mac[0:4], raw_mac[4:8], raw_mac[8:12] ] %}lacp system mac {{ groups | join('.') }}
-  {%- endif %}
-{%- endif %}
-{%- endif %}
-{%- if interface.custom_field_data.get("lacp_period") %}
+{%-                 endif %}
+{%-             endfor %}
+{%-             if interface.mac_address != None %}
+{%-                 if interface.type.value == lag %}
+{% set raw_mac = interface.mac_address | lower | replace(":", "") | replace("-", "") | replace(".", "") %}{% set groups = [ raw_mac[0:4], raw_mac[4:8], raw_mac[8:12] ] %}lacp system mac {{ groups | join('.') }}
+{%-                 endif %}
+{%-             endif %}
+{%-         endif %}
+{%-         if interface.custom_field_data.get("lacp_period") %}
   lcap period {{interface.custom_field_data.get("lacp_period")}}
-{%- endif %}
-{%- if interface.enabled == false %} 
+{%-         endif %}
+{%-         if interface.enabled == false %} 
   shutdown
-{%- elif interface.enabled == true %} 
+{%-         elif interface.enabled == true %} 
   no shutdown 
-{%- endif %}
-{%- if interface.lag == none %}
-{%- if interface.mode == "access" and interface.untagged_vlan %}
+{%-         endif %}
+{%-         if interface.lag == none %}
+{%-             if interface.mode == "access" and interface.untagged_vlan %}
   encapsulation dot1q {{ interface.untagged_vlan.vid }}
-{%- elif interface.mode == "tagged" and interface.tagged_vlans.count() == 1 %}
+{%-             elif interface.mode == "tagged" and interface.tagged_vlans.count() == 1 %}
   encapsulation dot1q {{ interface.tagged_vlans.first().vid }}
-{%- elif interface.mode == "tagged" and interface.tagged_vlans.count() > 1 %}
+{%-             elif interface.mode == "tagged" and interface.tagged_vlans.count() > 1 %}
   encapsulation dot1q all
-{%- endif %}
-{%- if interface.ip_addresses != None %}
-{%- for ip in interface.ip_addresses.all() %}
+{%-             endif %}
+{%-             if interface.ip_addresses != None %}
+{%-                 for ip in interface.ip_addresses.all() %}
   ip address {{ ip.address }} {{ ip.netmask }}
-{%- endfor %}
-{%- endif %}
-{%- endif %}
-{%- if interface.custom_field_data.get("rewrite_ingress_tag") %}
+{%-                 endfor %}
+{%-             endif %}
+{%-         endif %}
+{%-         if interface.custom_field_data.get("rewrite_ingress_tag") %}
   rewrite ingress tag {{ interface.custom_field_data.get("rewrite_ingress_tag") }}
-{%- endif %}
-{%- if interface.custom_field_data.get("load_interval") %}
+{%-         endif %}
+{%-         if interface.custom_field_data.get("load_interval") %}
   load-interval {{ interface.custom_field_data.get("load_interval") }}
-{%- endif %}
-{%- endfor %}
+{%-         endif %}
+{%-     endif %}
+{%-   endfor %}
 {% endif %}
