@@ -1,40 +1,35 @@
-{%- if device.interfaces %}
+{%-    if device.interfaces %}
+{%-        set ns = namespace(found=false) %}
+{%-        set bridge_groups = dict() %}
+{%-        for interface in device.interfaces.filter(type='virtual') %}
+{%-            if interface.parent and interface.parent.type == "lag" %}
+{%-                set bridge_group = interface.custom_field_data.get("EVPN_bridge_group") %}
+{%-                set base_evi = interface.custom_field_data.get("EVPN_bridge_domain") %}
 
-{%- set ns = namespace(found=false) %}
+{#--               Extract VLAN ID from the interface name after the dot, e.g. .100 → 100 --#}
+{%-                set vlan_id = interface.name.split(".")[1] | int if "." in interface.name else 0 %}
 
-{%- set bridge_groups = dict() %}
-{%- for interface in device.interfaces.filter(type='virtual') %}
-  {%- if interface.parent and interface.parent.type == "lag" %}
+{#--               Final EVI = base_evi + vlan_id --#}
+{%-                set evi = base_evi + vlan_id %}
 
-    {%- set bridge_group = interface.custom_field_data.get("EVPN_bridge_group") %}
-    {%- set base_evi = interface.custom_field_data.get("EVPN_bridge_domain") %}
+{%-                if bridge_group %}
+{%-                    set _dummy = bridge_groups.setdefault(bridge_group, {})  %}
+{%-                    set _dummy = bridge_groups[bridge_group].setdefault(evi, [])  %}
+{%-                    set _dummy = bridge_groups[bridge_group][evi].append(interface.name)  %}
+{%-                endif %}
+{%-            endif %}
+{%-        endfor %}
 
-    {#-- Extract VLAN ID from the interface name after the dot, e.g. .100 → 100 --#}
-    {%- set vlan_id = interface.name.split(".")[1] | int if "." in interface.name else 0 %}
-    {#-- Final EVI = base_evi + vlan_id --#}
-    {%- set evi = base_evi + vlan_id %}
-
-    {%- if bridge_group %}
-      {%- set _dummy = bridge_groups.setdefault(bridge_group, {})  %}
-        
-      {%- set _dummy = bridge_groups[bridge_group].setdefault(evi, [])  %}
-      {%- set _dummy = bridge_groups[bridge_group][evi].append(interface.name)  %}
-    {%- endif %}
-  {%- endif %}
-{%- endfor %}
-
-
-{%- if bridge_groups %}
+{%-        if bridge_groups %}
 evpn
-{%-   for bg, bds in bridge_groups.items() %}
-{%-     for evi, interfaces in bds.items() %}
+{%-            for bg, bds in bridge_groups.items() %}
+{%-                for evi, interfaces in bds.items() %}
   evi {{ evi }}
     bgp
       route-target import 1:{{ evi }}
       route-target export 1:{{ evi }}
     !
-{%-     endfor %}
-{%-   endfor %}
-
-{%- endif %}
-{%- endif %}
+{%-                endfor %}
+{%-            endfor %}
+{%-        endif %}
+{%-    endif %}
