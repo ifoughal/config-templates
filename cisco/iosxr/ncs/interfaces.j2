@@ -2,20 +2,17 @@
 {%-    for interface in device.interfaces.all() %}
 {%-        if interface.custom_field_data.get("auto_config", false)  %}
 interface {{ interface.name }} {{ "l2transport" if interface.custom_field_data.get("l2transport") else "" }}
-
 {%-            if interface.enabled == false %} 
   shutdown
 {%-            elif interface.enabled == true %} 
   no shutdown 
 {%-            endif %}
-
 {%-            if interface.lag != none %}
   bundle id {% for char in interface.lag.name if char.isdigit() %}{{ char }}{% endfor %} {{ "mode " ~ interface.custom_field_data.get("lacp_mode") if interface.custom_field_data.get("lacp_mode") else "" }}
 {%-            endif %}
 {%-            if interface.description != "" %}
   description {{ interface.description }}
 {%-            endif %}
-
 {%-            if interface.lag == none %}
 {%-                if interface.mtu != None %}
   mtu {{ interface.mtu}}
