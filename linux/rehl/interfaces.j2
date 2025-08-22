@@ -6,6 +6,7 @@
 nmcli connection delete {{ interface.name }}
 {%-        endif %}
 {%-    endfor %}
+
 {#-   ########################################################################   #}
 {#-   adding bond interfaces #}
 {%-    for interface in device.interfaces.all() %}
@@ -13,7 +14,6 @@ nmcli connection delete {{ interface.name }}
 {%-        if interface.type == "lag"  %}
 {%-          set inter_type = "bond" %}
 nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }}
-
 {%-          if interface.mtu != None  %}
 nmcli connection modify {{ interface.name }} 802-3-ethernet.mtu {{ interface.mtu }}
 {%-          endif  %}
