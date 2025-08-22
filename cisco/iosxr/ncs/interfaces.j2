@@ -3,7 +3,6 @@
 {%-        if interface.custom_field_data.get("auto_config", false)  %}
 interface {{ interface.name }} {{ "l2transport" if interface.custom_field_data.get("l2transport") else "" }}
 
-
 {%-            if interface.enabled == false %} 
   shutdown
 {%-            elif interface.enabled == true %} 
