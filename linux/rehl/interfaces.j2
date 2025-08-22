@@ -1,13 +1,11 @@
 {%-  if device.interfaces != None %} 
+{#--   ########################################################################   --}
+{#--   deeltion of bond interfaces --}
 {%-    for interface in device.interfaces.all() %}
 {%-        if interface.custom_field_data.get("auto_config", false)  %}
 nmcli connection delete {{ interface.name }}
 {%-        endif %}
 {%-    endfor %}
-{%-  endif %}
-{%-  if device.interfaces != None %} 
-
-
 {#--   ########################################################################   --}
 {#--   adding bond interfaces --}
 {%-    for interface in device.interfaces.all() %}
