@@ -54,6 +54,13 @@ nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname 
 {#-    ######################################################################## #}
 {#-      Ether interfaces #}
 {#-    ######################################################################## #}
-
+{%-    for interface in device.interfaces.all() %}
+{%-      if interface.custom_field_data.get("auto_config", false)  %}
+{%-        if interface.type != "virtual"  &&  interface.type != "bridge" && interface.type != "lag" %}
+{%-          set inter_type = "ethernet" %}
+nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} 
+{%-        endif  %}
+{%-      endif %}
+{%-    endfor %}
 {%-  endif %}
 echo "Config done"
