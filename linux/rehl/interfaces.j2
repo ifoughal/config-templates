@@ -2,12 +2,20 @@
 {%-    for interface in device.interfaces.all() %}
 {%-        if interface.custom_field_data.get("auto_config", false)  %}
 nmcli connection delete {{ interface.name }}
+{%-        endif %}
+{%-    endfor %}
+{%-  endif %}
+
+{%-  if device.interfaces != None %} 
+{%-    for interface in device.interfaces.all() %}
+{%-        if interface.custom_field_data.get("auto_config", false)  %}
+{%-          set inter_type = "ethernet" %}
 {%-          if interface.type == "lag"  %}
-{%-            set inter_type=bond %}
+{%-            set inter_type = "bond" %}
 {%-          elif interface.type == "virtual"  %}
-{%-            set inter_type=vlan %}
+{%-            set inter_type = "vlan" %}
 {%-          else  %}
-{%-            set inter_type=ethernet %}
+{%-            set inter_type = "ethernet" %}
 {%-          endif  %}
 nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }}
 
@@ -17,3 +25,4 @@ nmcli connection modify {{ interface.name }} 802-3-ethernet.mtu {{ interface.mtu
 {%-        endif %}
 {%-    endfor %}
 {%-  endif %}
+
