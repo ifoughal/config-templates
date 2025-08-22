@@ -60,7 +60,7 @@ nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname 
 {%-          set inter_type = "ethernet" %}
 {%-        if interface.lag == None %}
 nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} 
-{%-        elif interface.lag == None %}
+{%-        else %}
 nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} master {{ interface.lag.name }}
 {%-        endif  %}
 {%-      endif %}
