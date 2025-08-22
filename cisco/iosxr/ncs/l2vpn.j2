@@ -1,4 +1,4 @@
-{%- set bridge_groups = build_bridge_groups(device) %}
+{% include "bridge_groups.j2" %}
 
 {%- if bridge_groups %}
 l2vpn

@@ -1,7 +1,6 @@
-hostname {{ device.name }}
 
+{# builds bridge_groups dict #}
 
-{% macro build_bridge_groups(device) %}
 {%-    if device.interfaces %}
 {%-        set ns = namespace(found=false) %}
 {%-        set bridge_groups = dict() %}
@@ -23,4 +22,3 @@ hostname {{ device.name }}
 {%-                endif %}
 {%-            endif %}
 {%-        endfor %}
-{% endmacro %}
