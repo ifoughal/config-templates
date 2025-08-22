@@ -28,7 +28,6 @@ evpn
 {%-   for bg, bds in bridge_groups.items() %}
 {%-     for evi, interfaces in bds.items() %}
   evi {{ evi }}
-    evi {{ evi }}
     bgp
       route-target import 1:{{ evi }}
       route-target export 1:{{ evi }}
