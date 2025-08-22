@@ -1,8 +1,7 @@
 
 
 {%-    if device.interfaces %}
-{% include "bridge_groups.j2" %}
-
+{%-        include "base.j2" %}
 {%-        if bridge_groups %}
 evpn
 {%-            for bg, bds in bridge_groups.items() %}
