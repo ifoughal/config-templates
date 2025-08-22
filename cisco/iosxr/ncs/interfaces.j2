@@ -1,6 +1,6 @@
 {%-  if device.interfaces != None %} 
 {%-     for interface in device.interfaces.all() %}
-{%-         if interface.custom_field_data.get("auto_config", false)  % }
+{%-         if interface.custom_field_data.get("auto_config", false)  %}
 interface {{ interface.name }} {{ "l2transport" if interface.custom_field_data.get("l2transport") else "" }}
 {%-          endif %}
 {%-     endfor %}
