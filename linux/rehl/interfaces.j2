@@ -41,16 +41,18 @@ nmcli connection modify {{ interface.name }} ipv{{ family }}.method disabled
 {%-      endif %}
 {%-    endfor %}
 {#-    ######################################################################## #}
-
-
-
+{#-    adding vlan interfaces #}
+{#-    ######################################################################## #}
+{%-    for interface in device.interfaces.all() %}
+{%-      if interface.custom_field_data.get("auto_config", false)  %}
+{%-        if interface.type == "virtual"  %}
+{%-          set inter_type = "vlan" %}
+nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} dev {{ interface.parent.name }} id {% for char in interface.name.split('.')[1] if char.isdigit() %}{{ char }}{% endfor %}
+{%-        endif  %}
+{%-      endif %}
+{%-    endfor %}
 {#-    ######################################################################## #}
 {#-      Ether interfaces #}
-{#-    ######################################################################## #}
-
-
-{#-    ######################################################################## #}
-{#-    adding vlan interfaces #}
 {#-    ######################################################################## #}
 
 {%-  endif %}
