@@ -1,0 +1,21 @@
+{# builds bridge_groups dict #}
+{%-        set ns = namespace(found=false) %}
+{%-        set bridge_groups = dict() %}
+{%-        for interface in device.interfaces.filter(type='virtual') %}
+{%-            if interface.parent and interface.parent.type == "lag" %}
+{%-                set bridge_group = interface.custom_field_data.get("EVPN_bridge_group") %}
+{%-                set base_evi = interface.custom_field_data.get("EVPN_bridge_domain") %}
+{#--               Extract VLAN ID from the interface name after the dot, e.g. .100 → 100 --#}
+{%-                set vlan_id = interface.name.split(".")[1] | int if "." in interface.name else 0 %}
+{#--               Final EVI = base_evi + vlan_id --#}
+{%-                set evi = base_evi + vlan_id %}
+{%-                if bridge_group %}
+{%-                    set _dummy = bridge_groups.setdefault(bridge_group, {})  %}
+{%-                    set _dummy = bridge_groups[bridge_group].setdefault(evi, [])  %}
+{%-                    set _dummy = bridge_groups[bridge_group][evi].append(interface.name)  %}
+{%-                endif %}
+{%-            endif %}
+{%-        endfor %}
+{%-        include "cisco/iosxr/ncs/evpn.j2" %}
+!
+{%-        include "cisco/iosxr/ncs/l2vpn.j2" %}
