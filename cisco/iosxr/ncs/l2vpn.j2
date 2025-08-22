@@ -1,17 +1,18 @@
-{% include "bridge_groups.j2" %}
 
-{%- if bridge_groups %}
+{%-    if device.interfaces %}
+{%-        include "bridge_groups.j2" %}
+{%-        if bridge_groups %}
 l2vpn
-{%-    for bg, bds in bridge_groups.items() %}
+{%-            for bg, bds in bridge_groups.items() %}
   bridge group {{ bg }}
-{%-        for evi, interfaces in bds.items() %}
+{%-                for evi, interfaces in bds.items() %}
     bridge-domain EVPN_{{ evi }} 
-{%-           for inter in interfaces %}
+{%-                    for inter in interfaces %}
       interface {{ inter }}
-{%-           endfor %}
+{%-                    endfor %}
       evi {{ evi }}
-{%-        endfor %}
-{%-    endfor %}
-{%-   endif %}
-
+{%-                endfor %}
+{%-            endfor %}
+{%-        endif %}
 {{ bridge_groups }}
+{%-    endif %}

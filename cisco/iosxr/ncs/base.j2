@@ -1,7 +1,6 @@
 
 {# builds bridge_groups dict #}
 
-{%-    if device.interfaces %}
 {%-        set ns = namespace(found=false) %}
 {%-        set bridge_groups = dict() %}
 {%-        for interface in device.interfaces.filter(type='virtual') %}
