@@ -1,3 +1,5 @@
+{% include 'cisco/iosxr/ncs/evpn.j2' %}
+
 l2vpn
 {%-   for bg, bds in bridge_groups.items() %}
   bridge group {{ bg }}
@@ -12,4 +14,3 @@ l2vpn
 {%-   endif %}
 
 {{ bridge_groups }}
-
