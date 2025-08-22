@@ -1,7 +1,9 @@
 
-
+test 1
 {%-    if device.interfaces %}
+test 2
 {%-        include "cisco/iosxr/ncs/base.j2" %}
+test 3
 {%-        if bridge_groups %}
 evpn
 {%-            for bg, bds in bridge_groups.items() %}
