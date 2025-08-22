@@ -43,7 +43,6 @@ interface {{ interface.name }} {{ "l2transport" if interface.custom_field_data.g
 {%-                    endfor %}
 {%-                endif %}
 {%-            endif %}
-
 {%-            if interface.custom_field_data.get("rewrite_ingress_tag") %}
   rewrite ingress tag {{ interface.custom_field_data.get("rewrite_ingress_tag") }}
 {%-            endif %}
