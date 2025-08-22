@@ -18,6 +18,8 @@ nmcli connection modify {{ interface.name }} mode 802.3ad
 nmcli connection modify {{ interface.name }} miimon 100
 nmcli connection modify {{ interface.name }} lacp_rate {{ "fast" if interface.custom_field_data.get("lacp_period") == "short" else "slow" }}
 {%-          if interface.mac_addresses != [] %}
+intefrcace: {{interface.name }}
+interface.mac_addresses:  {{ interface.mac_addresses }}
 {%-            if interface.mac_address != None  %}
 {%-              set mac_address = interface.mac_address %}
 {%-            else  %}
