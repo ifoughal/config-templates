@@ -1,5 +1,7 @@
 {% extends 'cisco/iosxr/ncs/base.j2' %}
 
+{% block content %}
+
 {%- if device.interfaces %}
 {%- set ns = namespace(found=false) %}
 
@@ -54,3 +56,5 @@ l2vpn
 
 {{ bridge_groups }}
 {%- endif %}
+
+{% endblock %}
