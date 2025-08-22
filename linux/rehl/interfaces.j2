@@ -28,23 +28,15 @@ nmcli connection modify {{ interface.name }} 802.3-ethernet.cloned-mac-address {
 {%-          if interface.mtu != None  %}
 nmcli connection modify {{ interface.name }} 802-3-ethernet.mtu {{ interface.mtu }}
 {%-          endif  %}
-{%-          if interface.ip_addresses.filter(address__family=4) %}
-{%-            for ip in interface.ip_addresses.filter(address__family=4) %}
-nmcli connection modify {{ interface.name }} ipv4.method manual ipv4.address {{ ip.address }}
-{%-            endfor %}
-{%-          else  %}
-nmcli connection modify {{ interface.name }} ipv4.method disabled
-{%-          endif  %}
-
-{%-          if interface.ip_addresses.filter(address__family=6) %} 
-{%-            for ip in interface.ip_addresses.filter(address__family=6) %}
-nmcli connection modify {{ interface.name }} ipv4.method manual ipv6.address {{ ip.address }}
-{%-            endfor %}
-{%-          else  %}
-nmcli connection modify {{ interface.name }} ipv6.method disabled
-{%-          endif  %}
-
-
+{%-          for family in [4, 6] %}
+{%-            if interface.ip_addresses.filter(address__family=family) %}
+{%-              for ip in interface.ip_addresses.filter(address__family=family) %}
+nmcli connection modify {{ interface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
+{%-              endfor %}
+{%-            else  %}
+nmcli connection modify {{ interface.name }} ipv{{ family }}.method disabled
+{%-            endif  %}
+{%-          endfor %}
 {%-        endif  %}
 {%-      endif %}
 {%-    endfor %}
