@@ -5,24 +5,35 @@ nmcli connection delete {{ interface.name }}
 {%-        endif %}
 {%-    endfor %}
 {%-  endif %}
-
 {%-  if device.interfaces != None %} 
+
+
+{#--   ########################################################################   --}
+{#--   adding bond interfaces --}
 {%-    for interface in device.interfaces.all() %}
-{%-        if interface.custom_field_data.get("auto_config", false)  %}
-{%-          set inter_type = "ethernet" %}
-{%-          if interface.type == "lag"  %}
-{%-            set inter_type = "bond" %}
-{%-          elif interface.type == "virtual"  %}
-{%-            set inter_type = "vlan" %}
-{%-          else  %}
-{%-            set inter_type = "ethernet" %}
-{%-          endif  %}
+{%-      if interface.custom_field_data.get("auto_config", false)  %}
+{%-        if interface.type == "lag"  %}
+{%-          set inter_type = "bond" %}
 nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }}
 
 {%-          if interface.mtu != None  %}
 nmcli connection modify {{ interface.name }} 802-3-ethernet.mtu {{ interface.mtu }}
 {%-          endif  %}
-{%-        endif %}
+{%-        endif  %}
+{%-      endif %}
 {%-    endfor %}
+{#-- ######################################################################## --}
+
+
+
+{#-- ######################################################################## --}
+{#-- adding Ether interfaces --}
+{#-- ######################################################################## --}
+
+
+{#-- ######################################################################## --}
+{#-- adding vlan interfaces --}
+{#-- ######################################################################## --}
+
 {%-  endif %}
 
