@@ -19,11 +19,11 @@ nmcli connection modify {{ interface.name }} miimon 100
 nmcli connection modify {{ interface.name }} lacp_rate {{ "fast" if interface.custom_field_data.get("lacp_period") == "short" else "slow" }}
 {%-          if interface.mac_addresses %}
 {%-            if interface.mac_address  %}
-{%-              set mac_adress = interface.mac_address %}
+{%-              set mac_address = interface.mac_address %}
 {%-            else  %}
 {%-              set mac_address = interface.mac_addresses.all() %}
 {%-            endif  %}
-nmcli connection modify {{ interface.name }} 802.3-ethernet.cloned-mac-address {{ mac_adress }}
+nmcli connection modify {{ interface.name }} 802.3-ethernet.cloned-mac-address {{ mac_address }}
 {%-          endif  %}
 {%-          if interface.mtu != None  %}
 nmcli connection modify {{ interface.name }} 802-3-ethernet.mtu {{ interface.mtu }}
