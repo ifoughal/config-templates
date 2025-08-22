@@ -1,1 +1,5 @@
 hostname {{ device.name }}
+
+{% include 'interfaces.j2' %}
+
+{% include 'evpn.j2' %}
