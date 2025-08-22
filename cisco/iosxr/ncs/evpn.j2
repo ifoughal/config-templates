@@ -1,6 +1,5 @@
-{% include 'cisco/iosxr/ncs/base.j2' %}
-
 {%- if device.interfaces %}
+
 {%- set ns = namespace(found=false) %}
 
 {%- set bridge_groups = dict() %}
@@ -37,20 +36,4 @@ evpn
 {%-     endfor %}
 {%-   endfor %}
 
-
-
-l2vpn
-{%-   for bg, bds in bridge_groups.items() %}
-  bridge group {{ bg }}
-{%-     for evi, interfaces in bds.items() %}
-    bridge-domain EVPN_{{ evi }} 
-{%-       for inter in interfaces %}
-      interface {{ inter }}
-{%-       endfor %}
-      evi {{ evi }}
-{%-       endfor %}
-{%-     endfor %}
-{%-   endif %}
-
-{{ bridge_groups }}
 {%- endif %}
