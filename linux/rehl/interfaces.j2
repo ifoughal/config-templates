@@ -63,6 +63,16 @@ nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname 
 {%-          else %}
 nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} master {{ interface.lag.name }}
 {%-          endif  %}
+nmcli connection modify {{ interface.name }} 802-3-ethernet.auto-negotiate no
+{%-          if interface.speed != None  %}
+nmcli connection modify {{ interface.name }} 802-3-ethernet.speed {{ interface.speed}}
+{%-          endif  %}
+{%-          if interface.duplex != None  %}
+nmcli connection modify {{ interface.name }} 802-3-ethernet.duplex {{ interface.duplex}}
+{%-          endif  %}
+{%-          if interface.mtu != None  %}
+nmcli connection modify {{ interface.name }} 802-3-ethernet.mtu {{ interface.mtu }}
+{%-          endif  %}
 {%-        endif  %}
 {%-      endif %}
 {%-    endfor %}
