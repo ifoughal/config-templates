@@ -1,20 +1,16 @@
 
-test 1
-{%-    if device.interfaces %}
-test 2
-test 3
+{%-  if device.interfaces %}
 {{ bridge_groups }}
-test 4
-{%-        if bridge_groups %}
+{%-    if bridge_groups %}
 evpn
-{%-            for bg, bds in bridge_groups.items() %}
-{%-                for evi, interfaces in bds.items() %}
+{%-      for bg, bds in bridge_groups.items() %}
+{%-        for evi, interfaces in bds.items() %}
   evi {{ evi }}
     bgp
       route-target import 1:{{ evi }}
       route-target export 1:{{ evi }}
     !
-{%-                endfor %}
-{%-            endfor %}
-{%-        endif %}
+{%-        endfor %}
+{%-      endfor %}
 {%-    endif %}
+{%-  endif %}
