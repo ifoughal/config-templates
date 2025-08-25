@@ -14,8 +14,15 @@
 {%-                set _dummy = bridge_groups[bridge_group].setdefault(evi, [])  %}
 {%-                set _dummy = bridge_groups[bridge_group][evi].append(interface.name)  %}
 {#--            Extract VLAN ID from the interface name after the dot, e.g. .100 → 100 --#}
+{%-                  if interface.parent.mac_addresses.all().first() != None %}
+{%-                      if interface.parent.mac_address != None  %}
+{%-                          set mac_address = interface.parent.mac_address %}
+{%-                      else %}
+{%-                          set mac_address = interface.parent.mac_addresses.all().first() %}
+{%-                      endif  %}
+{%-                  endif  %}
 {%-                set _dummy = bridge_groups.setdefault("evpn_interfaces", {})  %}
-{%-                set _dummy = bridge_groups["evpn_interfaces"].update({interface.parent.name: interface.parent.mac_address | default("null", true) })  %}
+{%-                set _dummy = bridge_groups["evpn_interfaces"].update({interface.parent.name: interface.parent.mac_address | default("mac-address-no-set", true) })  %}
 {%-            endif %}
 {%-        endif %}
 {%-    endfor %}
