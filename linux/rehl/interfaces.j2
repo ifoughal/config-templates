@@ -23,7 +23,7 @@ nmcli connection modify {{ interface.name }} lacp-rate {{ "fast" if interface.cu
 {%-                      if interface.mac_address != None  %}
 {%-                          set mac_address = interface.mac_address %}
 {%-                      endif  %}
-nmcli connection modify {{ interface.name }} 802.3-ethernet.cloned-mac-address {{ mac_address }}
+nmcli connection modify {{ interface.name }} 802-3-ethernet.cloned-mac-address {{ mac_address }}
 {%-                  endif  %}
 {%-                  if interface.mtu != None  %}
 nmcli connection modify {{ interface.name }} 802-3-ethernet.mtu {{ interface.mtu }}
