@@ -4,7 +4,7 @@
 {#-      ########################################################################   #}
 {%-      for interface in device.interfaces.all() %}
 {%-          if interface.custom_field_data.get("auto_config", false)  %}
-nmcli connection delete {{ interface.name }}
+nmcli connection delete {{ interface.name }} 2> /dev/null
 {%-          endif %}
 {%-      endfor %}
 {#-      ########################################################################   #}
