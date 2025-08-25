@@ -15,6 +15,7 @@
 {%-                set _dummy = bridge_groups[bridge_group][evi].append(interface.name)  %}
 {#--            Extract VLAN ID from the interface name after the dot, e.g. .100 → 100 --#}
 {%-                set _dummy = bridge_groups.setdefault("evpn_interfaces", {})  %}
+{%-                set _dummy = bridge_groups["evpn_interfaces"].update({interface.parent: "test"})  %}
 {%-            endif %}
 {%-        endif %}
 {%-    endfor %}
