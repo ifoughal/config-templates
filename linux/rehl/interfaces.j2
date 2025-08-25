@@ -16,7 +16,8 @@ nmcli connection delete {{ interface.name }} > /dev/null 2>&1
 {%-          if interface.custom_field_data.get("auto_config", false)  %}
 {%-              if interface.type == "lag"  %}
 {%-                  set inter_type = "bond" %}
-nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} bond.options "mode=802.3ad,miimon=100"
+nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} 
+nmcli connection modify {{ interface.name }} bond.options "mode=802.3ad,miimon=100"
 nmcli connection modify {{ interface.name }} lacp-rate {{ "fast" if interface.custom_field_data.get("lacp_period") == "short" else "slow" }}
 {%-                  if interface.mac_addresses.all().first() != None %}
 {%-                      set mac_address = interface.mac_addresses.all().first() %}
