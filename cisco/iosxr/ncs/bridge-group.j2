@@ -22,7 +22,7 @@
 {%-                      endif  %}
 {%-                  endif  %}
 {%-                set _dummy = bridge_groups.setdefault("evpn_interfaces", {})  %}
-{%-                set _dummy = bridge_groups["evpn_interfaces"].update({interface.parent.name: mac_address | default("mac-address-no-set", true) })  %}
+{%-                set _dummy = bridge_groups["evpn_interfaces"].update({interface.parent.name: mac_address.mac_address | default("mac-address-no-set", true) })  %}
 {%-            endif %}
 {%-        endif %}
 {%-    endfor %}
