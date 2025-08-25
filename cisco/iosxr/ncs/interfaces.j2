@@ -24,11 +24,8 @@ interface {{ interface.name }} {{ "l2transport" if interface.custom_field_data.g
 {%-                endfor %}
 {%-                if interface.mac_address != None %}
 {%-                    if interface.type.value == lag %}
-{% set raw_mac = interface.mac_address | lower | replace(":", "") | replace("-", "") | replace(".", "") %}{% set groups = [ raw_mac[0:4], raw_mac[4:8], raw_mac[8:12] ] %}lacp system mac {{ groups | join('.') }}
+{%                         set raw_mac = interface.mac_address | lower | replace(":", "") | replace("-", "") | replace(".", "") %}{% set groups = [ raw_mac[0:4], raw_mac[4:8], raw_mac[8:12] ] %}lacp system mac {{ groups | join('.') }}
 {%-                    endif %}
-{%-                endif %}
-{%-                if interface.custom_field_data.get("lacp_period") %}
-  lcap period {{interface.custom_field_data.get("lacp_period")}}
 {%-                endif %}
 {%-                if interface.mode == "access" and interface.untagged_vlan %}
   encapsulation dot1q {{ interface.untagged_vlan.vid }}
@@ -42,6 +39,9 @@ interface {{ interface.name }} {{ "l2transport" if interface.custom_field_data.g
   ip address {{ ip.address }} {{ ip.netmask }}
 {%-                    endfor %}
 {%-                endif %}
+{%-            endif %}
+{%-            if interface.custom_field_data.get("lacp_period") %}
+  lcap period {{interface.custom_field_data.get("lacp_period")}}
 {%-            endif %}
 {%-            if interface.custom_field_data.get("rewrite_ingress_tag") %}
   rewrite ingress tag {{ interface.custom_field_data.get("rewrite_ingress_tag") }}
