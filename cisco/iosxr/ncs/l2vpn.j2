@@ -7,6 +7,7 @@ l2vpn
     bridge-domain EVPN_{{ evi }} 
 {%-                    for inter in interfaces %}
       interface {{ inter }}
+      !
 {%-                    endfor %}
       evi {{ evi }}
 {%-                endfor %}
@@ -15,5 +16,4 @@ l2vpn
     !
 {%-        endif %}
   !
-!
 {%-    endif %}
