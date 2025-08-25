@@ -1,8 +1,8 @@
-{%-  if device.interfaces %}
-{%-    if bridge_groups %}
+{%-    if device.interfaces %}
+{%-        if bridge_groups %}
 evpn
-{%-      for bg, bds in bridge_groups.items() %}
-{%-        for evi, interfaces in bds.items() %}
+{%-            for bg, bds in bridge_groups.items() %}
+{%-                for evi, interfaces in bds.items() %}
   evi {{ evi }}
     bgp
       route-target import 1:{{ evi }}
@@ -11,7 +11,14 @@ evpn
     advertise-mac
     !
   !
-{%-        endfor %}
-{%-      endfor %}
+{%-                    for interface in interfaces %}
+  interface Bundle-Ether{{ interface }}
+    ethernet-segment
+      identifier type 0 aa.00.00.78.20.61.00.12.01
+    !
+  !
+{%-                    endfor %}
+{%-                endfor %}
+{%-            endfor %}
+{%-        endif %}
 {%-    endif %}
-{%-  endif %}
