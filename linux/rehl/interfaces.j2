@@ -78,7 +78,7 @@ nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname 
 {%-              endif  %}
 nmcli connection modify {{ interface.name }} 802-3-ethernet.auto-negotiate no
 {%-                  if interface.speed != None  %}
-nmcli connection modify {{ interface.name }} 802-3-ethernet.speed {{ interface.speed}}
+nmcli connection modify {{ interface.name }} 802-3-ethernet.speed {{ interface.speed / 1000 }}
 {%-                  endif  %}
 {%-                  if interface.duplex != None  %}
 nmcli connection modify {{ interface.name }} 802-3-ethernet.duplex {{ interface.duplex}}
