@@ -8,6 +8,7 @@ evpn
       route-target import 1:{{ evi }}
       route-target export 1:{{ evi }}
     !
+    advertise-mac
 {%-        endfor %}
 {%-      endfor %}
 {%-    endif %}
