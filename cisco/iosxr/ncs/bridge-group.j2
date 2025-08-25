@@ -1,6 +1,8 @@
 {# builds bridge_groups dict #}
 {%-    set ns = namespace(found=false) %}
 {%-    set bridge_groups = dict() %}
+{%-    set _dummy = bridge_groups.setdefault("bridge_groups", {})  %}
+{%-    set _dummy = bridge_groups.setdefault("evpn_interfaces", {})  %}
 {%-    for interface in device.interfaces.filter(type='virtual') %}
 {%-        if interface.parent and interface.parent.type == "lag" %}
 {%-            set bridge_group = interface.custom_field_data.get("EVPN_bridge_group") %}
@@ -10,9 +12,9 @@
 {#--            Final EVI = base_evi + vlan_id --#}
 {%-            set evi = base_evi + vlan_id %}
 {%-            if bridge_group %}
-{%-                set _dummy = bridge_groups.setdefault(bridge_group, {})  %}
-{%-                set _dummy = bridge_groups[bridge_group].setdefault(evi, [])  %}
-{%-                set _dummy = bridge_groups[bridge_group][evi].append(interface.name)  %}
+{%-                set _dummy = bridge_groups["bridge_groups"].setdefault(bridge_group, {})  %}
+{%-                set _dummy = bridge_groups["bridge_groups"][bridge_group].setdefault(evi, [])  %}
+{%-                set _dummy = bridge_groups["bridge_groups"][bridge_group][evi].append(interface.name)  %}
 {#--            Extract VLAN ID from the interface name after the dot, e.g. .100 → 100 --#}
 {%-                  if interface.parent.mac_addresses.all().first() != None %}
 {%-                      if interface.parent.mac_address != None  %}
@@ -21,7 +23,6 @@
 {%-                          set mac_address = interface.parent.mac_addresses.all().first() %}
 {%-                      endif  %}
 {%-                  endif  %}
-{%-                set _dummy = bridge_groups.setdefault("evpn_interfaces", {})  %}
 {%-                set _dummy = bridge_groups["evpn_interfaces"].update({interface.parent.name: mac_address | default("mac-address-no-set", true) | string })  %}
 {%-            endif %}
 {%-        endif %}
