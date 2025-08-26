@@ -41,7 +41,7 @@ interface {{ interface.name }} {{ "l2transport" if interface.custom_field_data.g
 {%-                endif %}
 {%-            endif %}
 {%-            if interface.custom_field_data.get("lacp_period") %}
-  lcap period {{interface.custom_field_data.get("lacp_period")}}
+  lacp period {{interface.custom_field_data.get("lacp_period")}}
 {%-            endif %}
 {%-            if interface.custom_field_data.get("rewrite_ingress_tag") %}
   rewrite ingress tag {{ interface.custom_field_data.get("rewrite_ingress_tag") }}
