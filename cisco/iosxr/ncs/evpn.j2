@@ -2,24 +2,23 @@
 {%-		if vpns["evpn"] %}
 evpn
 {%-			for evi, evi_data in vpns["evpn"].items() %}
-  evi {{ evi }}
-    bgp
+ evi {{ evi }}
+  bgp
 {%-				for rt_type, rts in evi_data['targets'].items() %}
 {%-					for rt in rts %}
-      route-target {{ rt_type }} {{ rt }}
-    !
+   route-target {{ rt_type }} {{ rt }}
+   !
 {%-					endfor %}
 {%-				endfor %}
     advertise-mac
-    !
+   !
   !
 {%-			endfor %}
-
 {%-			for evi, evi_data in vpns["evpn"].items() %}
 {%-				for interface, identifier in evi_data['interfaces'].items() %}
-  interface {{ }}
-   ethernet-segment
-    identifier {{ identifier }}
+ interface {{ }}
+  ethernet-segment
+   identifier {{ identifier }}
   !
  !
 {%-		endif %}
