@@ -22,7 +22,7 @@
 {%-             set _dummy = vpns["evpn"].setdefault(evi.l2vpn.identifier, {}) %}
 {%-             set _dummy = vpns["evpn"].setdefault(evi.l2vpn.identifier, {}) %}
 {%-             set _dummy = vpns["evpn"][evi.l2vpn.identifier].setdefault('interfaces', {}) %}
-{%-             set _dummy = vpns["evpn"][evi.l2vpn.identifier]['interfaces'].update({interface.lag.name: 'type 0 some-9-hex-here'}) %}
+{%-             set _dummy = vpns["evpn"][evi.l2vpn.identifier]['interfaces'].update({interface.parent.name: 'type 0 some-9-hex-here'}) %}
 {%-             set _dummy = vpns["evpn"][evi.l2vpn.identifier].setdefault('targets', {
                     'import': evi.l2vpn.import_targets.all() | map(attribute="name") | list,
                     'export': evi.l2vpn.export_targets.all() | map(attribute="name") | list
