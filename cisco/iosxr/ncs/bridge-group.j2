@@ -13,7 +13,7 @@
                         'evi': evi.l2vpn.identifier, 
                         'type': evi.l2vpn.type, 
                         'targets': {
-                            'import': [rt|string for rt in evi.l2vpn.import_targets.all()], 
+                            'import': evi.l2vpn.import_targets.all(), 
                         }
                     })
 %}
