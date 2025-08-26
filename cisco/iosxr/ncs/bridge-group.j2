@@ -7,11 +7,9 @@
 {%-     if interface.bridge != None %}
 {%-         set evi = interface.l2vpn_termination %}
 {%-         set bundle_id = "" %}
-interface.parent.name: {{ interface.parent.name }}
 {%-         for c in interface.parent.name %}
 {%-             if c.isdigit() %}
-c is: {{ c }}
-{%-                 set bundle_id = c %}
+{%-                 set _ = bundle_id + c %}
 {%-             endif %}
 {%-         endfor %}
 bundle_id: {{ bundle_id }}
