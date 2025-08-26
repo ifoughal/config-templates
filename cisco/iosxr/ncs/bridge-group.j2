@@ -11,23 +11,26 @@
 {%-         set _dummy = vpns["l2vpn"].setdefault(interface.bridge.name, {}) %}
 {%-         if evi != None %}
 {%-             set _dummy = vpns["l2vpn"][interface.bridge.name].setdefault(evi.l2vpn.name, {
-                    'evi': evi.l2vpn.identifier, 
-                    'type': evi.l2vpn.type, 
+                    'evi': evi.l2vpn.identifier,
+                    'type': evi.l2vpn.type,
                     'interfaces': []
                 })
-%}      
+%}
 {%-             set _dummy = vpns["l2vpn"][interface.bridge.name][evi.l2vpn.name]['interfaces'].append(interface.name) %}
 {#-             ############################################################## #}
 {#-             update the EVPN dict to generate the config in EVPN template   #}
 {%-             set _dummy = vpns["evpn"].setdefault(evi.l2vpn.identifier, {}) %}
 {%-             set _dummy = vpns["evpn"].setdefault(evi.l2vpn.identifier, {}) %}
 {%-             set _dummy = vpns["evpn"][evi.l2vpn.identifier].setdefault('interfaces', {}) %}
-{%-             set _dummy = vpns["evpn"][evi.l2vpn.identifier]['interfaces'].update({interface.parent.name: 'type 0 some-9-hex-here'}) %}
+{%-             set _dummy = vpns["evpn"][evi.l2vpn.identifier]['interfaces'].update({
+                    interface.parent.name: evi.l2vpn.custom_field_data.get('evpn_identifier', None)
+                }) 
+%}
 {%-             set _dummy = vpns["evpn"][evi.l2vpn.identifier].setdefault('targets', {
                     'import': evi.l2vpn.import_targets.all() | map(attribute="name") | list,
                     'export': evi.l2vpn.export_targets.all() | map(attribute="name") | list
                 })
-%}      
+%}
 {%-         endif %}
 {%-     endif %}
 {%- endfor %}
