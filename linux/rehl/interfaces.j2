@@ -8,7 +8,9 @@
 nmcli connection delete {{ interface.name }} > /dev/null 2>&1
 {%-			endif %}
 {%-		endfor %}
-{% 		for i in range(1, 11) %}
+{%- set interface_count = device.interfaces.all() | length -%}
+{%- for i in range(interface_count) %}
+{%-			for i in range(1, 11) %}
 nmcli connection delete 'Wired connection {{ i }}' > /dev/null 2>&1
 {%-		endfor %}
 ######################################################################################
