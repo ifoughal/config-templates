@@ -8,6 +8,9 @@
 nmcli connection delete {{ interface.name }} > /dev/null 2>&1
 {%-			endif %}
 {%-		endfor %}
+{%-		for inter_id in [1, 10] %}
+nmcli connection delete 'Wired connection {{ inter_id }}' > /dev/null 2>&1
+{%-		endfor %}
 ######################################################################################
 {#-		########################################################################   #}
 {#-                           adding bond interfaces                                #}
