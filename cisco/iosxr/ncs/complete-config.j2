@@ -1,6 +1,6 @@
 hostname {{ device.name }}
 !
-# {# {%- include 'cisco/iosxr/ncs/interfaces.j2' %} #}
+{%- include 'cisco/iosxr/ncs/interfaces.j2' %}
 !
 {%- include 'cisco/iosxr/ncs/bridge-group.j2' %}
 !
