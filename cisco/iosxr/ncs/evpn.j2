@@ -1,10 +1,10 @@
 {%-	if device.interfaces %}
 {%-		if vpns["evpn"] %}
 evpn
-{%-			for evi, route_targets in vpns["evpn"].items() %}
+{%-			for evi, evi_data in vpns["evpn"].items() %}
   evi {{ evi }}
     bgp
-{%-				for rt_type, rt in vpns["evpn"].items() %}
+{%-				for rt_type, rt in evi_data['targets'].items() %}
       route-target {{ rt_type }} {{ rt }}
     !
 {%-				endfor %}
