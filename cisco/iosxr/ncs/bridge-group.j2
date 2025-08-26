@@ -12,7 +12,8 @@
 {%-                 set ns.bundle_id = ns.bundle_id + c %}
 {%-             endif %}
 {%-         endfor %}
-bundle_id: {{ ns.bundle_id }}
+{%-         endfor %}
+{%-         set bundle_id_with_dot = ns.bundle_id[:2] + '.' + ns.bundle_id[2:] %}
 {#-         ############################################################## #}
 {#-         update the L2VPN dict to generate the config in l2vpn template #}
 {%-         set _dummy = vpns["l2vpn"].setdefault(interface.bridge.name, {}) %}
@@ -30,7 +31,7 @@ bundle_id: {{ ns.bundle_id }}
 {%-             set _dummy = vpns["evpn"].setdefault(evi.l2vpn.identifier, {}) %}
 {%-             set _dummy = vpns["evpn"][evi.l2vpn.identifier].setdefault('interfaces', {}) %}
 {%-             set _dummy = vpns["evpn"][evi.l2vpn.identifier]['interfaces'].update({
-                    interface.parent.name: evi.l2vpn.custom_field_data.get('evpn_identifier', None) 
+                    interface.parent.name: evi.l2vpn.custom_field_data.get('evpn_identifier', None).bundle_id_with_dot
                 }) 
 %}
 {%-             set _dummy = vpns["evpn"][evi.l2vpn.identifier].setdefault('targets', {
