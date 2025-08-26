@@ -7,7 +7,7 @@
 {%-     if interface.bridge != None %}
 {%-         set evi = interface.l2vpn_termination %}
 {%          set bundle_id = "" %}
-{%          for c in interface.lag.name %}
+{%          for c in interface.parent.name %}
 {%              if c.isdigit() %}
 {%                  set bundle_id = bundle_id + c %}
 {%              endif %}
