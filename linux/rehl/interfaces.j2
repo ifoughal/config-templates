@@ -43,9 +43,9 @@ nmcli connection modify {{ interface.name }} ipv{{ family }}.method disabled
 {%-			endif %}
 {%-		endfor %}
 ######################################################################################
-{#-      ######################################################################## #}
+{#-		######################################################################## #}
 {#-                           adding vlan interfaces #}
-{#-      ######################################################################## #}
+{#-		######################################################################## #}
 {%-		for interface in device.interfaces.all() %}
 {%-			if interface.custom_field_data.get("auto_config", false)  %}
 {%-				if interface.type == "virtual"  %}
@@ -65,9 +65,9 @@ nmcli connection modify {{ interface.name }} ipv{{ family }}.method disabled
 {%-			endif %}
 {%-		endfor %}
 ######################################################################################
-{#-      ######################################################################## #}
+{#-		######################################################################## #}
 {#-                           Ether interfaces #}
-{#-      ######################################################################## #}
+{#-		######################################################################## #}
 {%-		for interface in device.interfaces.all() %}
 {%-			if interface.custom_field_data.get("auto_config", false)  %}
 {%-              if interface.type != "virtual" and interface.type != "bridge" and interface.type != "lag" %}
