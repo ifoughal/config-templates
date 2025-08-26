@@ -10,6 +10,7 @@
 interface.parent.name: {{ interface.parent.name }}
 {%-         for c in interface.parent.name %}
 {%-             if c.isdigit() %}
+c is: {{ c }}
 {%-                 set bundle_id = c %}
 {%-             endif %}
 {%-         endfor %}
