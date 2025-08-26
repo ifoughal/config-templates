@@ -8,6 +8,13 @@
 {%            set _dummy = vpns["l2vpn"].setdefault(interface.bridge.name, {})  %}
 {%            set evi = interface.l2vpn_termination  %}
 {{evi}}
+{{evi.identifier}}
+{{evi.name}}
+{{evi.type}}
+{{evi.import_targets}}
+{{evi.export_targets}}
+
+
 {%            set _dummy = vpns["l2vpn"][interface.bridge.name].setdefault(interface.l2vpn_termination.identifier, [])  %}
 {%        endif %}
 {%    endfor %}
