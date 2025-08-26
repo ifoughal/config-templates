@@ -1,15 +1,23 @@
-{#    builds vpns dict #}
-{%    set ns = namespace(found=false) %}
-{%    set vpns = dict() %}
-{%    set _dummy = vpns.setdefault("evpn", {}) %}
-{%    set _dummy = vpns.setdefault("l2vpn", {}) %}
-{%    for interface in device.interfaces.all() %}
-{%        if interface.bridge != None %}
-{%            set _dummy = vpns["l2vpn"].setdefault(interface.bridge.name, {}) %}
-{%            set evi = interface.l2vpn_termination %}
-{%            if evi != None %}
-{%                set _dummy = vpns["l2vpn"][interface.bridge.name].setdefault(evi.l2vpn.name, {}) %}
-{%                set _dummy = vpns["l2vpn"][interface.bridge.name][evi.l2vpn.name].update({'evi': evi.l2vpn.identifier, 'type': evi.l2vpn.type, 'targets': {'import': evi.l2vpn.import_targets, 'export': evi.l2vpn.export_targets}}) %}
+{#      builds vpns dict #}
+{%      set ns = namespace(found=false) %}
+{%      set vpns = dict() %}
+{%      set _dummy = vpns.setdefault("evpn", {}) %}
+{%      set _dummy = vpns.setdefault("l2vpn", {}) %}
+{%      for interface in device.interfaces.all() %}
+{%          if interface.bridge != None %}
+{%              set _dummy = vpns["l2vpn"].setdefault(interface.bridge.name, {}) %}
+{%              set evi = interface.l2vpn_termination %}
+{%              if evi != None %}
+{%                  set _dummy = vpns["l2vpn"][interface.bridge.name].setdefault(evi.l2vpn.name, {}) %}
+{%                  set _dummy = vpns["l2vpn"][interface.bridge.name][evi.l2vpn.name].update({
+                        'evi': evi.l2vpn.identifier, 
+                        'type': evi.l2vpn.type, 
+                        'targets': {
+                            'import': [rt|string for rt in evi.l2vpn.import_targets.all()], 
+                            'export': [rt|string for rt in evi.l2vpn.export.all()]
+                        }
+                    }) 
+%}
 {%            endif %}
 {%        endif %}
 {%    endfor %}
