@@ -6,6 +6,8 @@
 {%    for interface in device.interfaces.all() %}
 {%        if interface.bridge is not none %}
 {%            set _dummy = vpns["l2vpn"].setdefault(interface.bridge.name, {})  %}
+{%            set evi = interface.l2vpn_termination  %}
+{{evi}}
 {%            set _dummy = vpns["l2vpn"][interface.bridge.name].setdefault(interface.l2vpn_termination.identifier, [])  %}
 {%        endif %}
 {%    endfor %}
