@@ -1,19 +1,19 @@
-{%-		if device.interfaces %}
-{%-			if vpns["l2vpn"] %}
+{%-	if device.interfaces %}
+{%-		if vpns["l2vpn"] %}
 l2vpn
-{%-				for bg, bds in vpns["l2vpn"].items() %}
-  {{ bg }}
-{%-					for evi, interfaces in bds.items() %}
-    bridge-domain {{ evi }} 
-{%-						for inter in interfaces %}
-      interface {{ inter }}
-      !
-{%-						endfor %}
-      evi {{ evi }}
+{%-			for bridge_group, bridge_domains in vpns["l2vpn"].items() %}
+  {{ bridge_group }}
+{%-				for bridge_domain_name, bridge_domain in bridge_domains %}
+    bridge-domain {{ bridge_domain_name }}
+{%-					for interface in bridge_domain['interfaces'] %}
+      interface {{ interface }}
       !
 {%-					endfor %}
+      evi {{ bridge_domain['evi'] }}
+      !
 {%-				endfor %}
+{%-			endfor %}
     !
-{%-			endif %}
-  !
 {%-		endif %}
+  !
+{%-	endif %}
