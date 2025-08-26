@@ -6,13 +6,13 @@
 {%- for interface in device.interfaces.all() %}
 {%-     if interface.bridge != None %}
 {%-         set evi = interface.l2vpn_termination %}
-{%-         set bundle_id = "" %}
+{%-         set ns = namespace(bundle_id="") %}
 {%-         for c in interface.parent.name %}
 {%-             if c.isdigit() %}
-{%-                 set _ = bundle_id + c %}
+{%-                 set ns.bundle_id = ns.bundle_id + c %}
 {%-             endif %}
 {%-         endfor %}
-bundle_id: {{ bundle_id }}
+bundle_id: {{ ns.bundle_id }}
 {#-         ############################################################## #}
 {#-         update the L2VPN dict to generate the config in l2vpn template #}
 {%-         set _dummy = vpns["l2vpn"].setdefault(interface.bridge.name, {}) %}
