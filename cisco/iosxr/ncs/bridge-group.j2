@@ -12,6 +12,7 @@
 {%                  set _dummy = vpns["l2vpn"][interface.bridge.name][evi.l2vpn.name].update({
                         'evi': evi.l2vpn.identifier, 
                         'type': evi.l2vpn.type, 
+                        'interfaces': [interface.name],
                         'targets': {
                             'import': evi.l2vpn.import_targets.all() | map(attribute="name") | list,
                             'export': evi.l2vpn.export_targets.all() | map(attribute="name") | list
