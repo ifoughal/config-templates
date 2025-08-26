@@ -1,0 +1,17 @@
+{%- if vpns["l2vpn"] %}
+l2vpn
+{%-		for bridge_group, bridge_domains in vpns["l2vpn"].items() %}
+  {{ bridge_group }}
+{%-			for bridge_domain_name, bridge_domain in bridge_domains.items() %}
+    bridge-domain {{ bridge_domain_name }}
+{%-				for interface in bridge_domain['interfaces'] %}
+      interface {{ interface }}
+      !
+{%-				endfor %}
+      evi {{ bridge_domain['evi'] }}
+      !
+{%-			endfor %}
+{%-		endfor %}
+    !
+  !
+{%-	endif %}
