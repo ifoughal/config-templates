@@ -1,17 +1,16 @@
 {%-	if device.interfaces %}
 {%-		if vpns["evpn"] %}
 evpn
-{%-			for bg, bds in vpns["evpn"].items() %}
-{%-				for evi, interfaces in bds.items() %}
+{%-			for evi, route_targets in vpns["evpn"].items() %}
   evi {{ evi }}
     bgp
-      route-target import 1:{{ evi }}
-      route-target export 1:{{ evi }}
+{%-				for rt_type, rt in vpns["evpn"].items() %}
+      route-target {{ rt_type }} {{ rt }}
     !
+{%-				endfor %}
     advertise-mac
     !
   !
-{%-				endfor %}
 {%-			endfor %}
 {%-		endif %}
 {%-	endif %}
