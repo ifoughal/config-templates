@@ -6,7 +6,6 @@
 {%- for interface in device.interfaces.all() %}
 {%-     if interface.bridge != None %}
 {%-         set evi = interface.l2vpn_termination %}
-{% for char in interface.lag.name if char.isdigit() %}{{ char }}{% endfor %}
 {#-         ############################################################## #}
 {#-         update the L2VPN dict to generate the config in l2vpn template #}
 {%-         set _dummy = vpns["l2vpn"].setdefault(interface.bridge.name, {}) %}
