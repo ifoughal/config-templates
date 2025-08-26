@@ -12,7 +12,10 @@
 {%                  set _dummy = vpns["l2vpn"][interface.bridge.name][evi.l2vpn.name].update({
                         'evi': evi.l2vpn.identifier, 
                         'type': evi.l2vpn.type, 
-                    }) 
+                        'targets': {
+                            'import': [rt|string for rt in evi.l2vpn.import_targets.all()], 
+                        }
+                    })
 %}
 {%            endif %}
 {%        endif %}
