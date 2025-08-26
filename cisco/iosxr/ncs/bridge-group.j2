@@ -4,8 +4,8 @@
 {%-    set _dummy = vpns.setdefault("evpn", {})  %}
 {%-    set _dummy = vpns.setdefault("l2vpn", {})  %}
 {%-    for interface in device.interfaces.all() %}
-{%-        if interface.l2vpn is not none %}
-{{ interface.name }} has l2vpn: {{ interface.l2vpn }}
+{%-        if interface.bridge is not none %}
+{{ interface.name }} has l2vpn: {{ interface.bridge.name }}
 {%-        endif %}
 {%-    endfor %}
 
