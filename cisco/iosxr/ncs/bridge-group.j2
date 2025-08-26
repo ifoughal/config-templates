@@ -9,7 +9,7 @@
 {%            set evi = interface.l2vpn_termination %}
 {%            if evi != None %}
 {%                set _dummy = vpns["l2vpn"][interface.bridge.name].setdefault(evi.l2vpn.name, {}) %}
-{%                set vpns["l2vpn"][interface.bridge.name][evi.l2vpn.name].update({'evi': evi.l2vpn.identifier, 'type': evi.l2vpn.type, 'targets': {'import': evi.l2vpn.import_targets, 'export': evi.l2vpn.export_targets}}) %}
+{%                set _dummy = vpns["l2vpn"][interface.bridge.name][evi.l2vpn.name].update({'evi': evi.l2vpn.identifier, 'type': evi.l2vpn.type, 'targets': {'import': evi.l2vpn.import_targets, 'export': evi.l2vpn.export_targets}}) %}
 {%            endif %}
 {%        endif %}
 {%    endfor %}
