@@ -1,16 +1,15 @@
-{# builds vpns dict #}
-{%-    set ns = namespace(found=false) %}
-{%-    set vpns = dict() %}
-{%-    set _dummy = vpns.setdefault("evpn", {})  %}
-{%-    set _dummy = vpns.setdefault("l2vpn", {})  %}
-{%-    for interface in device.interfaces.all() %}
-{%-        if interface.bridge is not none %}
-{{ interface.name }} has l2vpn: {{ interface.bridge.name }}
-{%-        endif %}
-{%-    endfor %}
+{#    builds vpns dict #}
+{%    set ns = namespace(found=false) %}
+{%    set vpns = dict() %}
+{%    set _dummy = vpns.setdefault("evpn", {})  %}
+{%    set _dummy = vpns.setdefault("l2vpn", {})  %}
+{%    for interface in device.interfaces.all() %}
+{%        if interface.bridge is not none %}
+{%            set _dummy = vpns["l2vpn"].setdefault(interface.bridge.name, {})  %}
+{%            set _dummy = vpns["l2vpn"][interface.bridge.name].setdefault(interface.l2vpn.identifier, [])  %}
+{%        endif %}
+{%    endfor %}
 
 
 {{ vpns }}
-{%-        include "cisco/iosxr/ncs/evpn.j2" %}
-!
-{%-        include "cisco/iosxr/ncs/l2vpn.j2" %}
+
