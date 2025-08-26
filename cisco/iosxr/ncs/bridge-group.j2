@@ -10,6 +10,9 @@
 {% if evi %}
   L2VPN: {{ evi.l2vpn.name }}
   Identifier: {{ evi.l2vpn.identifier }}
+  type: {{evi.l2vpn.type}}
+  import_targets:  {{evi.l2vpn.import_targets}}
+  export_targets:  {{evi.l2vpn.export_targets}}
 {% endif %}
 
 
