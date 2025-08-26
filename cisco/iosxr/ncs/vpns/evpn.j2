@@ -16,7 +16,7 @@ evpn
 {%-			for interface, identifier in evi_data['interfaces'].items() %}
  interface {{ interface }}
   ethernet-segment
-   identifier {{ identifier }}
+   identifier type 0 {{ identifier }}
   !
  !
 {%-			endfor %}
