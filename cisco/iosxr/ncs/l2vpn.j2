@@ -5,10 +5,7 @@ l2vpn
   {{ bridge_group }}
 {%-				for bridge_domain_name, bridge_domain in bridge_domains %}
     bridge-domain {{ bridge_domain_name }}
-{%-					for interface in bridge_domain['interfaces'] %}
-      interface {{ interface }}
-      !
-{%-					endfor %}
+
       evi {{ bridge_domain['evi'] }}
       !
 {%-				endfor %}
