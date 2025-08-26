@@ -18,7 +18,7 @@
                         'evi': evi.l2vpn.identifier, 
                         'type': evi.l2vpn.type, 
                         'targets': {
-                            'import': import_targets,
+                            'import': evi.l2vpn.import_targets.all() | map(attribute="name") | list,
                             'export': export_targets
                         }
                     })
