@@ -8,18 +8,13 @@
 {%              set _dummy = vpns["l2vpn"].setdefault(interface.bridge.name, {}) %}
 {%              set evi = interface.l2vpn_termination %}
 {%              if evi != None %}
-{#                  since jinja dict parser reject list comprehensions, we have to build the import and export routes seperately #}
-{%                  set import_targets = evi.l2vpn.import_targets.all() | map(attribute="name") | list %}
-{%                  set export_targets = evi.l2vpn.export_targets.all() | map(attribute="name") | list %}
-
-
 {%                  set _dummy = vpns["l2vpn"][interface.bridge.name].setdefault(evi.l2vpn.name, {}) %}
 {%                  set _dummy = vpns["l2vpn"][interface.bridge.name][evi.l2vpn.name].update({
                         'evi': evi.l2vpn.identifier, 
                         'type': evi.l2vpn.type, 
                         'targets': {
                             'import': evi.l2vpn.import_targets.all() | map(attribute="name") | list,
-                            'export': export_targets
+                            'export': evi.l2vpn.export_targets.all() | map(attribute="name") | list
                         }
                     })
 %}
