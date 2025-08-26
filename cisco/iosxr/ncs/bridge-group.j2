@@ -1,6 +1,6 @@
-{# builds bridge_groups dict #}
+{# builds vpns dict #}
 {%-    set ns = namespace(found=false) %}
-{%-    set bridge_groups = dict() %}
+{%-    set vpns = dict() %}
 {%-    set _dummy = vpns.setdefault("evpn", {})  %}
 {%-    set _dummy = vpns.setdefault("l2vpn", {})  %}
 {%-    for interface in device.interfaces.all() %}
@@ -10,7 +10,7 @@
 {%-    endfor %}
 
 
-{{ bridge_groups }}
+{{ vpns }}
 {%-        include "cisco/iosxr/ncs/evpn.j2" %}
 !
 {%-        include "cisco/iosxr/ncs/l2vpn.j2" %}

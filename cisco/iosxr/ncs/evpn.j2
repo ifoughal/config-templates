@@ -1,7 +1,7 @@
 {%-    if device.interfaces %}
-{%-        if bridge_groups["bridge_groups"] %}
+{%-        if vpns["evpn"] %}
 evpn
-{%-            for bg, bds in bridge_groups["bridge_groups"].items() %}
+{%-            for bg, bds in vpns["evpn"].items() %}
 {%-                for evi, interfaces in bds.items() %}
   evi {{ evi }}
     bgp

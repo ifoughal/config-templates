@@ -1,7 +1,7 @@
 {%-    if device.interfaces %}
-{%-        if bridge_groups["bridge_groups"] %}
+{%-        if vpns["l2vpn"] %}
 l2vpn
-{%-            for bg, bds in bridge_groups["bridge_groups"].items() %}
+{%-            for bg, bds in vpns["l2vpn"].items() %}
   bridge group {{ bg }}
 {%-                for evi, interfaces in bds.items() %}
     bridge-domain EVPN_{{ evi }} 
