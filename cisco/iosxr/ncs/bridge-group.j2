@@ -6,8 +6,12 @@
 {%- for interface in device.interfaces.all() %}
 {%-     if interface.bridge != None %}
 {%-         set evi = interface.l2vpn_termination %}
-{%          set bundle_id = interface.parent.name | regex_findall('[0-9]') | join('') %}
-
+{%          set bundle_id = "" %}
+{%          for c in interface.lag.name %}
+{%              if c.isdigit() %}
+{%                  set bundle_id = bundle_id + c %}
+{%              endif %}
+{%          endfor %}
 bundle_id: {{ bundle_id }}
 {#-         ############################################################## #}
 {#-         update the L2VPN dict to generate the config in l2vpn template #}
