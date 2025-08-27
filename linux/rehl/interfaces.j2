@@ -1,4 +1,4 @@
-{%-		if device.interfaces != None %}
+{%- if device.interfaces != None %}
 ######################################################################################
 {#-		########################################################################   #}
 {#-                           deletion of nmcli connections                        #}
@@ -76,11 +76,14 @@ nmcli connection modify {{ interface.name }} ipv{{ family }}.method disabled
 {%-			if interface.custom_field_data.get("auto_config", false)  %}
 {%-              if interface.type != "virtual" and interface.type != "bridge" and interface.type != "lag" %}
 {%-              	set inter_type = "ethernet" %}
+{% if iface.children.all %}
+# {{ iface.name }} has child interfaces: {{ iface.children.all() }} 
+
 {%-              	if interface.lag == None %}
 nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} 
 {%-              	else %}
 nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} master {{ interface.lag.name }}
-{%-              endif  %}
+{%-              	endif  %}
 nmcli connection modify {{ interface.name }} 802-3-ethernet.auto-negotiate no
 {%-              	if interface.speed != None  %}
 nmcli connection modify {{ interface.name }} 802-3-ethernet.speed {{ (interface.speed / 1000) | int }}
