@@ -1,94 +1,108 @@
-{%-  if device.interfaces != None %}
+{%-		if device.interfaces != None %}
 ######################################################################################
-{#-      ########################################################################   #}
-{#-                           deltion of bond interfaces                            #}
-{#-      ########################################################################   #}
-{%-      for interface in device.interfaces.all() %}
-{%-          if interface.custom_field_data.get("auto_config", false)  %}
+{#-		########################################################################   #}
+{#-                           deletion of nmcli connections                        #}
+{#-		########################################################################   #}
+{%-		for interface in device.interfaces.all() %}
+{%-			if interface.custom_field_data.get("auto_config", false)  %}
 nmcli connection delete {{ interface.name }} > /dev/null 2>&1
-{%-          endif %}
-{%-      endfor %}
+{%-			endif %}
+{%-		endfor %}
+{%-		set interface_count = device.interfaces.all() | length -%}
+{%-		for i in range(interface_count) %}
+nmcli connection delete 'Wired connection {{ i }}' > /dev/null 2>&1
+{%-		endfor %}
 ######################################################################################
-{#-      ########################################################################   #}
-{#-                           adding bond interfaces                                #}
-{#-      ########################################################################   #}
-{%-      for interface in device.interfaces.all() %}
-{%-          if interface.custom_field_data.get("auto_config", false)  %}
-{%-              if interface.type == "lag"  %}
-{%-                  set inter_type = "bond" %}
+{#-		########################################################################   #}
+{#-                           adding bond interfaces                               #}
+{#-		########################################################################   #}
+{%-		for interface in device.interfaces.all() %}
+{%-			if interface.custom_field_data.get("auto_config", false)  %}
+{%-				if interface.type == "lag"  %}
+{%-					set inter_type = "bond" %}
 nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} 
 nmcli connection modify {{ interface.name }} bond.options "mode=802.3ad,miimon=100"
 nmcli connection modify {{ interface.name }} lacp-rate {{ "fast" if interface.custom_field_data.get("lacp_period") == "short" else "slow" }}
-{%-                  if interface.mac_addresses.all().first() != None %}
-{%-                      set mac_address = interface.mac_addresses.all().first() %}
-{%-                      if interface.mac_address != None  %}
-{%-                          set mac_address = interface.mac_address %}
-{%-                      endif  %}
+{%-					if interface.mac_addresses.all().first() != None %}
+{%-						set mac_address = interface.mac_addresses.all().first() %}
+{%-						if interface.mac_address != None  %}
+{%-							set mac_address = interface.mac_address %}
+{%-						endif  %}
 nmcli connection modify {{ interface.name }} 802-3-ethernet.cloned-mac-address {{ mac_address }}
-{%-                  endif  %}
-{%-                  if interface.mtu != None  %}
+{%-					endif  %}
+{%-					if interface.mtu != None  %}
 nmcli connection modify {{ interface.name }} 802-3-ethernet.mtu {{ interface.mtu }}
-{%-                  endif  %}
-{#-                  configure ipv4/6 when set #}
-{%-                  for family in [4, 6] %}
-{%-                      if interface.ip_addresses.filter(address__family=family) %}
-{%-                          for ip in interface.ip_addresses.filter(address__family=family) %}
+{%-					endif  %}
+{#-					configure ipv4/6 when set #}
+{%-					for family in [4, 6] %}
+{%-						if interface.ip_addresses.filter(address__family=family) %}
+{%-							for ip in interface.ip_addresses.filter(address__family=family) %}
 nmcli connection modify {{ interface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
-{%-                          endfor %}
-{%-                      else  %}
+{%-							endfor %}
+{%-						else  %}
 nmcli connection modify {{ interface.name }} ipv{{ family }}.method disabled
-{%-                      endif  %}
-{%-                  endfor %}
-{%-              endif  %}
-{%-          endif %}
-{%-      endfor %}
+{%-						endif  %}
+{%-					endfor %}
+{%-				endif  %}
+{%-			endif %}
+{%-		endfor %}
 ######################################################################################
-{#-      ######################################################################## #}
+{#-		######################################################################## #}
 {#-                           adding vlan interfaces #}
-{#-      ######################################################################## #}
-{%-      for interface in device.interfaces.all() %}
-{%-          if interface.custom_field_data.get("auto_config", false)  %}
-{%-              if interface.type == "virtual"  %}
-{%-                  set inter_type = "vlan" %}
+{#-		######################################################################## #}
+{%-		for interface in device.interfaces.all() %}
+{%-			if interface.custom_field_data.get("auto_config", false)  %}
+{%-				if interface.type == "virtual"  %}
+{%-					set inter_type = "vlan" %}
 nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} dev {{ interface.parent.name }} id {% for char in interface.name.split('.')[1] if char.isdigit() %}{{ char }}{% endfor %}
 {#-                  configure ipv4/6 when set #}
-{%-                  for family in [4, 6] %}
-{%-                      if interface.ip_addresses.filter(address__family=family) %}
-{%-                          for ip in interface.ip_addresses.filter(address__family=family) %}
+{%-					for family in [4, 6] %}
+{%-						if interface.ip_addresses.filter(address__family=family) %}
+{%-							for ip in interface.ip_addresses.filter(address__family=family) %}
 nmcli connection modify {{ interface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
-{%-                          endfor %}
-{%-                      else  %}
+{%-							endfor %}
+{%-						else  %}
 nmcli connection modify {{ interface.name }} ipv{{ family }}.method disabled
 {%-                      endif  %}
-{%-                  endfor %}
-{%-              endif  %}
-{%-          endif %}
-{%-      endfor %}
+{%-					endfor %}
+{%-				endif  %}
+{%-			endif %}
+{%-		endfor %}
 ######################################################################################
-{#-      ######################################################################## #}
+{#-		######################################################################## #}
 {#-                           Ether interfaces #}
-{#-      ######################################################################## #}
-{%-      for interface in device.interfaces.all() %}
-{%-          if interface.custom_field_data.get("auto_config", false)  %}
+{#-		######################################################################## #}
+{%-		for interface in device.interfaces.all() %}
+{%-			if interface.custom_field_data.get("auto_config", false)  %}
 {%-              if interface.type != "virtual" and interface.type != "bridge" and interface.type != "lag" %}
-{%-                  set inter_type = "ethernet" %}
-{%-                  if interface.lag == None %}
+{%-              	set inter_type = "ethernet" %}
+{%-              	if interface.lag == None %}
 nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} 
-{%-                  else %}
+{%-              	else %}
 nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} master {{ interface.lag.name }}
 {%-              endif  %}
 nmcli connection modify {{ interface.name }} 802-3-ethernet.auto-negotiate no
-{%-                  if interface.speed != None  %}
+{%-              	if interface.speed != None  %}
 nmcli connection modify {{ interface.name }} 802-3-ethernet.speed {{ (interface.speed / 1000) | int }}
-{%-                  endif  %}
-{%-                  if interface.duplex != None  %}
+{%-              	endif  %}
+{%-              	if interface.duplex != None  %}
 nmcli connection modify {{ interface.name }} 802-3-ethernet.duplex {{ interface.duplex}}
-{%-                  endif  %}
-{%-                  if interface.mtu != None  %}
+{%-              	endif  %}
+{%-              	if interface.mtu != None  %}
 nmcli connection modify {{ interface.name }} 802-3-ethernet.mtu {{ interface.mtu }}
-{%-                  endif  %}
+{%-              	endif  %}
+{#-					configure ipv4/6 when set #}
+{%-					for family in [4, 6] %}
+{%-						if interface.ip_addresses.filter(address__family=family) %}
+{%-							for ip in interface.ip_addresses.filter(address__family=family) %}
+nmcli connection modify {{ interface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
+{%-							endfor %}
+{%-						else  %}
+nmcli connection modify {{ interface.name }} ipv{{ family }}.method disabled
+{%-						endif  %}
+{%-					endfor %}
 {%-              endif  %}
-{%-          endif %}
-{%-      endfor %}
+{%-			endif %}
+{%-		endfor %}
 ######################################################################################
-{%-  endif %}
+{%-	endif %}
