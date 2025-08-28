@@ -76,7 +76,10 @@ nmcli connection modify {{ interface.name }} ipv{{ family }}.method disabled
 {%-			if interface.custom_field_data.get("auto_config", false)  %}
 {%-              if interface.type != "virtual" and interface.type != "bridge" and interface.type != "lag" %}
 {%-              	set inter_type = "ethernet" %}
-interface dir: {{ vars(iface)   }}
+interface dir: {{ interface.__dict__   }}
+{% for key, value in interface.__dict__.items() %}
+- {{ key }}: {{ value }}
+{% endfor %}
 
 {%-              	if interface.lag == None %}
 nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} 
