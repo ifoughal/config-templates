@@ -21,6 +21,11 @@ nmcli connection delete 'Wired connection {{ i }}' > /dev/null 2>&1
 {%-				if interface.type == "lag"  %}
 {%-					set inter_type = "bond" %}
 nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} 
+{%-                 if interface.enabled == false %}
+nmcli connection down {{ inter_type }}
+{%-                 elif interface.enabled == true %}
+nmcli connection up {{ inter_type }}
+{%-                  endif %}
 nmcli connection modify {{ interface.name }} bond.options "mode=802.3ad,miimon=100"
 nmcli connection modify {{ interface.name }} lacp-rate {{ "fast" if interface.custom_field_data.get("lacp_period") == "short" else "slow" }}
 {%-					if interface.mac_addresses.all().first() != None %}
@@ -59,10 +64,14 @@ nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ i
 {%-              	else %}
 nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} master {{ iface.lag.name }}
 {%-              	endif  %}
+{%-                 if interface.enabled == false %}
+nmcli connection down {{ inter_type }}
+{%-                 elif interface.enabled == true %}
+nmcli connection up {{ inter_type }}
+{%-                  endif %}
 {%-              	if iface.child_interfaces.all() != None %}
 {#-                      Clear IP config on eno1 (so it doesn’t try to get an IP via DHCP or static): #}
 nmcli connection modify {{ iface.name }} ipv4.method "disabled" ipv6.method "ignore"
-nmcli connection up {{ iface.name }}
 {%-              	else %}
 nmcli connection modify {{ iface.name }} 802-3-ethernet.auto-negotiate no
 {%-              	    if iface.speed != None  %}
@@ -97,6 +106,11 @@ nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
 {%-				if interface.type == "virtual"  %}
 {%-					set inter_type = "vlan" %}
 nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} dev {{ interface.parent.name }} id {% for char in interface.name.split('.')[1] if char.isdigit() %}{{ char }}{% endfor %}
+{%-                 if interface.enabled == false %}
+nmcli connection down {{ inter_type }}
+{%-                 elif interface.enabled == true %}
+nmcli connection up {{ inter_type }}
+{%-                  endif %}
 {#-                  configure ipv4/6 when set #}
 {%-					for family in [4, 6] %}
 {%-						if interface.ip_addresses.filter(address__family=family) %}
