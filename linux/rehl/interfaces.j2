@@ -3,12 +3,12 @@
 {#-		########################################################################   #}
 {#-                           deletion of nmcli connections                        #}
 {#-		########################################################################   #}
-{%-		for interface in device.interfaces.all() %}
-{%-			if interface.custom_field_data.get("auto_config", false)  %}
-nmcli connection delete {{ interface.name }} > /dev/null 2>&1
+{%-		for iface in device.interfaces.all() %}
+{%-			if iface.custom_field_data.get("auto_config", false)  %}
+nmcli connection delete {{ iface.name }} > /dev/null 2>&1
 {%-			endif %}
 {%-		endfor %}
-{%-		set interface_count = device.interfaces.all() | length -%}
+{%-		set iface_count = device.interfaces.all() | length -%}
 {%-		for i in range(interface_count) %}
 nmcli connection delete 'Wired connection {{ i }}' > /dev/null 2>&1
 {%-		endfor %}
@@ -16,36 +16,36 @@ nmcli connection delete 'Wired connection {{ i }}' > /dev/null 2>&1
 {#-		########################################################################   #}
 {#-                           adding bond interfaces                               #}
 {#-		########################################################################   #}
-{%-		for interface in device.interfaces.all() %}
-{%-			if interface.custom_field_data.get("auto_config", false)  %}
-{%-				if interface.type == "lag"  %}
+{%-		for iface in device.interfaces.all() %}
+{%-			if iface.custom_field_data.get("auto_config", false)  %}
+{%-				if iface.type == "lag"  %}
 {%-					set inter_type = "bond" %}
-nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} 
-{%-                 if interface.enabled == false %}
-nmcli connection down {{ inter_type }}
-{%-                 elif interface.enabled == true %}
-nmcli connection up {{ inter_type }}
+nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} 
+{%-                 if iface.enabled == false %}
+nmcli connection down {{ iface.name }}
+{%-                 elif iface.enabled == true %}
+nmcli connection up {{ iface.name }}
 {%-                  endif %}
-nmcli connection modify {{ interface.name }} bond.options "mode=802.3ad,miimon=100"
-nmcli connection modify {{ interface.name }} lacp-rate {{ "fast" if interface.custom_field_data.get("lacp_period") == "short" else "slow" }}
-{%-					if interface.mac_addresses.all().first() != None %}
-{%-						set mac_address = interface.mac_addresses.all().first() %}
-{%-						if interface.mac_address != None  %}
-{%-							set mac_address = interface.mac_address %}
+nmcli connection modify {{ iface.name }} bond.options "mode=802.3ad,miimon=100"
+nmcli connection modify {{ iface.name }} lacp-rate {{ "fast" if iface.custom_field_data.get("lacp_period") == "short" else "slow" }}
+{%-					if iface.mac_addresses.all().first() != None %}
+{%-						set mac_address = iface.mac_addresses.all().first() %}
+{%-						if iface.mac_address != None  %}
+{%-							set mac_address = iface.mac_address %}
 {%-						endif  %}
-nmcli connection modify {{ interface.name }} 802-3-ethernet.cloned-mac-address {{ mac_address }}
+nmcli connection modify {{ iface.name }} 802-3-ethernet.cloned-mac-address {{ mac_address }}
 {%-					endif  %}
-{%-					if interface.mtu != None  %}
-nmcli connection modify {{ interface.name }} 802-3-ethernet.mtu {{ interface.mtu }}
+{%-					if iface.mtu != None  %}
+nmcli connection modify {{ iface.name }} 802-3-ethernet.mtu {{ iface.mtu }}
 {%-					endif  %}
 {#-					configure ipv4/6 when set #}
 {%-					for family in [4, 6] %}
-{%-						if interface.ip_addresses.filter(address__family=family) %}
-{%-							for ip in interface.ip_addresses.filter(address__family=family) %}
-nmcli connection modify {{ interface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
+{%-						if iface.ip_addresses.filter(address__family=family) %}
+{%-							for ip in iface.ip_addresses.filter(address__family=family) %}
+nmcli connection modify {{ iface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
 {%-							endfor %}
 {%-						else  %}
-nmcli connection modify {{ interface.name }} ipv{{ family }}.method disabled
+nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
 {%-						endif  %}
 {%-					endfor %}
 {%-				endif  %}
@@ -64,10 +64,10 @@ nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ i
 {%-              	else %}
 nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} master {{ iface.lag.name }}
 {%-              	endif  %}
-{%-                 if interface.enabled == false %}
-nmcli connection down {{ inter_type }}
-{%-                 elif interface.enabled == true %}
-nmcli connection up {{ inter_type }}
+{%-                 if iface.enabled == false %}
+nmcli connection down {{ iface.name }}
+{%-                 elif iface.enabled == true %}
+nmcli connection up {{ iface.name }}
 {%-                  endif %}
 {%-              	if iface.child_interfaces.all() != None %}
 {#-                      Clear IP config on eno1 (so it doesn’t try to get an IP via DHCP or static): #}
@@ -101,24 +101,24 @@ nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
 {#-		######################################################################## #}
 {#-                           adding vlan interfaces #}
 {#-		######################################################################## #}
-{%-		for interface in device.interfaces.all() %}
-{%-			if interface.custom_field_data.get("auto_config", false)  %}
-{%-				if interface.type == "virtual"  %}
+{%-		for iface in device.interfaces.all() %}
+{%-			if iface.custom_field_data.get("auto_config", false)  %}
+{%-				if iface.type == "virtual"  %}
 {%-					set inter_type = "vlan" %}
-nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} dev {{ interface.parent.name }} id {% for char in interface.name.split('.')[1] if char.isdigit() %}{{ char }}{% endfor %}
-{%-                 if interface.enabled == false %}
-nmcli connection down {{ inter_type }}
-{%-                 elif interface.enabled == true %}
-nmcli connection up {{ inter_type }}
+nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} dev {{ iface.parent.name }} id {% for char in iface.name.split('.')[1] if char.isdigit() %}{{ char }}{% endfor %}
+{%-                 if iface.enabled == false %}
+nmcli connection down {{ iface.name }}
+{%-                 elif iface.enabled == true %}
+nmcli connection up {{ iface.name }}
 {%-                  endif %}
 {#-                  configure ipv4/6 when set #}
 {%-					for family in [4, 6] %}
-{%-						if interface.ip_addresses.filter(address__family=family) %}
-{%-							for ip in interface.ip_addresses.filter(address__family=family) %}
-nmcli connection modify {{ interface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
+{%-						if iface.ip_addresses.filter(address__family=family) %}
+{%-							for ip in iface.ip_addresses.filter(address__family=family) %}
+nmcli connection modify {{ iface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
 {%-							endfor %}
 {%-						else  %}
-nmcli connection modify {{ interface.name }} ipv{{ family }}.method disabled
+nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
 {%-                      endif  %}
 {%-					endfor %}
 {%-				endif  %}
