@@ -48,28 +48,6 @@ nmcli connection modify {{ interface.name }} ipv{{ family }}.method disabled
 {%-		endfor %}
 ######################################################################################
 {#-		######################################################################## #}
-{#-                           adding vlan interfaces #}
-{#-		######################################################################## #}
-{%-		for interface in device.interfaces.all() %}
-{%-			if interface.custom_field_data.get("auto_config", false)  %}
-{%-				if interface.type == "virtual"  %}
-{%-					set inter_type = "vlan" %}
-nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} dev {{ interface.parent.name }} id {% for char in interface.name.split('.')[1] if char.isdigit() %}{{ char }}{% endfor %}
-{#-                  configure ipv4/6 when set #}
-{%-					for family in [4, 6] %}
-{%-						if interface.ip_addresses.filter(address__family=family) %}
-{%-							for ip in interface.ip_addresses.filter(address__family=family) %}
-nmcli connection modify {{ interface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
-{%-							endfor %}
-{%-						else  %}
-nmcli connection modify {{ interface.name }} ipv{{ family }}.method disabled
-{%-                      endif  %}
-{%-					endfor %}
-{%-				endif  %}
-{%-			endif %}
-{%-		endfor %}
-######################################################################################
-{#-		######################################################################## #}
 {#-                           Ether interfaces #}
 {#-		######################################################################## #}
 {%-		for iface in device.interfaces.all() %}
@@ -108,6 +86,28 @@ nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
 {%-					    endfor %}
 {%-                 endif  %}
 {%-			    endif %}
+{%-			endif %}
+{%-		endfor %}
+######################################################################################
+{#-		######################################################################## #}
+{#-                           adding vlan interfaces #}
+{#-		######################################################################## #}
+{%-		for interface in device.interfaces.all() %}
+{%-			if interface.custom_field_data.get("auto_config", false)  %}
+{%-				if interface.type == "virtual"  %}
+{%-					set inter_type = "vlan" %}
+nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} dev {{ interface.parent.name }} id {% for char in interface.name.split('.')[1] if char.isdigit() %}{{ char }}{% endfor %}
+{#-                  configure ipv4/6 when set #}
+{%-					for family in [4, 6] %}
+{%-						if interface.ip_addresses.filter(address__family=family) %}
+{%-							for ip in interface.ip_addresses.filter(address__family=family) %}
+nmcli connection modify {{ interface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
+{%-							endfor %}
+{%-						else  %}
+nmcli connection modify {{ interface.name }} ipv{{ family }}.method disabled
+{%-                      endif  %}
+{%-					endfor %}
+{%-				endif  %}
 {%-			endif %}
 {%-		endfor %}
 ######################################################################################
