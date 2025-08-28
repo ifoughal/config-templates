@@ -63,7 +63,7 @@ nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ i
 {%-              	else %}
 nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} master {{ iface.lag.name }}
 {%-              	endif  %}
-{%-              	if iface.child_interfaces.all() != None %}
+{%-              	if iface.child_interfaces.all() %}
 nmcli connection modify {{ iface.name }} ipv4.method "disabled" ipv6.method "ignore"
 child interfaces are: {{ iface.child_interfaces.all() }}
 {%-              	else %}
