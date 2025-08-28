@@ -81,9 +81,8 @@ nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ i
 {%-              	else %}
 nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} master {{ iface.lag.name }}
 {%-              	endif  %}
-
-{%              	if iface.child_interfaces.all() != None %}
-{#                      Clear IP config on eno1 (so it doesn’t try to get an IP via DHCP or static): #}
+{%-              	if iface.child_interfaces.all() != None %}
+{#-                      Clear IP config on eno1 (so it doesn’t try to get an IP via DHCP or static): #}
 nmcli connection modify {{ iface.name }} ipv4.method "disabled" ipv6.method "ignore"
 nmcli connection up {{ iface.name }}
 {%-              	else %}
