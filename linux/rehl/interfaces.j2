@@ -19,7 +19,17 @@ nmcli connection delete 'Wired connection {{ i }}' > /dev/null 2>&1
 {%-			if iface.custom_field_data.get("auto_config", false)  %}
 {%-				if iface.type == "lag"  %}
 {%-					set inter_type = "bond" %}
-nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} 
+nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }}
+{#-					configure ipv4/6 when set #}
+{%-					for family in [4, 6] %}
+{%-						if iface.ip_addresses.filter(address__family=family) %}
+{%-							for ip in iface.ip_addresses.filter(address__family=family) %}
+nmcli connection modify {{ iface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
+{%-							endfor %}
+{%-						else  %}
+nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
+{%-						endif  %}
+{%-					endfor %}
 {%-                 if iface.enabled == false %}
 nmcli connection down {{ iface.name }}
 {%-                 elif iface.enabled == true %}
@@ -37,16 +47,6 @@ nmcli connection modify {{ iface.name }} 802-3-ethernet.cloned-mac-address {{ ma
 {%-					if iface.mtu != None  %}
 nmcli connection modify {{ iface.name }} 802-3-ethernet.mtu {{ iface.mtu }}
 {%-					endif  %}
-{#-					configure ipv4/6 when set #}
-{%-					for family in [4, 6] %}
-{%-						if iface.ip_addresses.filter(address__family=family) %}
-{%-							for ip in iface.ip_addresses.filter(address__family=family) %}
-nmcli connection modify {{ iface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
-{%-							endfor %}
-{%-						else  %}
-nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
-{%-						endif  %}
-{%-					endfor %}
 {%-				endif  %}
 {%-			endif %}
 {%-		endfor %}
@@ -63,25 +63,10 @@ nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ i
 {%-              	else %}
 nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} master {{ iface.lag.name }}
 {%-              	endif  %}
-{%-                 if iface.enabled == false %}
-nmcli connection down {{ iface.name }}
-{%-                 elif iface.enabled == true %}
-nmcli connection up {{ iface.name }}
-{%-                  endif %}
 {%-              	if iface.child_interfaces.all() != None %}
 {#-                      Clear IP config on eno1 (so it doesn’t try to get an IP via DHCP or static): #}
 nmcli connection modify {{ iface.name }} ipv4.method "disabled" ipv6.method "ignore"
 {%-              	else %}
-nmcli connection modify {{ iface.name }} 802-3-ethernet.auto-negotiate no
-{%-              	    if iface.speed != None  %}
-nmcli connection modify {{ iface.name }} 802-3-ethernet.speed {{ (iface.speed / 1000) | int }}
-{%-              	    endif  %}
-{%-              	    if iface.duplex != None  %}
-nmcli connection modify {{ iface.name }} 802-3-ethernet.duplex {{ iface.duplex}}
-{%-              	    endif  %}
-{%-              	    if iface.mtu != None  %}
-nmcli connection modify {{ iface.name }} 802-3-ethernet.mtu {{ iface.mtu }}
-{%-              	    endif  %}
 {#-					    configure ipv4/6 when set #}
 {%-					    for family in [4, 6] %}
 {%-						    if iface.ip_addresses.filter(address__family=family) %}
@@ -92,6 +77,23 @@ nmcli connection modify {{ iface.name }} ipv4.method manual ipv{{ family }}.addr
 nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
 {%-						    endif  %}
 {%-					    endfor %}
+{%-              	endif  %}
+{%-                 if iface.enabled == false %}
+nmcli connection down {{ iface.name }}
+{%-                 elif iface.enabled == true %}
+nmcli connection up {{ iface.name }}
+{%-                  endif %}
+{%-              	if iface.child_interfaces.all() == None %}
+nmcli connection modify {{ iface.name }} 802-3-ethernet.auto-negotiate no
+{%-              	    if iface.speed != None  %}
+nmcli connection modify {{ iface.name }} 802-3-ethernet.speed {{ (iface.speed / 1000) | int }}
+{%-              	    endif  %}
+{%-              	    if iface.duplex != None  %}
+nmcli connection modify {{ iface.name }} 802-3-ethernet.duplex {{ iface.duplex}}
+{%-              	    endif  %}
+{%-              	    if iface.mtu != None  %}
+nmcli connection modify {{ iface.name }} 802-3-ethernet.mtu {{ iface.mtu }}
+{%-              	    endif  %}
 {%-                 endif  %}
 {%-			    endif %}
 {%-			endif %}
@@ -105,11 +107,6 @@ nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
 {%-				if iface.type == "virtual"  %}
 {%-					set inter_type = "vlan" %}
 nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} dev {{ iface.parent.name }} id {% for char in iface.name.split('.')[1] if char.isdigit() %}{{ char }}{% endfor %}
-{%-                 if iface.enabled == false %}
-nmcli connection down {{ iface.name }}
-{%-                 elif iface.enabled == true %}
-nmcli connection up {{ iface.name }}
-{%-                  endif %}
 {#-                  configure ipv4/6 when set #}
 {%-					for family in [4, 6] %}
 {%-						if iface.ip_addresses.filter(address__family=family) %}
@@ -120,6 +117,11 @@ nmcli connection modify {{ iface.name }} ipv4.method manual ipv{{ family }}.addr
 nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
 {%-                      endif  %}
 {%-					endfor %}
+{%-                 if iface.enabled == false %}
+nmcli connection down {{ iface.name }}
+{%-                 elif iface.enabled == true %}
+nmcli connection up {{ iface.name }}
+{%-                  endif %}
 {%-				endif  %}
 {%-			endif %}
 {%-		endfor %}
