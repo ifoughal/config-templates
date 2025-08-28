@@ -72,38 +72,36 @@ nmcli connection modify {{ interface.name }} ipv{{ family }}.method disabled
 {#-		######################################################################## #}
 {#-                           Ether interfaces #}
 {#-		######################################################################## #}
-{%-		for interface in device.interfaces.all() %}
-{%-			if interface.custom_field_data.get("auto_config", false)  %}
-{%-              if interface.type != "virtual" and interface.type != "bridge" and interface.type != "lag" %}
+{%-		for iface in device.interfaces.all() %}
+{%-			if iface.custom_field_data.get("auto_config", false)  %}
+{%-              if iface.type != "virtual" and iface.type != "bridge" and iface.type != "lag" %}
 {%-              	set inter_type = "ethernet" %}
-interface dir: {{ interface.__dict__   }}
-{% for key, value in interface.__dict__.items() %}
-- {{ key }}: {{ value }}
-{% endfor %}
-
-{%-              	if interface.lag == None %}
-nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} 
+{%              	if child_interfaces.all() != None %}
+interface: { iface.name } has children
+{%              	endif %}
+{%-              	if iface.lag == None %}
+nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} 
 {%-              	else %}
-nmcli connection add type {{ inter_type }} con-name {{ interface.name }} ifname {{ interface.name }} master {{ interface.lag.name }}
+nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} master {{ iface.lag.name }}
 {%-              	endif  %}
-nmcli connection modify {{ interface.name }} 802-3-ethernet.auto-negotiate no
-{%-              	if interface.speed != None  %}
-nmcli connection modify {{ interface.name }} 802-3-ethernet.speed {{ (interface.speed / 1000) | int }}
+nmcli connection modify {{ iface.name }} 802-3-ethernet.auto-negotiate no
+{%-              	if iface.speed != None  %}
+nmcli connection modify {{ iface.name }} 802-3-ethernet.speed {{ (iface.speed / 1000) | int }}
 {%-              	endif  %}
-{%-              	if interface.duplex != None  %}
-nmcli connection modify {{ interface.name }} 802-3-ethernet.duplex {{ interface.duplex}}
+{%-              	if iface.duplex != None  %}
+nmcli connection modify {{ iface.name }} 802-3-ethernet.duplex {{ iface.duplex}}
 {%-              	endif  %}
-{%-              	if interface.mtu != None  %}
-nmcli connection modify {{ interface.name }} 802-3-ethernet.mtu {{ interface.mtu }}
+{%-              	if iface.mtu != None  %}
+nmcli connection modify {{ iface.name }} 802-3-ethernet.mtu {{ iface.mtu }}
 {%-              	endif  %}
 {#-					configure ipv4/6 when set #}
 {%-					for family in [4, 6] %}
-{%-						if interface.ip_addresses.filter(address__family=family) %}
-{%-							for ip in interface.ip_addresses.filter(address__family=family) %}
-nmcli connection modify {{ interface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
+{%-						if iface.ip_addresses.filter(address__family=family) %}
+{%-							for ip in iface.ip_addresses.filter(address__family=family) %}
+nmcli connection modify {{ iface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
 {%-							endfor %}
 {%-						else  %}
-nmcli connection modify {{ interface.name }} ipv{{ family }}.method disabled
+nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
 {%-						endif  %}
 {%-					endfor %}
 {%-              endif  %}
