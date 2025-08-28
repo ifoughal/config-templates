@@ -58,10 +58,12 @@ nmcli connection modify {{ iface.name }} 802-3-ethernet.mtu {{ iface.mtu }}
 {%-			if iface.custom_field_data.get("auto_config", false)  %}
 {%-              if iface.type != "virtual" and iface.type != "bridge" and iface.type != "lag" %}
 {%-              	set inter_type = "ethernet" %}
-{%-              	if iface.lag == None %}
-nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} 
-{%-              	else %}
+{%-              	if iface.lag %}
 nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} master {{ iface.lag.name }}
+{%-              	else %}
+nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} 
+{%-              	endif  %}
+{%-              	if not iface.lag %}
 {%-              	    if iface.child_interfaces.all() %}
 nmcli connection modify {{ iface.name }} ipv4.method "disabled" ipv6.method "ignore"
 {%-              	    else %}
@@ -81,8 +83,8 @@ nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
 nmcli connection down {{ iface.name }}
 {%-                 elif iface.enabled == true %}
 nmcli connection up {{ iface.name }}
-{%-                  endif %}
-{%-              	if iface.lag == None %}
+{%-                 endif %}
+{%-              	if not iface.lag %}
 {%-              	    if not iface.child_interfaces.all() %}
 nmcli connection modify {{ iface.name }} 802-3-ethernet.auto-negotiate no
 {%-              	        if iface.speed != None  %}
