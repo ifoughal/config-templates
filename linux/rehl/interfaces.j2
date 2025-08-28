@@ -76,7 +76,7 @@ nmcli connection modify {{ interface.name }} ipv{{ family }}.method disabled
 {%-			if iface.custom_field_data.get("auto_config", false)  %}
 {%-              if iface.type != "virtual" and iface.type != "bridge" and iface.type != "lag" %}
 {%-              	set inter_type = "ethernet" %}
-{%              	if child_interfaces.all() != None %}
+{%              	if iface.child_interfaces.all() != None %}
 interface: { iface.name } has children
 {%              	endif %}
 {%-              	if iface.lag == None %}
