@@ -1,0 +1,10 @@
+{%- if device.static_routes != None %}
+
+{%-     for sr in device.static_routes.all() != None %}
+name: {{ sr.name }}
+prefix: {{ sr.prefix }}
+next_hop: {{ sr.next_hop }}
+metric: {{ sr.metric }}
+vrf: {{ sr.vrf }}
+{%-     endfor %}
+{%- endif %}
