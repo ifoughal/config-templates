@@ -1,6 +1,6 @@
 {%- if device.static_routes != None %}
 
-{%-     for sr in device.static_routes.all() != None %}
+{%-     for sr in device.static_routes.all() %}
 name: {{ sr.name }}
 prefix: {{ sr.prefix }}
 next_hop: {{ sr.next_hop }}
