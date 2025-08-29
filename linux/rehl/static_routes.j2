@@ -1,10 +1,7 @@
 {%- if device.static_routes != None %}
-
+###########################################################
 {%-     for sr in device.static_routes.all() %}
-name: {{ sr.name }}
-prefix: {{ sr.prefix }}
-next_hop: {{ sr.next_hop }}
-metric: {{ sr.metric }}
-vrf: {{ sr.vrf }}
+ip route add {{ sr.prefix }} via {{ sr.next_hop }} weight {{ sr.metric }}
 {%-     endfor %}
+###########################################################
 {%- endif %}
