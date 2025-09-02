@@ -3,11 +3,8 @@
 {%-   set http_proxy=device.custom_field_data.get('http_proxy')  %}
 
 http_proxy id: {{ http_proxy }}
-{% set ns = namespace(items=[]) %}
-{% for item in ns.items %}
-key: {{ k }}
-value: {{ v }}
-{%-  endfor %}
+There are {{ dcim.Site.objects.count() }} sites.
+
 {# export http_proxy={{ http_proxy.ipaddresses.first().address }}:{{ http_proxy.ports[0] }}  #}
 {# export HTTP_PROXY={{ http_proxy.ipaddresses.first().address }}:{{ http_proxy.ports[0] }}  #}
 ######################################################################################
