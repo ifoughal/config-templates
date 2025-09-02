@@ -2,10 +2,10 @@
 ######################################################################################
 {%-   set http_proxy=device.custom_field_data.get('http_proxy')  %}
 
-http_proxy.ip
-http_proxy.ports
+http_proxy id: {{ http_proxy }}
+{{ Service.objects.all() }}
 
-export http_proxy={{ http_proxy.ipaddresses.first().address }}:{{ http_proxy.ports[0] }}
-export HTTP_PROXY={{ http_proxy.ipaddresses.first().address }}:{{ http_proxy.ports[0] }}
+{# export http_proxy={{ http_proxy.ipaddresses.first().address }}:{{ http_proxy.ports[0] }}  #}
+{# export HTTP_PROXY={{ http_proxy.ipaddresses.first().address }}:{{ http_proxy.ports[0] }}  #}
 ######################################################################################
 {% endif %}
