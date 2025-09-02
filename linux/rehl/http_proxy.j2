@@ -1,15 +1,11 @@
 {%- if device.custom_field_data.get('http_proxy') != None %}
+{%-		set http_proxy=device.custom_field_data.get('http_proxy')  %}
+{%-		if ipam['Service'].objects.get(id=http_proxy).ipaddresses != None %}
 ######################################################################################
-{%-   set http_proxy=device.custom_field_data.get('http_proxy')  %}
-
-http_proxy id: {{ http_proxy }}
-There are {{ dcim.Site.objects.count() }} sites.
-
-http_proxy {{ ipam['Service'].objects.get(id=http_proxy) }} 
-http_proxy {{ ipam['Service'].objects.get(id=http_proxy).ipaddresses.first().address.ip }} 
-http_proxy {{ ipam['Service'].objects.get(id=http_proxy).ports[0] }} 
-
-{# export http_proxy={{ http_proxy.ipaddresses.first().address }}:{{ http_proxy.ports[0] }}  #}
-{# export HTTP_PROXY={{ http_proxy.ipaddresses.first().address }}:{{ http_proxy.ports[0] }}  #}
+{%-			set ip_address = ipam['Service'].objects.get(id=http_proxy).ipaddresses.first().address.ip %}
+{%-			set port = ipam['Service'].objects.get(id=http_proxy).ports[0] %}
+export http_proxy={{ ip_address }}:{{ port }}
+export HTTP_PROXY={{ ip_address }}:{{ port }} 
+{%-		endif %}
 ######################################################################################
 {% endif %}
