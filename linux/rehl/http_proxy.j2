@@ -3,8 +3,10 @@
 {%-   set http_proxy=device.custom_field_data.get('http_proxy')  %}
 
 http_proxy id: {{ http_proxy }}
-ns: {{ dir(namespace) }}
-
+{%-   for k, v in namespace %}
+key: {{ k }}
+value: {{ v }}
+{%-  endfor %}
 {# export http_proxy={{ http_proxy.ipaddresses.first().address }}:{{ http_proxy.ports[0] }}  #}
 {# export HTTP_PROXY={{ http_proxy.ipaddresses.first().address }}:{{ http_proxy.ports[0] }}  #}
 ######################################################################################
