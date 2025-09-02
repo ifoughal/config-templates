@@ -3,7 +3,8 @@
 {%-   set http_proxy=device.custom_field_data.get('http_proxy')  %}
 
 http_proxy id: {{ http_proxy }}
-{%-   for k, v in namespace %}
+{% set ns = namespace(items=[]) %}
+{% for item in ns.items %}
 key: {{ k }}
 value: {{ v }}
 {%-  endfor %}
