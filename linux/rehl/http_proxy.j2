@@ -7,7 +7,7 @@
 export http_proxy={{ ip_address }}:{{ port }}
 export HTTP_PROXY={{ ip_address }}:{{ port }} 
 {%-			endif %}
-{% 		endif %}
+{%-		endif %}
 {%- 	if device.custom_field_data.get('https_proxy') != None %}
 {%-			set https_proxy=device.custom_field_data.get('https_proxy')  %}
 {%-			if ipam['Service'].objects.get(id=https_proxy).ipaddresses != None %}
@@ -17,6 +17,6 @@ export HTTP_PROXY={{ ip_address }}:{{ port }}
 export https_proxy={{ ip_address }}:{{ port }}
 export HTTPS_PROXY={{ ip_address }}:{{ port }} 
 {%-			endif %}
-{% 		endif %}
+{%-		endif %}
 ######################################################################################
-{% endif %}
+{%- endif %}
