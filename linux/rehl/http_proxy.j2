@@ -3,7 +3,7 @@
 {%-   set http_proxy=device.custom_field_data.get('http_proxy')  %}
 
 http_proxy id: {{ http_proxy }}
-{{ Service.objects.all() }}
+http_proxy objct id: {{ service.objects.get(id=http_proxy) }}
 
 {# export http_proxy={{ http_proxy.ipaddresses.first().address }}:{{ http_proxy.ports[0] }}  #}
 {# export HTTP_PROXY={{ http_proxy.ipaddresses.first().address }}:{{ http_proxy.ports[0] }}  #}
