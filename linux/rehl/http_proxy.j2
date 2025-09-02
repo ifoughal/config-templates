@@ -6,7 +6,7 @@ http_proxy id: {{ http_proxy }}
 There are {{ dcim.Site.objects.count() }} sites.
 
 http_proxy {{ ipam['Service'].objects.get(id=http_proxy) }} 
-http_proxy {{ ipam['Service'].objects.get(id=http_proxy).ipaddresses.first().address.split('/')[0] }} 
+http_proxy {{ ipam['Service'].objects.get(id=http_proxy).ipaddresses.first().address.ip }} 
 http_proxy {{ ipam['Service'].objects.get(id=http_proxy).ports[0] }} 
 
 {# export http_proxy={{ http_proxy.ipaddresses.first().address }}:{{ http_proxy.ports[0] }}  #}
