@@ -3,14 +3,8 @@
 {#-		########################################################################   #}
 {#-                           deletion of nmcli connections                        #}
 {#-		########################################################################   #}
-{%-		for iface in device.interfaces.all() %}
-{%-			if iface.custom_field_data.get("auto_config", false)  %}
-nmcli connection delete {{ iface.name }} > /dev/null 2>&1
-{%-			endif %}
-{%-		endfor %}
-{%-		for i in range(device.interfaces.all() | length) %}
-nmcli connection delete 'Wired connection {{ i }}' > /dev/null 2>&1
-{%-		endfor %}
+# warning: This will cleanup all interface configurations!
+nmcli connection delete $(nmcli -t -f NAME connection show)
 ######################################################################################
 {#-		########################################################################   #}
 {#-                           adding bond interfaces                               #}
