@@ -4,7 +4,7 @@
 {#-                           deletion of nmcli connections                        #}
 {#-		########################################################################   #}
 # warning: This will cleanup all interface configurations!
-nmcli connection delete $(nmcli -t -f NAME connection show)
+nmcli -t -f NAME connection show | awk '{print "\"" $0 "\""}' | xargs -n1 nmcli connection delete
 ######################################################################################
 {#-		########################################################################   #}
 {#-                           adding bond interfaces                               #}
