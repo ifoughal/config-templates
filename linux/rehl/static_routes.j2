@@ -2,12 +2,12 @@
 ######################################################################################
 {%-     for sr in device.static_routes.all() %}
 ip route add {{ sr.prefix }} via {{ sr.next_hop }}
-{# TODO: add logic for ECMP using.. eg: #} 
-{# ip route add 0.0.0.0/0 \
+{#- TODO: add logic for ECMP using.. eg: #} 
+{#- ip route add 0.0.0.0/0 \
   via {{ sr1.next_hop }} dev eth0 weight {{ sr1.metric }} \
   via {{ sr2.next_hop }}dev eth1 weight {{ sr2.metric }}
   so, we must check if the same route prefix has an occurence of more than 1, if so, we configure the routing with ecmp in mind!
-#} 
+#}
 {%-     endfor %}
 ######################################################################################
 {%- endif %}
