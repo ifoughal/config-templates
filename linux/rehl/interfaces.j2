@@ -110,10 +110,11 @@ nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ i
 {%-							for ip in iface.ip_addresses.filter(address__family=family) %}
 nmcli connection modify {{ iface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
 {%-							endfor %}
-{%-						else  %}
+{%-                     else  %}
 nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
-{%-                      endif  %}
+{%-                     endif  %}
 {%-					endfor %}
+nmcli connection up {{ iface.name }}
 {%-				endif  %}
 {%-			endif %}
 {%-		endfor %}
