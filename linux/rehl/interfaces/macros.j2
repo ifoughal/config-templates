@@ -51,11 +51,10 @@ nmcli connection modify {{ iface.name }} 802-3-ethernet.cloned-mac-address {{ if
 {%-         set inter_type = "ethernet" %}
 {%-     endif %}
 {%- if iface.type == "virtual" -%}
-ns.vlan_id:  {{ ns.vlan_id }}
 nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} dev {{ iface.parent.name }} id {{ ns.vlan_id }}
-{%- else -%}
+{%-     else %}
 nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }}
-{%- endif -%}
+{%-     endif %}
 {%-     if iface.type == "lag" %}
 nmcli connection modify {{ iface.name }} bond.options "mode=802.3ad,miimon=100"
 nmcli connection modify {{ iface.name }} lacp-rate {{ "fast" if iface.custom_field_data.get("lacp_period") == "short" else "slow" }}
