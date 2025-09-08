@@ -23,25 +23,24 @@
 			}
 		)
 %}
+{#-		############################################################## #}
+{#-		update the EVPN dict to generate the config in EVPN template   #}
+{%-		set _dummy = vpns["l2vpn"][iface.bridge.name][evi.l2vpn.name]['interfaces'].append(interface.name) %}
 
-vpns: {{ vpns }}
-{#-             ############################################################## #}
-{#-             update the EVPN dict to generate the config in EVPN template   #}
-{#- 
-{%-             set _dummy = vpns["l2vpn"][interface.bridge.name][evi.l2vpn.name]['interfaces'].append(interface.name) %}
-
-{%-             set _dummy = vpns["evpn"].setdefault(evi.l2vpn.identifier, {}) %}
-{%-             set _dummy = vpns["evpn"].setdefault(evi.l2vpn.identifier, {}) %}
-{%-             set _dummy = vpns["evpn"][evi.l2vpn.identifier].setdefault('interfaces', {}) %}
-{%-             set _dummy = vpns["evpn"][evi.l2vpn.identifier]['interfaces'].update({
-                    interface.parent.name: evi.l2vpn.custom_field_data.get('evpn_identifier', None)~'.'~bundle_id_with_dot
-                }) 
+{%-		set _dummy = vpns["evpn"].setdefault(evi.l2vpn.identifier, {}) %}
+{%-		set _dummy = vpns["evpn"].setdefault(evi.l2vpn.identifier, {}) %}
+{%-		set _dummy = vpns["evpn"][evi.l2vpn.identifier].setdefault('interfaces', {}) %}
+{%-		set _dummy = vpns["evpn"][evi.l2vpn.identifier]['interfaces'].update({
+			interface.parent.name: evi.l2vpn.custom_field_data.get('evpn_identifier', None)~'.'~ns.bundle_id
+		}) 
 %}
-{%-             set _dummy = vpns["evpn"][evi.l2vpn.identifier].setdefault('targets', {
-                    'import': evi.l2vpn.import_targets.all() | map(attribute="name") | list,
-                    'export': evi.l2vpn.export_targets.all() | map(attribute="name") | list
-                })
+{%-		set _dummy = vpns["evpn"][evi.l2vpn.identifier].setdefault(
+			'targets', 
+			{
+				'import': evi.l2vpn.import_targets.all() | map(attribute="name") | list,
+				'export': evi.l2vpn.export_targets.all() | map(attribute="name") | list
+			}
+		)
 %}
-#}
-
 {%- endfor %}
+vpns: {{ vpns }}
