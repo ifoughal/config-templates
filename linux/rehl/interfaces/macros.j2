@@ -44,7 +44,7 @@ nmcli connection modify {{ iface.name }} 802-3-ethernet.cloned-mac-address {{ if
 {%-     elif iface.type not in ["virtual","bridge","lag"] %}
 {%-         set inter_type = "ethernet" %}
 {%-     endif %}
-nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }}{%- if iface.type == "virtual" %} dev {{ iface.parent.name }} id {%- for char in iface.name.split('.')[1] if char.isdigit() %}{{ char }}{%- endfor -%}{%- endif %}
+nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }}{%- if iface.type == "virtual" %} dev {{ iface.parent.name }} id {%- for char in iface.name.split('.')[1] if char.isdigit() -%}{{ char }}{%- endfor -%}{%- endif -%}
 
 {%-     if iface.type == "lag" %}
 nmcli connection modify {{ iface.name }} bond.options "mode=802.3ad,miimon=100"
