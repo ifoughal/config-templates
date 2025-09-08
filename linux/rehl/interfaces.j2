@@ -10,8 +10,8 @@ nmcli -t -f NAME connection show | awk '{print "\"" $0 "\""}' | xargs -n1 nmcli 
 ######################################################################################
 {%- include 'linux/rehl/interfaces/macros.j2' %}
 
-{%- for iface in device.interfaces.filter(custom_field_data__auto_config=true) %}
-iface: {{ iface.name }}
+{%- for iface in device.interfaces.filter(custom_field_data__auto_config=true): %}
+{{ create_connection(iface) }}
 {%- endfor %}
 
 {%- endif %}
