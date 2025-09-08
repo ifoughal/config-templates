@@ -1,6 +1,6 @@
 hostname {{ device.name }}
 ! #################################################
-{%- set ns = namespace(vpns="") %}
+{%- set ns = namespace(vpns=dict()) %}
 {%- include 'cisco/iosxr/ncs/interfaces/clean.j2' %}
 !
 {%- include 'cisco/iosxr/ncs/vpns/clean.j2' %}
