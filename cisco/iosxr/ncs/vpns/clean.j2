@@ -6,6 +6,20 @@
 {#- iterate through all interfaces that are part of a bridge domain #}
 {%- for iface in device.interfaces.filter(bridge__isnull=false, l2vpn_terminations__isnull=false) %}
 {%-		set evi = iface.l2vpn_termination %}
+
+
+
+{%- 	set ns = namespace(bundle_id="") %}
+{%- 	for c in interface.parent.name %}
+{%- 		if c.isdigit() %}
+{%- 			set ns.bundle_id = ns.bundle_id + c %}
+{%- 		endif %}
+{%- 	endfor %}
+{%- 	set bundle_id_with_dot = ns.bundle_id[:2] + '.' + ns.bundle_id[2:] %}
+
+bundle_id_with_dot: {{ bundle_id_with_dot }}
+
+
 {%- 	set ns = namespace(digits='') %}
 {%- 	for c in iface.parent.name %}
 {%- 		if c.isdigit() %}
