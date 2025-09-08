@@ -1,8 +1,12 @@
 hostname {{ device.name }}
 ! #################################################
+{%- set ns = namespace(vpns="") %}
 {%- include 'cisco/iosxr/ncs/interfaces/clean.j2' %}
 !
 {%- include 'cisco/iosxr/ncs/vpns/clean.j2' %}
+!
+vpns in complete-config.j2: {{ ns.vpns }}
+!
 ! #################################################
 !
 commit
