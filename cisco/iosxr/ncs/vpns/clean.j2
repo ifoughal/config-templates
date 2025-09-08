@@ -8,7 +8,7 @@ l2vpn
 commit
 {%-	endif %}
 {%-	if vpns["evpn"] %}
-{%-		set interfaces_cleanup = Dict() %}
+{%-		set interfaces_cleanup = {} %}
 !
 evpn
 {%-		for evi, evi_data in vpns["evpn"].items() %}
