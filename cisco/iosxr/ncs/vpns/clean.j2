@@ -25,13 +25,13 @@
 %}
 {#-		############################################################## #}
 {#-		update the EVPN dict to generate the config in EVPN template   #}
-{%-		set _dummy = vpns["l2vpn"][iface.bridge.name][evi.l2vpn.name]['interfaces'].append(interface.name) %}
+{%-		set _dummy = vpns["l2vpn"][iface.bridge.name][evi.l2vpn.name]['interfaces'].append(iface.name) %}
 
 {%-		set _dummy = vpns["evpn"].setdefault(evi.l2vpn.identifier, {}) %}
 {%-		set _dummy = vpns["evpn"].setdefault(evi.l2vpn.identifier, {}) %}
 {%-		set _dummy = vpns["evpn"][evi.l2vpn.identifier].setdefault('interfaces', {}) %}
 {%-		set _dummy = vpns["evpn"][evi.l2vpn.identifier]['interfaces'].update({
-			interface.parent.name: evi.l2vpn.custom_field_data.get('evpn_identifier', None)~'.'~ns.bundle_id
+			iface.parent.name: evi.l2vpn.custom_field_data.get('evpn_identifier', None)~'.'~ns.bundle_id
 		}) 
 %}
 {%-		set _dummy = vpns["evpn"][evi.l2vpn.identifier].setdefault(
