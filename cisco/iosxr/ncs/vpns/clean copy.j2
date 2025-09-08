@@ -1,0 +1,46 @@
+{#- builds vpns dict #}
+{%- set ns = namespace(found=false) %}
+{%- set vpns = dict() %}
+{%- set _dummy = ns.vpns.setdefault("evpn", {}) %}
+{%- set _dummy = ns.vpns.setdefault("l2vpn", {}) %}
+{#- iterate through all interfaces that are part of a bridge domain #}
+{%- for iface in device.interfaces.filter(bridge__isnull=false, l2vpn_terminations__isnull=false) %}
+{%- 	set ns = namespace(bundle_id="") %}
+{%- 	for c in iface.parent.name %}
+{%- 		if c.isdigit() %}
+{%- 			set ns.bundle_id = ns.bundle_id ~ c %}
+{%- 		endif %}
+{%- 	endfor %}
+{#-		############################################################## #}
+{#-		update the L2VPN dict to generate the config in l2vpn template #}
+{%-		set _dummy = ns.vpns["l2vpn"].setdefault(iface.bridge.name, {}) %}
+{%-		set evi = iface.l2vpn_termination %}
+{%-		set _dummy = ns.vpns["l2vpn"][iface.bridge.name].setdefault(
+			evi.l2vpn.name, {
+				'evi': evi.l2vpn.identifier,
+				'type': evi.l2vpn.type,
+				'interfaces': []
+			}
+		)
+%}
+{#-		############################################################## #}
+{#-		update the EVPN dict to generate the config in EVPN template   #}
+{%-		set _dummy = ns.vpns["l2vpn"][iface.bridge.name][evi.l2vpn.name]['interfaces'].append(iface.name) %}
+
+{%-		set _dummy = ns.vpns["evpn"].setdefault(evi.l2vpn.identifier, {}) %}
+{%-		set _dummy = ns.vpns["evpn"].setdefault(evi.l2vpn.identifier, {}) %}
+{%-		set _dummy = ns.vpns["evpn"][evi.l2vpn.identifier].setdefault('interfaces', {}) %}
+{%-		set _dummy = ns.vpns["evpn"][evi.l2vpn.identifier]['interfaces'].update({
+			iface.parent.name: evi.l2vpn.custom_field_data.get('evpn_identifier', None)~'.'~ns.bundle_id
+		}) 
+%}
+{%-		set _dummy = ns.vpns["evpn"][evi.l2vpn.identifier].setdefault(
+			'targets', 
+			{
+				'import': evi.l2vpn.import_targets.all() | map(attribute="name") | list,
+				'export': evi.l2vpn.export_targets.all() | map(attribute="name") | list
+			}
+		)
+%}
+{%- endfor %}
+vpns in clean.j2: {{ ns.vpns }}
