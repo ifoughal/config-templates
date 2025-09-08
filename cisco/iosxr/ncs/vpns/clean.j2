@@ -10,11 +10,13 @@
 
 
 {%- 	set ns = namespace(bundle_id="") %}
+iface.parent.name:  {{ iface.parent.name }}
 {%- 	for c in iface.parent.name %}
 {%- 		if c.isdigit() %}
 {%- 			set ns.bundle_id = ns.bundle_id + c %}
 {%- 		endif %}
 {%- 	endfor %}
+ns.bundle_id:  {{ ns.bundle_id }}
 {%- 	set bundle_id_with_dot = ns.bundle_id[:2] + '.' + ns.bundle_id[2:] %}
 
 bundle_id_with_dot: {{ bundle_id_with_dot }}
