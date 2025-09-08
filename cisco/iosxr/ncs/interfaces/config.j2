@@ -49,4 +49,6 @@ interface {{ interface.name }} {{ "l2transport" if interface.custom_field_data.g
   load-interval {{ interface.custom_field_data.get("load_interval") }}
 {%-			endif %}
 {%-		endfor %}
+!
+commit
 {%-  endif %}

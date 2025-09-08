@@ -8,17 +8,17 @@ l2vpn
 commit
 {%-	endif %}
 {%-	if vpns["evpn"] %}
-{%-		set interfaces_cleanup = {} %}
+{%-		set evpn_interfaces = {} %}
 !
 evpn
 {%-		for evi, evi_data in vpns["evpn"].items() %}
  no evi {{ evi }}
-{%-			for interface_name, interface_mac in evi_data['interfaces'].items() %}
-{%-				set _dummy = interfaces_cleanup.setdefault(interface_name, interface_mac) %}
+{%-			for interface_name, identifier in evi_data['interfaces'].items() %}
+{%-				set _dummy = evpn_interfaces.setdefault(interface_name, identifier) %}
 {%-			endfor %}
 {%-		endfor %}
  !
-{%-	for interface_name, interface_mac in interfaces_cleanup.items() %}
+{%-	for interface_name, identifier in evpn_interfaces.items() %}
  no interface {{ interface_name }}
  !
 {%-		endfor %}
