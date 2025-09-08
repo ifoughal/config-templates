@@ -17,7 +17,9 @@ nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
 {#- Macro: configure ethernet options (MTU, speed, duplex)          #}
 {#- ------------------------------------------------------------    #}
 {%- macro configure_eth_opts(iface) -%}
+{%-     if iface.speed != None and iface.speed != None and iface.duplex != None and iface.mtu != None %}
 nmcli connection modify {{ iface.name }} 802-3-ethernet.auto-negotiate no
+{%-     endif %}
 {%-     if iface.speed %}
 nmcli connection modify {{ iface.name }} 802-3-ethernet.speed {{ (iface.speed / 1000) | int }}
 {%-     endif %}
