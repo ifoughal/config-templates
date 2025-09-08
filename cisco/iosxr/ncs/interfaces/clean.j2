@@ -4,11 +4,11 @@
 ! in this order to avoid inheritance issues:
 ! 1: phy
 {%-		for iface in device.interfaces.filter(custom_field_data__auto_config=true).exclude(type__in=["lag", "virtual"]) %}
-default interface {{ interface.name }}
+default interface {{ iface.name }}
 {%-		endfor %}
 ! 2: virt/lag
 {%-		for iface in device.interfaces.filter(custom_field_data__auto_config=true, type__in=["virtual", "lag"]) | reverse %}
-no interface {{ interface.name }}
+no interface {{ iface.name }}
 {%-		endfor %}
 !
 {%- endif %}
