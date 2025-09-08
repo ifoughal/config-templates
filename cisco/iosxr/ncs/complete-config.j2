@@ -1,12 +1,18 @@
 hostname {{ device.name }}
-!
+! #################################################
 {%- include 'cisco/iosxr/ncs/interfaces/clean.j2' %}
+!
+{%- include 'cisco/iosxr/ncs/vpns/clean.j2' %}
+! #################################################
 !
 commit
 !
-{%- include 'cisco/iosxr/ncs/interfaces/config.j2' %}
+{%- include 'cisco/iosxr/ncs/vpns/clean.j2' %}
+!
+{#- {%- include 'cisco/iosxr/ncs/interfaces/config.j2' %}
 !
 commit
 !
 {%- include 'cisco/iosxr/ncs/vpns/vpns.j2' %}
 !
+#}
