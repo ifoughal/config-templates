@@ -1,4 +1,2 @@
 {#- builds vpns dict #}
-{%- set ns = namespace(found=false) %}
-{%- set _dummy = ns.vpns.setdefault("evpn", {}) %}
-vpns in clean.j2: {{ ns.vpns }}
+vpns in clean.j2: {{ vpns }}
