@@ -1,50 +1,17 @@
-{%- if device.interfaces != None %}
+{%- if device.interfaces %}
+
 ######################################################################################
-{#-		########################################################################    #}
-{#-                           deletion of nmcli connections                         #}
-{#-		########################################################################    #}
-# warning: This will cleanup all interface configurations!
+# Delete all existing NM connections
+######################################################################################
 nmcli -t -f NAME connection show | awk '{print "\"" $0 "\""}' | xargs -n1 nmcli connection delete
-#
-{#-		########################################################################    #}
-{#-                                adding interfaces                                #}
-{#-		########################################################################    #}
-{%-		for iface in device.interfaces.filter(custom_field_data__auto_config=true, type="lag") %}
-{%-         if iface.type != "lag" %}
-{%-             set inter_type = "bond" %}
-{%-         elif iface.type != "virtual" %}
-{%-             set inter_type = "vlan" %}
-{%-         else %}
-{%-             set inter_type = "ethernet" %}
-{%-         endif %}
-nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }}
-{#-         configure ipv4/6 when set #}
-{%-         for family in [4, 6] %}
-{%-             if iface.ip_addresses.filter(address__family=family) %}
-{%-                 for ip in iface.ip_addresses.filter(address__family=family) %}
-nmcli connection modify {{ iface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
-{%-                 endfor %}
-{%-             else  %}
-nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
-{%-             endif  %}
-{%-         endfor %}
-{%-         if iface.enabled == false %}
-nmcli connection down {{ iface.name }}
-{%-         elif iface.enabled == true %}
-nmcli connection up {{ iface.name }}
-{%-         endif %}
-nmcli connection modify {{ iface.name }} bond.options "mode=802.3ad,miimon=100"
-nmcli connection modify {{ iface.name }} lacp-rate {{ "fast" if iface.custom_field_data.get("lacp_period") == "short" else "slow" }}
-{%-         if iface.mac_addresses.all().first() != None %}
-{%-             set mac_address = iface.mac_addresses.all().first() %}
-{%-             if iface.mac_address != None  %}
-{%-                 set mac_address = iface.mac_address %}
-{%-             endif  %}
-nmcli connection modify {{ iface.name }} 802-3-ethernet.cloned-mac-address {{ mac_address }}
-{%-         endif  %}
-{%-         if iface.mtu != None  %}
-nmcli connection modify {{ iface.name }} 802-3-ethernet.mtu {{ iface.mtu }}
-{%-         endif  %}
-{%-		endfor %}
-#
-{%-	endif %}
+
+######################################################################################
+# Create all interfaces
+######################################################################################
+{%- include 'linux/rehl/interfaces/macros.j2' %}
+
+{%- for iface in device.interfaces.filter(custom_field_data__auto_config=true) %}
+{{ create_connection(iface) }}
+{%- endfor %}
+
+{%- endif %}

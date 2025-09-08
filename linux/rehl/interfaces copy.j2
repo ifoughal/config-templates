@@ -1,17 +1,118 @@
-{%- if device.interfaces %}
-
+{%- if device.interfaces != None %}
 ######################################################################################
-# Delete all existing NM connections
-######################################################################################
+{#-		########################################################################   #}
+{#-                           deletion of nmcli connections                        #}
+{#-		########################################################################   #}
+# warning: This will cleanup all interface configurations!
 nmcli -t -f NAME connection show | awk '{print "\"" $0 "\""}' | xargs -n1 nmcli connection delete
-
 ######################################################################################
-# Create all interfaces
+{#-		########################################################################   #}
+{#-                           adding bond interfaces                               #}
+{#-		########################################################################   #}
+{%-		for iface in device.interfaces.filter(custom_field_data__auto_config=true, type="lag") %} %}
+{%-         set inter_type = "bond" %}
+nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }}
+{#-         configure ipv4/6 when set #}
+{%-         for family in [4, 6] %}
+{%-             if iface.ip_addresses.filter(address__family=family) %}
+{%-                 for ip in iface.ip_addresses.filter(address__family=family) %}
+nmcli connection modify {{ iface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
+{%-                 endfor %}
+{%-             else  %}
+nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
+{%-             endif  %}
+{%-         endfor %}
+{%-         if iface.enabled == false %}
+nmcli connection down {{ iface.name }}
+{%-         elif iface.enabled == true %}
+nmcli connection up {{ iface.name }}
+{%-         endif %}
+nmcli connection modify {{ iface.name }} bond.options "mode=802.3ad,miimon=100"
+nmcli connection modify {{ iface.name }} lacp-rate {{ "fast" if iface.custom_field_data.get("lacp_period") == "short" else "slow" }}
+{%-         if iface.mac_addresses.all().first() != None %}
+{%-             set mac_address = iface.mac_addresses.all().first() %}
+{%-             if iface.mac_address != None  %}
+{%-                 set mac_address = iface.mac_address %}
+{%-             endif  %}
+nmcli connection modify {{ iface.name }} 802-3-ethernet.cloned-mac-address {{ mac_address }}
+{%-         endif  %}
+{%-         if iface.mtu != None  %}
+nmcli connection modify {{ iface.name }} 802-3-ethernet.mtu {{ iface.mtu }}
+{%-         endif  %}
+{%-		endfor %}
 ######################################################################################
-{%- include 'linux/rehl/interfaces/macros.j2' %}
-
-{%- for iface in device.interfaces.all() if iface.custom_field_data.get("auto_config") %}
-{{ create_connection(iface) }}
-{%- endfor %}
-
-{%- endif %}
+{#-		######################################################################## #}
+{#-                           Ether interfaces #}
+{#-		######################################################################## #}
+{%-		for iface in device.interfaces.all() %}
+{%-			if iface.custom_field_data.get("auto_config", false)  %}
+{%-              if iface.type != "virtual" and iface.type != "bridge" and iface.type != "lag" %}
+{%-              	set inter_type = "ethernet" %}
+{%-              	if iface.lag %}
+nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} master {{ iface.lag.name }}
+{%-              	else %}
+nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} 
+{%-              	endif  %}
+{%-              	if not iface.lag %}
+{%-              	    if iface.child_interfaces.all() %}
+nmcli connection modify {{ iface.name }} ipv4.method "disabled" ipv6.method "ignore"
+{%-              	    else %}
+{#-					        configure ipv4/6 when set #}
+{%-					        for family in [4, 6] %}
+{%-						        if iface.ip_addresses.filter(address__family=family) %}
+{%-							        for ip in iface.ip_addresses.filter(address__family=family) %}
+nmcli connection modify {{ iface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
+{%-							        endfor %}
+{%-						        else  %}
+nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
+{%-						        endif  %}
+{%-					        endfor %}
+{%-              	    endif  %}
+{%-              	endif  %}
+{%-                 if iface.enabled == false %}
+nmcli connection down {{ iface.name }}
+{%-                 elif iface.enabled == true %}
+nmcli connection up {{ iface.name }}
+{%-                 endif %}
+{%-              	if not iface.lag %}
+{%-              	    if not iface.child_interfaces.all() %}
+nmcli connection modify {{ iface.name }} 802-3-ethernet.auto-negotiate no
+{%-              	        if iface.speed != None  %}
+nmcli connection modify {{ iface.name }} 802-3-ethernet.speed {{ (iface.speed / 1000) | int }}
+{%-              	        endif  %}
+{%-              	        if iface.duplex != None  %}
+nmcli connection modify {{ iface.name }} 802-3-ethernet.duplex {{ iface.duplex}}
+{%-              	        endif  %}
+{%-              	        if iface.mtu != None  %}
+nmcli connection modify {{ iface.name }} 802-3-ethernet.mtu {{ iface.mtu }}
+{%-              	        endif  %}
+{%-                     endif  %}
+{%-                 endif  %}
+{%-			    endif %}
+{%-			endif %}
+{%-		endfor %}
+######################################################################################
+{#-		######################################################################## #}
+{#-                           adding vlan interfaces #}
+{#-		######################################################################## #}
+{%-		for iface in device.interfaces.all() %}
+{%-			if iface.custom_field_data.get("auto_config", false)  %}
+{%-				if iface.type == "virtual"  %}
+{%-					set inter_type = "vlan" %}
+nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} dev {{ iface.parent.name }} id {% for char in iface.name.split('.')[1] if char.isdigit() %}{{ char }}{% endfor %}
+{#-                  configure ipv4/6 when set #}
+{%-					for family in [4, 6] %}
+{%-						if iface.ip_addresses.filter(address__family=family) %}
+{%-							for ip in iface.ip_addresses.filter(address__family=family) %}
+nmcli connection modify {{ iface.name }} ipv4.method manual ipv{{ family }}.address {{ ip.address }}
+{%-							endfor %}
+{%-                     else  %}
+nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
+{%-                     endif  %}
+{%-					endfor %}
+nmcli connection up {{ iface.name }}
+{%-				endif  %}
+{%-			endif %}
+{%-		endfor %}
+######################################################################################
+{%-	endif %}
