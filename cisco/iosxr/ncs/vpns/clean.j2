@@ -1,2 +1,5 @@
 {#- builds vpns dict #}
+{%- set _dummy = vpns.setdefault("evpn", {}) %}
+{%- set _dummy = vpns.setdefault("l2vpn", {}) %}
+
 vpns in clean.j2: {{ vpns }}

@@ -11,9 +11,10 @@ vpns in complete-config.j2: {{ vpns }}
 !
 commit
 !
+{#-
 {%- include 'cisco/iosxr/ncs/vpns/clean.j2' %}
 !
-{#- {%- include 'cisco/iosxr/ncs/interfaces/config.j2' %}
+ {%- include 'cisco/iosxr/ncs/interfaces/config.j2' %}
 !
 commit
 !
