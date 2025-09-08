@@ -10,7 +10,7 @@
 
 
 {%- 	set ns = namespace(bundle_id="") %}
-{%- 	for c in interface.parent.name %}
+{%- 	for c in iface.parent.name %}
 {%- 		if c.isdigit() %}
 {%- 			set ns.bundle_id = ns.bundle_id + c %}
 {%- 		endif %}
