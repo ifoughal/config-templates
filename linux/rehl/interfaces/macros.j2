@@ -41,11 +41,18 @@ nmcli connection modify {{ iface.name }} 802-3-ethernet.cloned-mac-address {{ if
 {%-         set inter_type = "bond" %}
 {%-     elif iface.type == "virtual" %}
 {%-         set inter_type = "vlan" %}
+{%-         set ns = namespace(vlan_id="") %}
+{%-         for char in iface.name.split('.')[1] %}
+{%-             if char.isdigit() %}
+{%-                 set ns.vlan_id = ns.vlan_id + char %}
+{%-             endif %}
+{%-         endfor %}
 {%-     elif iface.type not in ["virtual","bridge","lag"] %}
 {%-         set inter_type = "ethernet" %}
 {%-     endif %}
 {%- if iface.type == "virtual" -%}
-nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} dev {{ iface.parent.name }} id {%- for char in iface.name.split('.')[1] if char.isdigit() -%}{{ char }}{%- endfor -%}
+ns.vlan_id:  {{ ns.vlan_id }}
+nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }} dev {{ iface.parent.name }} id {{ ns.vlan_id }}
 {%- else -%}
 nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ iface.name }}
 {%- endif -%}
