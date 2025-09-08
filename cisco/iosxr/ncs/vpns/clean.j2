@@ -6,10 +6,9 @@
 {#- iterate through all interfaces that are part of a bridge domain #}
 {%- for iface in device.interfaces.filter(bridge__isnull=false, l2vpn_terminations__isnull=false) %}
 {%-		set evi = interface.l2vpn_termination %}
-{%- 	set bundle_id = interface.parent.name | regex_replace('[^0-9]', '') %}
-{%- 	set bundle_id_with_dot = bundle_id[:2] ~ '.' ~ bundle_id[2:] %}
-
-bundle_id: {{ bundle_id }}
+{#-		extract digits directly #}
+{%- 	set digits = ''.join(c for c in interface.parent.name if c.isdigit()) %}
+{#-		insert the dot after the 2nd digit #}
+{%- 	set bundle_id_with_dot = digits[:2] ~ '.' ~ digits[2:] %}
 bundle_id_with_dot: {{ bundle_id_with_dot }}
-
 {%- endfor %}
