@@ -3,7 +3,7 @@ hostname {{ device.name }}
 {%- include 'cisco/iosxr/ncs/interfaces/clean.j2' %}
 !
 {%- set ns = namespace(vpns=dict()) %}
-{%- include 'cisco/iosxr/ncs/vpns/clean.j2' %}
+{%- include 'cisco/iosxr/ncs/vpns/clean.j2' with ns=ns %} 
 !
 vpns in complete-config.j2: {{ ns.vpns }}
 !
