@@ -1,0 +1,27 @@
+{%- if vpns["l2vpn"] %}
+l2vpn
+{%-		for bridge_group, bridge_domains in vpns["l2vpn"].items() %}
+  no {{ bridge_group }}
+{%-		endfor %}
+  !
+!
+commit
+{%-	endif %}
+{%-	if vpns["evpn"] %}
+{%-		set evpn_interfaces = {} %}
+!
+evpn
+{%-		for evi, evi_data in vpns["evpn"].items() %}
+ no evi {{ evi }}
+{%-			for interface_name, identifier in evi_data['interfaces'].items() %}
+{%-				set _dummy = evpn_interfaces.setdefault(interface_name, identifier) %}
+{%-			endfor %}
+{%-		endfor %}
+ !
+{%-	for interface_name, identifier in evpn_interfaces.items() %}
+ no interface {{ interface_name }}
+ !
+{%-		endfor %}
+!
+commit
+{%-	endif %}

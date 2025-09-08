@@ -1,6 +1,10 @@
 {%-	if vpns["evpn"] %}
+{%-		set evpn_interfaces = {} %}
 evpn
 {%-		for evi, evi_data in vpns["evpn"].items() %}
+{%-			for interface_name, interface_mac in evi_data['interfaces'].items() %}
+{%-				set _dummy = evpn_interfaces.setdefault(interface_name, interface_mac) %}
+{%-			endfor %}
  evi {{ evi }}
   bgp
 {%-			for rt_type, rts in evi_data['targets'].items() %}
@@ -12,13 +16,11 @@ evpn
   advertise-mac
  !
 {%-		endfor %}
-{%-		for evi, evi_data in vpns["evpn"].items() %}
-{%-			for interface, identifier in evi_data['interfaces'].items() %}
- interface {{ interface }}
+{%-		for interface_name, identifier in evpn_interfaces.items() %}
+ interface {{ interface_name }}
   ethernet-segment
    identifier type 0 {{ identifier }}
   !
  !
-{%-			endfor %}
 {%-		endfor %}
 {%-	endif %}
