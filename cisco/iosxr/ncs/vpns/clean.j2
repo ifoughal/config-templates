@@ -12,15 +12,8 @@ commit
 evpn
 {%-		for evi, evi_data in vpns["evpn"].items() %}
  no evi {{ evi }}
-{%-			for rt_type, rts in evi_data['targets'].items() %}
-{%-				for rt in rts %}
-   no route-target {{ rt_type }} {{ rt }}
-{%-				endfor %}
-{%-			endfor %}
-  !
-  no advertise-mac
- !
 {%-		endfor %}
+ !
 {%-		for evi, evi_data in vpns["evpn"].items() %}
 {%-			for interface, identifier in evi_data['interfaces'].items() %}
  no interface {{ interface }}
