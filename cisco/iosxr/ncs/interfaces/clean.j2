@@ -10,5 +10,4 @@ default interface {{ iface.name }}
 {%-		for iface in device.interfaces.filter(custom_field_data__auto_config=true, type__in=["virtual", "lag"]) | reverse %}
 no interface {{ iface.name }}
 {%-		endfor %}
-!
 {%- endif %}

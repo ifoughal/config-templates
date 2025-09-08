@@ -8,7 +8,7 @@ hostname {{ device.name }}
 {%- include 'cisco/iosxr/ncs/vpns/build_dict.j2' %} 
 {#- ################################################# #}
 {%- include 'cisco/iosxr/ncs/vpns/clean.j2' %}
-
+!
 
 vpns: {{ vpns }}
 {#-
