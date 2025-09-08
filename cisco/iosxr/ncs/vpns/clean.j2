@@ -6,6 +6,7 @@
 {#- iterate through all interfaces that are part of a bridge domain #}
 {%- for iface in device.interfaces.filter(bridge__isnull=false, l2vpn_terminations__isnull=false) %}
 {%-		set evi = iface.l2vpn_termination %}
+{%- 	set ns = namespace(digits='') %}
 {%- 	for c in iface.parent.name %}
 {%- 		if c.isdigit() %}
 {%- 			set ns.digits = ns.digits ~ c %}
