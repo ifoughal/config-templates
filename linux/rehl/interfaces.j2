@@ -1,19 +1,11 @@
 {%- if device.interfaces %}
-
-######################################################################################
 # Delete all existing NM connections
-######################################################################################
 nmcli -t -f NAME connection show | awk '{print "\"" $0 "\""}' | xargs -n1 nmcli connection delete
-
-######################################################################################
 # Create all interfaces
-######################################################################################
-{%- include 'linux/rehl/interfaces/macros.j2' %}
 {%- import 'linux/rehl/interfaces/macros.j2' as nm %}
-
 {%-     for iface in device.interfaces.filter(custom_field_data__auto_config=true) %}
 iface: {{ iface.name }}
 {{ nm.configure_ip(iface) }} 
+{{ nm.configure_eth_opts(iface) }} 
 {%-     endfor %}
-
 {%- endif %}
