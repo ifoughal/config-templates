@@ -51,9 +51,29 @@ nmcli connection modify {{ iface.name }} lacp-rate {{ "fast" if iface.custom_fie
 {%-     endif %}
 {%-     if iface.lag %}
 nmcli connection modify {{ iface.name }} master {{ iface.lag.name }}
-{%-     else %}
+{%-      endif %}
+{#-
 {{ configure_ip(iface) }}
-{{ configure_eth_opts(iface) }}
-{%-     endif %}
+nmcli connection {{ "up" if iface.enabled else "down" }} {{ iface.name }}
 
+{%-     elif iface.type not in ["virtual","bridge","lag"] %}
+nmcli connection add type ethernet con-name {{ iface.name }} ifname {{ iface.name }}{% if iface.lag %} master {{ iface.lag.name }}{% endif %}
+{%-         if not iface.lag %}
+{%-             if iface.child_interfaces.all() %}
+nmcli connection modify {{ iface.name }} ipv4.method disabled ipv6.method ignore
+{%-             else %}
+{{ configure_ip(iface) }}
+{%-             endif %}
+{{ configure_eth_opts(iface) }}
+{%-         endif %}
+nmcli connection {{ "up" if iface.enabled else "down" }} {{ iface.name }}
+
+{%-     elif iface.type == "virtual" %}
+{# VLAN interface 
+{%-         set vlan_id = ''.join([c for c in iface.name.split('.')[1] if c.isdigit()]) %}
+nmcli connection add type vlan con-name {{ iface.name }} ifname {{ iface.name }} dev {{ iface.parent.name }} id {{ vlan_id }}
+{{ configure_ip(iface) }}
+nmcli connection up {{ iface.name }}
+{%-     endif %}
+#}
 {%- endmacro %}
