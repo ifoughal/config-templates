@@ -14,11 +14,9 @@ evpn
  no evi {{ evi }}
 {%-		endfor %}
  !
-{%-		for evi, evi_data in vpns["evpn"].items() %}
-{%-			for interface, identifier in evi_data['interfaces'].items() %}
- no interface {{ interface }}
+{%-		for interface_name, interface_mac in evi_data['interfaces'].items() %}
+ no interface {{ interface_name }}
  !
-{%-			endfor %}
 {%-		endfor %}
 !
 commit
