@@ -35,10 +35,12 @@ nmcli connection modify {{ iface.name }} 802-3-ethernet.cloned-mac-address {{ if
 
 {#------------------------------------------------------------#}
 {# Macro: create connection based on type (bond, ethernet, vlan) #}
-{#------------------------------------------------------------
+{#------------------------------------------------------------ #}
 {% macro create_connection(iface) -%}
-{%-     if iface.type == "lag" %}
 nmcli connection add type bond con-name {{ iface.name }} ifname {{ iface.name }}
+
+
+{#
 nmcli connection modify {{ iface.name }} bond.options "mode=802.3ad,miimon=100"
 nmcli connection modify {{ iface.name }} lacp-rate {{ "fast" if iface.custom_field_data.get("lacp_period") == "short" else "slow" }}
 {{ configure_ip(iface) }}
