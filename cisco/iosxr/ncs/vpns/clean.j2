@@ -2,11 +2,31 @@
 l2vpn
 {%-		for bridge_group, bridge_domains in vpns["l2vpn"].items() %}
   no {{ bridge_group }}
-{%-			for bridge_domain_name, bridge_domain in bridge_domains.items() %}
-    no bridge-domain {{ bridge_domain_name }}
+{%-		endfor %}
+  !
+!
+commit
+{%-	endif %}
+{%-	if vpns["evpn"] %}
+!
+evpn
+{%-		for evi, evi_data in vpns["evpn"].items() %}
+ no evi {{ evi }}
+{%-			for rt_type, rts in evi_data['targets'].items() %}
+{%-				for rt in rts %}
+   no route-target {{ rt_type }} {{ rt }}
+{%-				endfor %}
+{%-			endfor %}
+  !
+  no advertise-mac
+ !
+{%-		endfor %}
+{%-		for evi, evi_data in vpns["evpn"].items() %}
+{%-			for interface, identifier in evi_data['interfaces'].items() %}
+ no interface {{ interface }}
+ !
 {%-			endfor %}
 {%-		endfor %}
-    !
-  !
+!
+commit
 {%-	endif %}
-
