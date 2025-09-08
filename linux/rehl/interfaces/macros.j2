@@ -1,6 +1,6 @@
-{#------------------------------------------------------------#}
-{#- Macro: configure IP addresses for IPv4/IPv6              #}
-{#------------------------------------------------------------#}
+{#- -----------------------------------------------------------     #}
+{#- Macro: configure IP addresses for IPv4/IPv6                     #}
+{#- -----------------------------------------------------------     #}
 {%- macro configure_ip(iface) -%}
 {%-     for family in [4, 6] %}
 {%-         set ips = iface.ip_addresses.filter(address__family=family) %}
@@ -13,9 +13,9 @@ nmcli connection modify {{ iface.name }} ipv{{ family }}.method disabled
 {%-         endif %}
 {%-     endfor %}
 {%- endmacro %}
-{#-------------------------------------------------------------#}
-{#- Macro: configure ethernet options (MTU, speed, duplex)    #}
-{#-------------------------------------------------------------#}
+{#- ------------------------------------------------------------    #}
+{#- Macro: configure ethernet options (MTU, speed, duplex)          #}
+{#- ------------------------------------------------------------    #}
 {%- macro configure_eth_opts(iface) -%}
 nmcli connection modify {{ iface.name }} 802-3-ethernet.auto-negotiate no
 {%-     if iface.speed %}
@@ -31,9 +31,9 @@ nmcli connection modify {{ iface.name }} 802-3-ethernet.mtu {{ iface.mtu }}
 nmcli connection modify {{ iface.name }} 802-3-ethernet.cloned-mac-address {{ iface.mac_address or iface.mac_addresses.all().first() }}
 {%-     endif %}
 {%- endmacro %}
-{#-------------------------------------------------------------#}
-{#- Macro: create connection based on type (bond, ethernet, vlan) #}
-{#------------------------------------------------------------- #}
+{#- ------------------------------------------------------------    #}
+{#- Macro: create connection based on type (bond, ethernet, vlan)   #}
+{#- ------------------------------------------------------------    #}
 {%- macro create_connection(iface) -%}
 {%-     if iface.type == "lag" %}
 {%-         set inter_type = "bond" %}
@@ -47,7 +47,7 @@ nmcli connection add type {{ inter_type }} con-name {{ iface.name }} ifname {{ i
 nmcli connection modify {{ iface.name }} bond.options "mode=802.3ad,miimon=100"
 nmcli connection modify {{ iface.name }} lacp-rate {{ "fast" if iface.custom_field_data.get("lacp_period") == "short" else "slow" }}
 {%-     endif %}
-{% if iface.lag %}nmcli connection modify {{ iface.name }} master {{ iface.lag.name }}{% endif %}
+{%- if iface.lag %}nmcli connection modify {{ iface.name }} master {{ iface.lag.name }}{% endif %}
 {#-
 {{ configure_ip(iface) }}
 nmcli connection {{ "up" if iface.enabled else "down" }} {{ iface.name }}
