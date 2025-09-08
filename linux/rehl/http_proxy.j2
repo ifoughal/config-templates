@@ -11,12 +11,11 @@ export HTTP_PROXY={{ ip_address }}:{{ port }}
 {%- 	if device.custom_field_data.get('https_proxy') != None %}
 {%-			set https_proxy=device.custom_field_data.get('https_proxy')  %}
 {%-			if ipam['Service'].objects.get(id=https_proxy).ipaddresses != None %}
-######################################################################################
+#
 {%-				set ip_address = ipam['Service'].objects.get(id=https_proxy).ipaddresses.first().address.ip %}
 {%-				set port = ipam['Service'].objects.get(id=https_proxy).ports[0] %}
 export https_proxy={{ ip_address }}:{{ port }}
 export HTTPS_PROXY={{ ip_address }}:{{ port }} 
 {%-			endif %}
 {%-		endif %}
-######################################################################################
 {%- endif %}
