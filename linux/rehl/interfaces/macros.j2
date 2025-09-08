@@ -55,5 +55,5 @@ nmcli connection modify {{ iface.name }} master {{ iface.lag.name }}
 {{ configure_ip(iface) }}
 {{ configure_eth_opts(iface) }}
 {%-     endif %}
-
+nmcli connection {{ "up" if iface.enabled else "down" }} {{ iface.name }}
 {%- endmacro %}
