@@ -6,6 +6,7 @@
 {%-			if sr_interface != None %}
 {%- 			set interface_name = device.interfaces.get(id=sr_interface).name %}
 sudo nmcli connection modify {{ interface_name }} +ipv4.routes "{{ sr.prefix }} {{ sr.next_hop }} {{ sr.metric }}" 
+{%-				set sr_set=false %}
 {%-			endif %}
 
 {%-			if sr_set == true %}
