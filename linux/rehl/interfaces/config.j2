@@ -7,5 +7,6 @@ nmcli -t -f NAME connection show | awk '{print "\"" $0 "\""}' | xargs -n1 nmcli 
 #
 {{- nm.create_connection(iface) }} 
 {{- nm.configure_static_routes(device, iface) }}
+nmcli connection {{ "up" if iface.enabled else "down" }} {{ iface.name }}
 {%-     endfor %}
 {%- endif %}
