@@ -65,7 +65,7 @@ nmcli connection {{ "up" if iface.enabled else "down" }} {{ iface.name }}
 {%-         for sr in device.static_routes.all() %}
 {%-             set sr_iface_id = sr.custom_field_data.get('interface') %}
 {%-             if sr_iface_id != None and interface.id== sr_iface_id %}
-{%                  if sr.prefix==0.0.0.0/0 %}
+{%                  if sr.prefix=="0.0.0.0/0" %}
 sudo nmcli connection modify {{ interface.name }} ipv4.gateway {{ sr.next_hop }} ipv4.route-metric {{ sr.metric }}
 {%                  else %}
 sudo nmcli connection modify {{ interface.name }} +ipv4.routes "{{ sr.prefix }} {{ sr.next_hop }} {{ sr.metric }}"
