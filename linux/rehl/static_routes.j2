@@ -3,7 +3,7 @@
 {%-		for sr in device.static_routes.all() %}
 {%-			set sr_interface=sr.custom_field_data.get('interface') %}
 {%-			if sr_interface != None %}
-sudo nmcli connection modify {{ sr.custom_field_data.get('interface') }} +ipv4.routes "{{ sr.prefix }} {{ sr.next_hop }} {{ sr.metric }}" 
+sudo nmcli connection modify {{ sr_interface.name }} +ipv4.routes "{{ sr.prefix }} {{ sr.next_hop }} {{ sr.metric }}" 
 {%-			endif %}
 {%-     endfor %}
 {%- endif %}
