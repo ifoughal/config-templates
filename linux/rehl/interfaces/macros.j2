@@ -60,7 +60,7 @@ nmcli connection {{ "up" if iface.enabled else "down" }} {{ iface.name }}
 {#- ------------------------------------------------------------    #}
 {#- Macro: configure static routes for an interface                #}
 {#- ------------------------------------------------------------    #}
-{%- macro configure_static_routes(device) -%}
+{%- macro configure_static_routes() -%}
 {%-     if device.static_routes != None %}
 {%-         for sr in device.static_routes.all() %}
 {%-			    set sr_set=false %}

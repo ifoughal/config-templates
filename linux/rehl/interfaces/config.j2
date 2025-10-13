@@ -6,6 +6,6 @@ nmcli -t -f NAME connection show | awk '{print "\"" $0 "\""}' | xargs -n1 nmcli 
 {%-     for iface in device.interfaces.filter(custom_field_data__auto_config=true) %}
 #
 {{- nm.create_connection(iface) }} 
-{{- nm.configure_static_routes(iface) }}
+{{- nm.configure_static_routes() }}
 {%-     endfor %}
 {%- endif %}
