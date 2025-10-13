@@ -65,7 +65,7 @@ nmcli connection modify {{ iface.name }} master {{ iface.lag.name }}
 {%-             set sr_iface_id = sr.custom_field_data.get('interface') %}
 {%-             set prefix = sr.prefix|string %}
 {%-             if sr_iface_id != None and interface.id== sr_iface_id %}
-{%                  if prefix.strip() in ["0.0.0.0/0", "::/0"] %}
+{%-                  if prefix.strip() in ["0.0.0.0/0", "::/0"] %}
 sudo nmcli connection modify {{ interface.name }} ipv4.gateway {{ sr.next_hop }} ipv4.route-metric {{ sr.metric }}
 {%-                 else %}
 sudo nmcli connection modify {{ interface.name }} +ipv4.routes "{{ prefix }} {{ sr.next_hop }} {{ sr.metric }}"
