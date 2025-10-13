@@ -60,12 +60,12 @@ nmcli connection {{ "up" if iface.enabled else "down" }} {{ iface.name }}
 {#- ------------------------------------------------------------    #}
 {#- Macro: configure static routes for an interface                #}
 {#- ------------------------------------------------------------    #}
-{%- macro configure_static_routes(device) -%}
+{%- macro configure_static_routes(device, interface) -%}
 {%-     if device.static_routes != None %}
 {%-         for sr in device.static_routes.all() %}
 {%-			    set sr_set=false %}
 {%-             set sr_iface_id = sr.custom_field_data.get('interface') %}
-{%-             if sr_iface_id != None %}
+{%-             if sr_iface_id != None && interface.id== sr_iface_id %}
 {%-                 set iface = device.interfaces.get(id=sr_iface_id).name %}
 {%-			        set sr_set=true %}
 sudo nmcli connection modify {{ interface_name }} +ipv4.routes "{{ sr.prefix }} {{ sr.next_hop }} {{ sr.metric }}"
