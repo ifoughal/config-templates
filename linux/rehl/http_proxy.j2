@@ -10,7 +10,9 @@
 
 http_proxy={{ http_proxy }}
 ip_addresses={{ ip_addresses }}
-
+{%-		        else %}
+no http_proxy
+no HTTP_PROXY
 {%-		        endif %}
 {%-		    endif %}
 {%-		endif %}
