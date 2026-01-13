@@ -15,4 +15,20 @@ no HTTP_PROXY
 {%-		        endif %}
 {%-		    endif %}
 {%-		endif %}
+{%- 	if device.custom_field_data.get('https_proxy') != None %}
+{%-			set https_proxy_id=device.custom_field_data.get('https_proxy')  %}
+{%-         if https_proxy_id != None %}
+{%-             set https_proxy=ipam['Service'].objects.get(id=https_proxy_id) %}
+{%-             set ip_addresses=https_proxy.ipaddresses %}
+{%-			    if ip_addresses and ip_addresses.first() %}
+{%-				    set ip_address = ip_addresses.first().address.ip %}
+{%-				    set port = https_proxy.first() %}
+https_proxy={{ https_proxy }}
+ip_addresses={{ ip_addresses }}
+{%-		        else %}
+no https_proxy
+no HTTPS_PROXY
+{%-		        endif %}
+{%-		    endif %}
+{%-		endif %}
 {%- endif %}
