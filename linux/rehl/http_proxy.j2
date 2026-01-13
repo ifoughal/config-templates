@@ -1,6 +1,9 @@
 {%- if device.custom_field_data.get('http_proxy') != None or device.custom_field_data.get('https_proxy') != None %}
 {%- 	if device.custom_field_data.get('http_proxy') != None %}
-{%-			set http_proxy=device.custom_field_data.get('http_proxy')  %}
+{%-			set http_proxy_name=device.custom_field_data.get('http_proxy')  %}
+{%-         set http_proxy=ipam['Service'].objects.get(id=http_proxy_name) %}
+http_proxy = {{ http_proxy_name }}
+http_proxy = {{ http_proxy }}
 
 {%-		endif %}
 {%- endif %}
