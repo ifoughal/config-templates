@@ -1,17 +1,9 @@
-{%- if device.custom_field_data.get('http_proxy') or device.custom_field_data.get('https_proxy') %}
-{%- 	if device.custom_field_data.get('http_proxy') %}
-{%-         set http_proxy_id = device.custom_field_data.get('http_proxy') %}
-{%-         if http_proxy_id %}
-{%-             set http_proxy = ipam['Service'].objects.get(id=http_proxy_id) %}
-{%-             set ip_addresses = http_proxy.ipaddresses %}
-{%-             if ip_addresses.count() > 0 %}
-{%-                 set ip = ip_addresses.first().address.ip %}
-{%-                 set port = http_proxy.port %}
-http_proxy=http://{{ ip }}:{{ port }}
-HTTP_PROXY=http://{{ ip }}:{{ port }}
-{%-             endif %}
-{%-         endif %}
-{%-     endif %}
+{%- if device.custom_field_data.get('http_proxy') %}
+{%-     set http_proxy_id = device.custom_field_data.get('http_proxy') %}
+{%-     if http_proxy_id %}
+{%-         set http_proxy = ipam['Service'].objects.get(id=http_proxy_id) %}
+{%-         set ip_addresses = http_proxy.ipaddresses %}
+{%- else %}
+no http_proxy
+no HTTP_PROXY
 {%- endif %}
-
-
