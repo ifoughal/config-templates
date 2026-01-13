@@ -1,5 +1,7 @@
 {%- if device.custom_field_data.get('http_proxy') %}
+has http_proxy
 {%-     set http_proxy_id = device.custom_field_data.get('http_proxy') %}
+http_proxy_id = {{ http_proxy_id }}
 {%- else %}
 no http_proxy
 no HTTP_PROXY
