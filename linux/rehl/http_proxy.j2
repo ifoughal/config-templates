@@ -1,14 +1,17 @@
 {%- if device.custom_field_data.get('http_proxy') != None or device.custom_field_data.get('https_proxy') != None %}
 {%- 	if device.custom_field_data.get('http_proxy') != None %}
-{%-			set http_proxy_id=device.custom_field_data.get('http_proxy')  %}
+{%-         set http_proxy_id = device.custom_field_data.get('http_proxy') %}
 {%-         if http_proxy_id %}
-http_proxy_id= {{ http_proxy_id }}
-{%- 	    else %}
-no http_proxy
-no HTTP_PROXY
-{%-		    endif %}
-{%- 	else %}
-no http_proxy
-no HTTP_PROXY
+{%-             set http_proxy = ipam['Service'].objects.filter(id=http_proxy_id).first() %}
+{%-             set ip_addresses = http_proxy.ipaddresses %}
+{%-             if ip_addresses.count() > 0 %}
+{%-                 set ip = ip_addresses.first().address.ip %}
+{%-                 set port = http_proxy.port %}
+http_proxy=http://{{ ip }}:{{ port }}
+HTTP_PROXY=http://{{ ip }}:{{ port }}
+{%-             endif %}
+{%-         endif %}
 {%-     endif %}
 {%- endif %}
+
+
