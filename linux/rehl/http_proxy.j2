@@ -1,21 +1,44 @@
+{# ---------- HTTP PROXY ---------- #}
 {%- if device.custom_field_data.get('http_proxy') %}
-{%-     set http_proxy_id=device.custom_field_data.get('http_proxy')  %}
-{%-     if http_proxy_id %}
-{%-         set http_proxy=ipam['Service'].objects.get(id=http_proxy_id) %}
-{%-         set ip_addresses=http_proxy.ipaddresses %}
-{%-         if ip_addresses %}
-{%-             set ip_address = ip_addresses.first().address.ip %}
-{%-             set port = http_proxy.ports[0] %}
-http_proxy={{ http_proxy }}
-ip_addresses={{ ip_addresses }}
+{%-   set http_proxy_id = device.custom_field_data.get('http_proxy') %}
+{%-   if http_proxy_id %}
+{%-     set http_proxy = ipam['Service'].objects.filter(id=http_proxy_id).first() %}
+{%-     if http_proxy %}
+{%-       set ip_addresses = http_proxy.ipaddresses %}
+{%-       if ip_addresses and ip_addresses.first() %}
+{%-         set ip_address = ip_addresses.first().address.ip %}
+{%-         set port = http_proxy.ports[0] %}
 export http_proxy={{ ip_address }}:{{ port }}
-export HTTP_PROXY={{ ip_address }}:{{ port }} 
-{%-         else %}
+export HTTP_PROXY={{ ip_address }}:{{ port }}
+{%-       else %}
 no http_proxy
 no HTTP_PROXY
-{%-         endif %}
+{%-       endif %}
 {%-     endif %}
+{%-   endif %}
 {%- else %}
 no http_proxy
 no HTTP_PROXY
+{%- endif %}
+{# ---------- HTTP PROXY ---------- #}
+{%- if device.custom_field_data.get('https_proxy') %}
+{%-   set https_proxy_id = device.custom_field_data.get('https_proxy') %}
+{%-   if https_proxy_id %}
+{%-     set https_proxy = ipam['Service'].objects.filter(id=https_proxy_id).first() %}
+{%-     if https_proxy %}
+{%-       set ip_addresses = https_proxy.ipaddresses %}
+{%-       if ip_addresses and ip_addresses.first() %}
+{%-         set ip_address = ip_addresses.first().address.ip %}
+{%-         set port = https_proxy.ports[0] %}
+export https_proxy={{ ip_address }}:{{ port }}
+export HTTPS_PROXY={{ ip_address }}:{{ port }}
+{%-       else %}
+no https_proxy
+no HTTPS_PROXY
+{%-       endif %}
+{%-     endif %}
+{%-   endif %}
+{%- else %}
+no https_proxy
+no HTTPS_PROXY
 {%- endif %}
