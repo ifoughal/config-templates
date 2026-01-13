@@ -1,7 +1,11 @@
 {%- if device.custom_field_data.get('http_proxy') != None or device.custom_field_data.get('https_proxy') != None %}
 {%- 	if device.custom_field_data.get('http_proxy') != None %}
 {%-			set http_proxy_id=device.custom_field_data.get('http_proxy')  %}
-test
+{%-         if http_proxy_id != None %}
+{%-             set http_proxy=ipam['Service'].objects.get(id=http_proxy_id) %}
+{%-             set ip_addresses=http_proxy.ipaddresses %}
+
+{%-		    endif %}
 {%- 	else %}
 no http_proxy
 no HTTP_PROXY
