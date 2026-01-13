@@ -5,7 +5,7 @@
 {%-         set ip_addresses=http_proxy.ipaddresses %}
 {%-         if ip_addresses %}
 {%-             set ip_address = ip_addresses.first().address.ip %}
-{%-             set port = http_proxy.ports.first() %}
+{%-             set port = http_proxy.ports[0] %}
 http_proxy={{ http_proxy }}
 ip_addresses={{ ip_addresses }}
 {%-         else %}
