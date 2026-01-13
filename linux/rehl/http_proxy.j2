@@ -1,4 +1,4 @@
-{%- if device.custom_field_data.get('http_proxy') != None and device.custom_field_data.get('https_proxy') != None %}
+{%- if device.custom_field_data.get('http_proxy') != None or device.custom_field_data.get('https_proxy') != None %}
 {%- 	if device.custom_field_data.get('http_proxy') != None %}
 {%-			set http_proxy_id=device.custom_field_data.get('http_proxy')  %}
 http_proxy_id = {{ http_proxy_id }}
