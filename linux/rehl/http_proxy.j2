@@ -5,8 +5,8 @@
 {%-             set http_proxy=ipam['Service'].objects.get(id=http_proxy_id) %}
 {%-             set ip_addresses=http_proxy.ipaddresses %}
 {%-			    if ip_addresses != None %}
-{%-				    set ip_address = ipam['Service'].objects.get(id=http_proxy).ipaddresses.first().address.ip %}
-{%-				    set port = ipam['Service'].objects.get(id=http_proxy).ports[0] %}
+{%-				    set ip_address = ip_addresses.first().address.ip %}
+{%-				    set port = http_proxy.first() %}
 
 http_proxy={{ http_proxy }}
 ip_addresses={{ ip_addresses }}
