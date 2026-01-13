@@ -2,7 +2,7 @@
 {%- 	if device.custom_field_data.get('http_proxy') != None %}
 {%-         set http_proxy_id = device.custom_field_data.get('http_proxy') %}
 {%-         if http_proxy_id %}
-{%-             set http_proxy = ipam['Service'].objects.filter(id=http_proxy_id).first() %}
+{%-             set http_proxy = ipam['Service'].objects.get(id=http_proxy_id) %}
 {%-             set ip_addresses = http_proxy.ipaddresses %}
 {%-             if ip_addresses.count() > 0 %}
 {%-                 set ip = ip_addresses.first().address.ip %}
