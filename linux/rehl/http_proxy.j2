@@ -8,6 +8,8 @@
 {%-             set port = http_proxy.ports[0] %}
 http_proxy={{ http_proxy }}
 ip_addresses={{ ip_addresses }}
+export http_proxy={{ ip_address }}:{{ port }}
+export HTTP_PROXY={{ ip_address }}:{{ port }} 
 {%-         else %}
 no http_proxy
 no HTTP_PROXY
