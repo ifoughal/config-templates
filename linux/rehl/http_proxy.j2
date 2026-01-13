@@ -1,4 +1,4 @@
-{# ---------- HTTP PROXY ---------- #}
+{#- ---------- HTTP PROXY ---------- #}
 {%- if device.custom_field_data.get('http_proxy') %}
 {%-   set http_proxy_id = device.custom_field_data.get('http_proxy') %}
 {%-   if http_proxy_id %}
@@ -20,7 +20,7 @@ no HTTP_PROXY
 no http_proxy
 no HTTP_PROXY
 {%- endif %}
-{# ---------- HTTP PROXY ---------- #}
+{#- ---------- HTTP PROXY ---------- #}
 {%- if device.custom_field_data.get('https_proxy') %}
 {%-   set https_proxy_id = device.custom_field_data.get('https_proxy') %}
 {%-   if https_proxy_id %}
