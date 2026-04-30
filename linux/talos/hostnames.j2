@@ -6,7 +6,6 @@ apiVersion: v1alpha1
 kind: HostnameConfig
 auto: off
 hostname: "{{ virtualmachine.name }}"
-
 ---
 version: v1alpha1
 debug: false
@@ -18,10 +17,8 @@ cluster:
     # TODO: The pod subnet CIDRs should be dynamic.
     podSubnets: ["172.17.0.0/16"]
     serviceSubnets: ["172.18.0.0/16"]
-
   proxy:
     disabled: true
-
 {%-     if virtualmachine.role.name == "storage-worker"  %}
 machine:
   kernel:
