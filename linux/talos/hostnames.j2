@@ -7,15 +7,6 @@ kind: HostnameConfig
 auto: off
 hostname: "{{ virtualmachine.name }}"
 
-{%-     if virtualmachine.primary_ip  %}
----
-apiVersion: v1alpha1
-kind: LinkConfig
-name: "{{ virtualmachine.primary_ip.interface.name }}"
-addresses:
-- address: "{{ virtualmachine.primary_ip.address }}"
-{%-     endif %}
-
 ---
 version: v1alpha1
 debug: false
