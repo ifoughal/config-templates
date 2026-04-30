@@ -32,7 +32,7 @@ cluster:
   proxy:
     disabled: true
 
-{%-     if virtualmachine.device_role.name == "storage-worker"  %}
+{%-     if virtualmachine.role.name == "storage-worker"  %}
 machine:
   kernel:
     modules:
