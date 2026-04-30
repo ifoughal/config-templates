@@ -1,7 +1,52 @@
 {%- if virtualmachine.platform.name == "Talos"  %}
+
+
 ---
 apiVersion: v1alpha1
 kind: HostnameConfig
 auto: off
 hostname: "{{ virtualmachine.name }}"
+
+{%-     if virtualmachine.primary_ip  %}
+---
+apiVersion: v1alpha1
+kind: LinkConfig
+name: "{{ virtualmachine.primary_ip.interface.name }}"
+addresses:
+- address: "{{ virtualmachine.primary_ip.address }}"
 {%-     endif %}
+
+cluster:
+  network:
+
+---
+cluster:
+  network:
+    cni:
+      name: none
+    # TODO: The pod subnet CIDR.
+    podSubnets:
+    # TODO: The service subnet CIDR.
+    serviceSubnets:
+
+  proxy:
+    disabled: true
+
+{%-     if virtualmachine.device_role.name == "storage-worker"  %}
+machine:
+  kernel:
+    modules:
+    - name: dm_mod
+    - name: dm_snapshot
+    - name: dm_thin_pool
+
+  kubelet:
+    extraMounts:
+    - destination: /var/openebs/local
+      type: bind
+      source: /var/openebs/local
+      options:
+      - bind
+      - rshared
+{%-     endif %}
+{%- endif %}
