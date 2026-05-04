@@ -1,7 +1,7 @@
 {%- if virtualmachine.platform.name == "Talos"  %}
 {%- set cert_sans = ["127.0.0.1"] %}
 {%- set install_disk = namespace(name="") %}
-{%- set openstack_image = virtualmachine.custom_field_data.get("openstack_image") %}
+{%- set openstack_image = virtualmachine.custom_field_data.get("openstack_image").name %}
 {%- set installer_version = (openstack_image | string).split("-")[-1] if openstack_image else "" %}
 {%- if virtualmachine.interfaces %}
 {%-     for interface in virtualmachine.interfaces.all() %}
@@ -17,9 +17,7 @@
 {%- endif %}
 {%- if virtualmachine.virtual_disks %}
 {%-     for disk in virtualmachine.virtual_disks.all() %}
-{%-         if not install_disk.name and disk.custom_field_data.get("operating_system") == true %}
 {%-             set install_disk.name = disk.name %}
-{%-         endif %}
 {%-     endfor %}
 {%- endif %}
 
