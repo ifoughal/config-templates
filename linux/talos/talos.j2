@@ -1,8 +1,21 @@
 {%- if virtualmachine.platform.name == "Talos"  %}
 {%- set cert_sans = ["127.0.0.1"] %}
 {%- set install_disk = namespace(name="") %}
-{%- set openstack_image = virtualmachine.custom_field_data.get("openstack_image").name %}
-{%- set installer_version = (openstack_image | string).split("-")[-1] if openstack_image else "not-set" %}
+{%- set cf_openstack_image = virtualmachine.cf.openstack_image if virtualmachine.cf.openstack_image is defined else none %}
+{%- set openstack_image = cf_openstack_image or virtualmachine.custom_field_data.get("openstack_image") %}
+{%- set openstack_image_name = namespace(value="") %}
+{%- if openstack_image %}
+{%-     if openstack_image.name is defined and openstack_image.name %}
+{%-         set openstack_image_name.value = openstack_image.name %}
+{%-     elif openstack_image.display is defined and openstack_image.display %}
+{%-         set openstack_image_name.value = openstack_image.display %}
+{%-     elif openstack_image.value is defined and openstack_image.value %}
+{%-         set openstack_image_name.value = openstack_image.value %}
+{%-     else %}
+{%-         set openstack_image_name.value = openstack_image | string %}
+{%-     endif %}
+{%- endif %}
+{%- set installer_version = openstack_image_name.value.split("-")[-1] if openstack_image_name.value else "latest" %}
 {%- if virtualmachine.interfaces %}
 {%-     for interface in virtualmachine.interfaces.all() %}
 {%-         if interface.ip_addresses %}
