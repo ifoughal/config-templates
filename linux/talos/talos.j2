@@ -51,9 +51,8 @@ cluster:
   network:
     cni:
       name: none
-    {# TODO: The pod subnet CIDRs should be dynamic. #}
-    podSubnets: ["172.17.0.0/16"]
-    serviceSubnets: ["172.18.0.0/16"]
+    podSubnets: ["172.17.0.0/16"]       {#- TODO: The pod subnet CIDRs should be dynamic. #}
+    serviceSubnets: ["172.18.0.0/16"]   {#- TODO: The pod subnet CIDRs should be dynamic. #}
   proxy:
     disabled: true
 machine:
