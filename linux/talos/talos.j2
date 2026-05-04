@@ -1,0 +1,53 @@
+{%- if virtualmachine.platform.name == "Talos"  %}
+{%- set cert_sans = ["127.0.0.1"] %}
+{%- if virtualmachine.interfaces %}
+{%-     for interface in virtualmachine.interfaces.all() %}
+{%-         if interface.ip_addresses %}
+{%-             for ip in interface.ip_addresses.all() %}
+{%-                 set ip_address = ip.address.ip | string %}
+{%-                 if ip_address not in cert_sans %}
+{%-                     set _dummy = cert_sans.append(ip_address) %}
+{%-                 endif %}
+{%-             endfor %}
+{%-         endif %}
+{%-     endfor %}
+{%- endif %}
+
+
+---
+apiVersion: v1alpha1
+kind: HostnameConfig
+auto: off
+hostname: "{{ virtualmachine.name }}"
+---
+version: v1alpha1
+debug: false
+persist: true
+cluster:
+  network:
+    cni:
+      name: none
+    # TODO: The pod subnet CIDRs should be dynamic.
+    podSubnets: ["172.17.0.0/16"]
+    serviceSubnets: ["172.18.0.0/16"]
+  proxy:
+    disabled: true
+machine:
+  certSANs: {{ cert_sans | tojson }}
+{%-     if virtualmachine.role.name == "storage-worker"  %}
+  kernel:
+    modules:
+    - name: dm_mod
+    - name: dm_snapshot
+    - name: dm_thin_pool
+
+  kubelet:
+    extraMounts:
+    - destination: /var/openebs/local
+      type: bind
+      source: /var/openebs/local
+      options:
+      - bind
+      - rshared
+{%-     endif %}
+{%- endif %}
