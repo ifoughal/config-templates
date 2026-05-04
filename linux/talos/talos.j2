@@ -1,5 +1,21 @@
 {%- if virtualmachine.platform.name == "Talos"  %}
 {%- set cert_sans = ["127.0.0.1"] %}
+{%- set install_disk = namespace(name="") %}
+{%- set cf_openstack_image = virtualmachine.cf.openstack_image if virtualmachine.cf.openstack_image is defined else none %}
+{%- set openstack_image = cf_openstack_image or virtualmachine.custom_field_data.get("openstack_image") %}
+{%- set openstack_image_name = namespace(value="") %}
+{%- if openstack_image %}
+{%-     if openstack_image.name is defined and openstack_image.name %}
+{%-         set openstack_image_name.value = openstack_image.name %}
+{%-     elif openstack_image.display is defined and openstack_image.display %}
+{%-         set openstack_image_name.value = openstack_image.display %}
+{%-     elif openstack_image.value is defined and openstack_image.value %}
+{%-         set openstack_image_name.value = openstack_image.value %}
+{%-     else %}
+{%-         set openstack_image_name.value = openstack_image | string %}
+{%-     endif %}
+{%- endif %}
+{%- set installer_version = openstack_image_name.value.split("-")[-1] if openstack_image_name.value else "latest" %}
 {%- if virtualmachine.interfaces %}
 {%-     for interface in virtualmachine.interfaces.all() %}
 {%-         if interface.ip_addresses %}
@@ -9,6 +25,14 @@
 {%-                     set _dummy = cert_sans.append(ip_address) %}
 {%-                 endif %}
 {%-             endfor %}
+{%-         endif %}
+{%-     endfor %}
+{%- endif %}
+{%- if virtualmachine.virtualdisks %}
+{%-     for disk in virtualmachine.virtualdisks.all() %}
+{%-         set is_operating_system_disk = disk.cf.operating_system if disk.cf.operating_system is defined else disk.custom_field_data.get("operating_system") %}
+{%-         if not install_disk.name and is_operating_system_disk == true %}
+{%-             set install_disk.name = disk.name %}
 {%-         endif %}
 {%-     endfor %}
 {%- endif %}
@@ -27,12 +51,16 @@ cluster:
   network:
     cni:
       name: none
-    # TODO: The pod subnet CIDRs should be dynamic.
-    podSubnets: ["172.17.0.0/16"]
-    serviceSubnets: ["172.18.0.0/16"]
+    podSubnets: ["172.17.0.0/16"]       {#- TODO: The pod subnet CIDRs should be dynamic. #}
+    serviceSubnets: ["172.18.0.0/16"]   {#- TODO: The pod subnet CIDRs should be dynamic. #}
   proxy:
     disabled: true
 machine:
+  install:
+    disk: {{ install_disk.name }} {# eg: /dev/sda The disk used for installations. #}
+    image: ghcr.io/siderolabs/installer:v{{ installer_version }}  {# eg: v1.12.5 # Allows for supplying the image used to perform the installation. #}
+    wipe: true  {# Indicates if the installation disk should be wiped at installation time. #}
+    grubUseUKICmdline: true  {# Indicates if legacy GRUB bootloader should use kernel cmdline from the UKI instead of building it on the host. #}
   certSANs: {{ cert_sans | tojson }}
 {%-     if virtualmachine.role.name == "storage-worker"  %}
   kernel:
@@ -40,7 +68,6 @@ machine:
     - name: dm_mod
     - name: dm_snapshot
     - name: dm_thin_pool
-
   kubelet:
     extraMounts:
     - destination: /var/openebs/local
