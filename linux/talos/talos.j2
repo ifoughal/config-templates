@@ -1,4 +1,17 @@
 {%- if virtualmachine.platform.name == "Talos"  %}
+{%- set cert_sans = ["127.0.0.1"] %}
+{%- if virtualmachine.interfaces %}
+{%-     for interface in virtualmachine.interfaces.all() %}
+{%-         if interface.ip_addresses %}
+{%-             for ip in interface.ip_addresses.all() %}
+{%-                 set ip_address = ip.address.ip | string %}
+{%-                 if ip_address not in cert_sans %}
+{%-                     set _dummy = cert_sans.append(ip_address) %}
+{%-                 endif %}
+{%-             endfor %}
+{%-         endif %}
+{%-     endfor %}
+{%- endif %}
 
 
 ---
@@ -19,8 +32,9 @@ cluster:
     serviceSubnets: ["172.18.0.0/16"]
   proxy:
     disabled: true
-{%-     if virtualmachine.role.name == "storage-worker"  %}
 machine:
+  certSANs: {{ cert_sans | tojson }}
+{%-     if virtualmachine.role.name == "storage-worker"  %}
   kernel:
     modules:
     - name: dm_mod
