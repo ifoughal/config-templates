@@ -28,9 +28,10 @@
 {%-         endif %}
 {%-     endfor %}
 {%- endif %}
-{%- if virtualmachine.virtual_disks %}
-{%-     for disk in virtualmachine.virtual_disks.all() %}
-{%-         if not install_disk.name and disk.custom_field_data.get("operating_system") == true %}
+{%- if virtualmachine.virtualdisks %}
+{%-     for disk in virtualmachine.virtualdisks.all() %}
+{%-         set is_operating_system_disk = disk.cf.operating_system if disk.cf.operating_system is defined else disk.custom_field_data.get("operating_system") %}
+{%-         if not install_disk.name and is_operating_system_disk == true %}
 {%-             set install_disk.name = disk.name %}
 {%-         endif %}
 {%-     endfor %}
