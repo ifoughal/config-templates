@@ -1,5 +1,8 @@
 {%- if virtualmachine.platform.name == "Talos"  %}
 {%- set cert_sans = ["127.0.0.1"] %}
+{%- set install_disk = namespace(name="") %}
+{%- set openstack_image = virtualmachine.custom_field_data.get("openstack_image") %}
+{%- set installer_version = (openstack_image | string).split("-")[-1] if openstack_image else "" %}
 {%- if virtualmachine.interfaces %}
 {%-     for interface in virtualmachine.interfaces.all() %}
 {%-         if interface.ip_addresses %}
@@ -9,6 +12,13 @@
 {%-                     set _dummy = cert_sans.append(ip_address) %}
 {%-                 endif %}
 {%-             endfor %}
+{%-         endif %}
+{%-     endfor %}
+{%- endif %}
+{%- if virtualmachine.virtual_disks %}
+{%-     for disk in virtualmachine.virtual_disks.all() %}
+{%-         if not install_disk.name and disk.custom_field_data.get("operating_system") == true %}
+{%-             set install_disk.name = disk.name %}
 {%-         endif %}
 {%-     endfor %}
 {%- endif %}
@@ -33,6 +43,12 @@ cluster:
   proxy:
     disabled: true
 machine:
+  install:
+    disk: {{ install_disk.name }} # eg: /dev/sda The disk used for installations.
+    image: ghcr.io/siderolabs/installer:v{{ installer_version }}     # eg: v1.12.5 # Allows for supplying the image used to perform the installation.
+    wipe: true # Indicates if the installation disk should be wiped at installation time.
+    grubUseUKICmdline: true # Indicates if legacy GRUB bootloader should use kernel cmdline from the UKI instead of building it on the host.
+
   certSANs: {{ cert_sans | tojson }}
 {%-     if virtualmachine.role.name == "storage-worker"  %}
   kernel:
