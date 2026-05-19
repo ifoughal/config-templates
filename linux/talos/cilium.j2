@@ -1,26 +1,11 @@
 {%- set cilium_ca_secret_role_slug = cilium_ca_secret_role_slug | default("cilium") %}
 {%- set cilium_ca_crt_secret_name = cilium_ca_crt_secret_name | default("cilium-ca-crt") %}
 {%- set cilium_ca_key_secret_name = cilium_ca_key_secret_name | default("cilium-ca-key") %}
-{%- set cilium_vm_secrets = netbox_secrets.Secret.objects.filter(
-        assigned_object_type__app_label="virtualization",
-        assigned_object_type__model="virtualmachine",
-        assigned_object_id=virtualmachine.pk,
-        role__slug=cilium_ca_secret_role_slug
-    ) %}
-{%- set cilium_ca_crt_secret = cilium_vm_secrets.get(name=cilium_ca_crt_secret_name) %}
-{%- set cilium_ca_key_secret = cilium_vm_secrets.get(name=cilium_ca_key_secret_name) %}
-{%- set cilium_netbox_secrets_master_key = netbox_secrets_master_key if netbox_secrets_master_key is defined else none %}
-{%- if cilium_ca_crt_secret.plaintext in [none, ""] or cilium_ca_key_secret.plaintext in [none, ""] %}
-{%-     if cilium_netbox_secrets_master_key and cilium_netbox_secrets_master_key | length in [16, 24, 32] %}
-{%-         set _ = cilium_ca_crt_secret.decrypt(cilium_netbox_secrets_master_key) %}
-{%-         set _ = cilium_ca_key_secret.decrypt(cilium_netbox_secrets_master_key) %}
-{%-     else %}
-{{ netbox_secrets_plaintext_unavailable_for_cilium_ca() }}
-{%-     endif %}
-{%- endif %}
-{%- if cilium_ca_crt_secret.plaintext in [none, ""] or cilium_ca_key_secret.plaintext in [none, ""] %}
-{{ netbox_secrets_plaintext_unavailable_for_cilium_ca() }}
-{%- endif %}
+{%- set cilium_vm_secrets = virtualmachine.secrets.all() %}
+{%- set cilium_ca_crt_secret = cilium_vm_secrets.get(role__slug=cilium_ca_secret_role_slug, name=cilium_ca_crt_secret_name) %}
+{%- set cilium_ca_key_secret = cilium_vm_secrets.get(role__slug=cilium_ca_secret_role_slug, name=cilium_ca_key_secret_name) %}
+{%- set cilium_ca_crt_value = cilium_ca_crt if cilium_ca_crt is defined else cilium_ca_crt_secret.plaintext %}
+{%- set cilium_ca_key_value = cilium_ca_key if cilium_ca_key is defined else cilium_ca_key_secret.plaintext %}
   - name: cilium
     contents: |
       ---
@@ -33,5 +18,5 @@
         labels:
           cilium.io/helm-template-non-idempotent: "true"
       data:
-        ca.crt: {{ cilium_ca_crt_secret.plaintext | string | replace('\n', '') | replace('\r', '') }}
-        ca.key: {{ cilium_ca_key_secret.plaintext | string | replace('\n', '') | replace('\r', '') }}
+        ca.crt: {{ cilium_ca_crt_value | string | replace('\n', '') | replace('\r', '') }}
+        ca.key: {{ cilium_ca_key_value | string | replace('\n', '') | replace('\r', '') }}
