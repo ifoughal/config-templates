@@ -1,17 +1,25 @@
-{%- set cilium_vm_secrets = virtualmachine.secrets.all() %}
-{%- set cilium_ca_crt_secret = cilium_vm_secrets.filter(role__slug="cilium", name="cilium-ca-crt") | first %}
-{%- set cilium_ca_key_secret = cilium_vm_secrets.filter(role__slug="cilium", name="cilium-ca-key") | first %}
+{%- set cilium_east_west_ip = namespace(address="") %}
+{%- if virtualmachine.interfaces %}
+{%-     for interface in virtualmachine.interfaces.all() %}
+{%-         set traffic_role = interface.cf.traffic_role if interface.cf.traffic_role is defined else none %}
+{%-         if not traffic_role and interface.custom_field_data is defined %}
+{%-             set traffic_role = interface.custom_field_data.get("traffic_role") %}
+{%-         endif %}
+{%-         if not traffic_role and interface.custom_fields is defined %}
+{%-             set traffic_role = interface.custom_fields.get("traffic_role") %}
+{%-         endif %}
+{%-         if traffic_role.value is defined %}
+{%-             set traffic_role = traffic_role.value %}
+{%-         endif %}
+{%-         if traffic_role == "east_west" and not cilium_east_west_ip.address and interface.ip_addresses %}
+{%-             set east_west_ipv4_addresses = interface.ip_addresses.filter(address__family=4) %}
+{%-             if east_west_ipv4_addresses and east_west_ipv4_addresses.first() %}
+{%-                 set cilium_east_west_ip.address = east_west_ipv4_addresses.first().address.ip | string %}
+{%-             endif %}
+{%-         endif %}
+{%-     endfor %}
+{%- endif %}
 
-  - name: cilium
-    contents: |
-      ---
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: cilium-ca
-        namespace: kube-system
-      stringData:
-        debug-ca-crt-object: "{{ cilium_ca_crt_secret }}"
-        debug-ca-key-object: "{{ cilium_ca_key_secret }}"
-        debug-ca-crt-plaintext: "{{ cilium_ca_crt_secret.plaintext if cilium_ca_crt_secret else 'missing' }}"
-        debug-ca-key-plaintext: "{{ cilium_ca_key_secret.plaintext if cilium_ca_key_secret else 'missing' }}"
+
+k8sServiceHost: {{ cilium_east_west_ip.address }}
+k8sServicePort: 6443
