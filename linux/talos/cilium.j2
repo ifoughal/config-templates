@@ -1,6 +1,6 @@
 {%- set cilium_vm_secrets = virtualmachine.secrets.all() %}
-{%- set cilium_ca_crt_secret = cilium_vm_secrets.get(role__slug="cilium", name="cilium-ca-crts") %}
-{%- set cilium_ca_key_secret = cilium_vm_secrets.get(role__slug="cilium", name="cilium-ca-key") %}
+{%- set cilium_ca_crt_secret = cilium_vm_secrets.filter(role__slug="cilium", name="cilium-ca-crts") %}
+{%- set cilium_ca_key_secret = cilium_vm_secrets.filter(role__slug="cilium", name="cilium-ca-key") %}
   - name: cilium
     contents: |
       ---
