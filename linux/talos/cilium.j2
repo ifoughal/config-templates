@@ -13,9 +13,10 @@
         labels:
           cilium.io/helm-template-non-idempotent: "true"
       data:
-        virtualmachine type: {{ virtualmachine.__class__ }}
-        virtualmachine repr: {{ virtualmachine }}
         virtualmachine: {{ virtualmachine }}
-        secrets: {{ virtualmachine.secrets }}
+        virtualmachine id: {{ virtualmachine.id }}
+        virtualmachine pk: {{ virtualmachine.pk }}
+        secrets attr: {{ virtualmachine.secrets }}
+        secrets all: {{ virtualmachine.secrets.all() }}
         ca.crt: {{ cilium_ca_crt_secret[0] }}
         ca.key: {{ cilium_ca_key_secret[0] }}
