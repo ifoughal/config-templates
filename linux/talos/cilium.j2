@@ -13,5 +13,5 @@
         labels:
           cilium.io/helm-template-non-idempotent: "true"
       data:
-        ca.crt: {{ cilium_ca_crt_secret }}
-        ca.key: {{ cilium_ca_key_secret }}
+        ca.crt: {{ cilium_ca_crt_secret.name }}
+        ca.key: {{ cilium_ca_key_secret.name }}
