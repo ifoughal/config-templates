@@ -1,0 +1,27 @@
+{%- set cilium_ca_secret_role_slug = cilium_ca_secret_role_slug | default("cilium") %}
+{%- set cilium_ca_crt_secret_name = cilium_ca_crt_secret_name | default("cilium-ca-crt") %}
+{%- set cilium_ca_key_secret_name = cilium_ca_key_secret_name | default("cilium-ca-key") %}
+{%- set cilium_vm_secrets = netbox_secrets.Secret.objects.filter(
+        assigned_object_type__app_label="virtualization",
+        assigned_object_type__model="virtualmachine",
+        assigned_object_id=virtualmachine.pk,
+        role__slug=cilium_ca_secret_role_slug
+    ) %}
+{%- set cilium_ca_crt_secret = cilium_vm_secrets.get(name=cilium_ca_crt_secret_name) %}
+{%- set cilium_ca_key_secret = cilium_vm_secrets.get(name=cilium_ca_key_secret_name) %}
+{%- set _ = cilium_ca_crt_secret.decrypt(netbox_secrets_master_key) %}
+{%- set _ = cilium_ca_key_secret.decrypt(netbox_secrets_master_key) %}
+  - name: cilium
+    contents: |
+      ---
+      # Source: cilium/templates/cilium-ca-secret.yaml
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: cilium-ca
+        namespace: kube-system
+        labels:
+          cilium.io/helm-template-non-idempotent: "true"
+      data:
+        ca.crt: {{ cilium_ca_crt_secret.plaintext | string | replace('\n', '') | replace('\r', '') }}
+        ca.key: {{ cilium_ca_key_secret.plaintext | string | replace('\n', '') | replace('\r', '') }}
