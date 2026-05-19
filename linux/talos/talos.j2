@@ -1,4 +1,3 @@
-{%- if virtualmachine.platform.name == "Talos"  %}
 {%- set cert_sans = ["127.0.0.1"] %}
 {%- set install_disk = namespace(name="") %}
 {%- set cf_openstack_image = virtualmachine.cf.openstack_image if virtualmachine.cf.openstack_image is defined else none %}
@@ -61,7 +60,7 @@ talos_patches:
       wipe: true  {# Indicates if the installation disk should be wiped at installation time. #}
       grubUseUKICmdline: true  {# Indicates if legacy GRUB bootloader should use kernel cmdline from the UKI instead of building it on the host. #}
     certSANs: {{ cert_sans | tojson }}
-  {%-     if virtualmachine.role.name == "storage-worker"  %}
+{%-     if virtualmachine.role.name == "storage-worker"  %}
     kernel:
       modules:
       - name: dm_mod
@@ -75,12 +74,4 @@ talos_patches:
         options:
         - bind
         - rshared
-{%-     endif %}
-{%- endif %}
-
-
-{%-     if virtualmachine.role.name == "control-plane"  %}
-cilium:
-
-{% include "linux/talos/cilium.j2" %}
 {%-     endif %}
