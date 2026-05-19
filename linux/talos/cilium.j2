@@ -1,5 +1,5 @@
 {%- set cilium_vm_secrets = virtualmachine.secrets.all() %}
-{%- set cilium_ca_crt_secret = cilium_vm_secrets.filter(role__slug="cilium", name="cilium-ca-crts") %}
+{%- set cilium_ca_crt_secret = cilium_vm_secrets.filter(role__slug="cilium", name="cilium-ca-crt") %}
 {%- set cilium_ca_key_secret = cilium_vm_secrets.filter(role__slug="cilium", name="cilium-ca-key") %}
   - name: cilium
     contents: |
@@ -13,5 +13,5 @@
         labels:
           cilium.io/helm-template-non-idempotent: "true"
       data:
-        ca.crt: {{ cilium_ca_crt_secret.name }}
-        ca.key: {{ cilium_ca_key_secret.name }}
+        ca.crt: {{ cilium_ca_crt_secret[0] }}
+        ca.key: {{ cilium_ca_key_secret[0] }}
