@@ -4,5 +4,5 @@ talos:
 {%- endif %}
 {%-     if virtualmachine.role.name == "control-plane"  %}
 cilium:
-{%  include "linux/talos/cilium.j2" %}
 {% include "linux/talos/cilium.j2" %}
+{%- endif %}
