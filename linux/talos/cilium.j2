@@ -9,8 +9,18 @@
     ) %}
 {%- set cilium_ca_crt_secret = cilium_vm_secrets.get(name=cilium_ca_crt_secret_name) %}
 {%- set cilium_ca_key_secret = cilium_vm_secrets.get(name=cilium_ca_key_secret_name) %}
-{%- set _ = cilium_ca_crt_secret.decrypt(netbox_secrets_master_key) %}
-{%- set _ = cilium_ca_key_secret.decrypt(netbox_secrets_master_key) %}
+{%- set cilium_netbox_secrets_master_key = netbox_secrets_master_key if netbox_secrets_master_key is defined else none %}
+{%- if cilium_ca_crt_secret.plaintext in [none, ""] or cilium_ca_key_secret.plaintext in [none, ""] %}
+{%-     if cilium_netbox_secrets_master_key and cilium_netbox_secrets_master_key | length in [16, 24, 32] %}
+{%-         set _ = cilium_ca_crt_secret.decrypt(cilium_netbox_secrets_master_key) %}
+{%-         set _ = cilium_ca_key_secret.decrypt(cilium_netbox_secrets_master_key) %}
+{%-     else %}
+{{ netbox_secrets_plaintext_unavailable_for_cilium_ca() }}
+{%-     endif %}
+{%- endif %}
+{%- if cilium_ca_crt_secret.plaintext in [none, ""] or cilium_ca_key_secret.plaintext in [none, ""] %}
+{{ netbox_secrets_plaintext_unavailable_for_cilium_ca() }}
+{%- endif %}
   - name: cilium
     contents: |
       ---
