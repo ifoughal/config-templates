@@ -1,22 +1,17 @@
 {%- set cilium_vm_secrets = virtualmachine.secrets.all() %}
-{%- set cilium_ca_crt_secret = cilium_vm_secrets.filter(role__slug="cilium", name="cilium-ca-crt") %}
-{%- set cilium_ca_key_secret = cilium_vm_secrets.filter(role__slug="cilium", name="cilium-ca-key") %}
+{%- set cilium_ca_crt_secret = cilium_vm_secrets.filter(role__slug="cilium", name="cilium-ca-crt") | first %}
+{%- set cilium_ca_key_secret = cilium_vm_secrets.filter(role__slug="cilium", name="cilium-ca-key") | first %}
+
   - name: cilium
     contents: |
       ---
-      # Source: cilium/templates/cilium-ca-secret.yaml
       apiVersion: v1
       kind: Secret
       metadata:
         name: cilium-ca
         namespace: kube-system
-        labels:
-          cilium.io/helm-template-non-idempotent: "true"
-      data:
-        virtualmachine: {{ virtualmachine }}
-        virtualmachine id: {{ virtualmachine.id }}
-        virtualmachine pk: {{ virtualmachine.pk }}
-        secrets attr: {{ virtualmachine.secrets }}
-        secrets all: {{ virtualmachine.secrets.all() }}
-        ca.crt: {{ cilium_ca_crt_secret[0] }}
-        ca.key: {{ cilium_ca_key_secret[0] }}
+      stringData:
+        debug-ca-crt-object: "{{ cilium_ca_crt_secret }}"
+        debug-ca-key-object: "{{ cilium_ca_key_secret }}"
+        debug-ca-crt-plaintext: "{{ cilium_ca_crt_secret.plaintext if cilium_ca_crt_secret else 'missing' }}"
+        debug-ca-key-plaintext: "{{ cilium_ca_key_secret.plaintext if cilium_ca_key_secret else 'missing' }}"
