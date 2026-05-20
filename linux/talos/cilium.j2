@@ -19,7 +19,7 @@
 {%- set cilium_east_west = namespace(address="", port="6443", subnet="") %}
 {%- if virtualmachine.interfaces %}
 {%-     for interface in virtualmachine.interfaces.all() %}
-{%-         set traffic_role = interface.custom_field_data.get("traffic_role", {}).get("value") %}
+{%-         set traffic_role = interface.custom_field_data.get("traffic_role", {}) %}
 {%-         if traffic_role == "east_west" and not cilium_east_west.address and interface.ip_addresses %}
 {%-             set east_west_ipv4_addresses = interface.ip_addresses.filter(address__family=4) %}
 {%-             if east_west_ipv4_addresses and east_west_ipv4_addresses.first() %}
