@@ -1,16 +1,34 @@
+{%- set k8s_cluster = namespace(object=none, pod_subnet="172.17.0.0/16", pod_network="172.17.0.0", pod_mask_size="16") %}
+{%- set k8s_cluster.object = virtualmachine.custom_field_data.get("k8s_cluster") %}
+{%- if k8s_cluster.object %}
+{%-     if k8s_cluster.object.pods_cidr is defined and k8s_cluster.object.pods_cidr %}
+{%-         if k8s_cluster.object.pods_cidr.prefix is defined and k8s_cluster.object.pods_cidr.prefix %}
+{%-             set k8s_cluster.pod_subnet = k8s_cluster.object.pods_cidr.prefix | string %}
+{%-         elif k8s_cluster.object.pods_cidr.display is defined and k8s_cluster.object.pods_cidr.display %}
+{%-             set k8s_cluster.pod_subnet = k8s_cluster.object.pods_cidr.display | string %}
+{%-         else %}
+{%-             set k8s_cluster.pod_subnet = k8s_cluster.object.pods_cidr | string %}
+{%-         endif %}
+{%-     elif k8s_cluster.object.custom_fields is defined and k8s_cluster.object.custom_fields.get("pods_cidr") %}
+{%-         set pods_cidr = k8s_cluster.object.custom_fields.get("pods_cidr") %}
+{%-         if pods_cidr.prefix is defined and pods_cidr.prefix %}
+{%-             set k8s_cluster.pod_subnet = pods_cidr.prefix | string %}
+{%-         elif pods_cidr.display is defined and pods_cidr.display %}
+{%-             set k8s_cluster.pod_subnet = pods_cidr.display | string %}
+{%-         else %}
+{%-             set k8s_cluster.pod_subnet = pods_cidr | string %}
+{%-         endif %}
+{%-     endif %}
+{%- endif %}
+{%- if "/" in k8s_cluster.pod_subnet %}
+{%-     set pod_subnet_parts = k8s_cluster.pod_subnet.split("/") %}
+{%-     set k8s_cluster.pod_network = pod_subnet_parts[0] %}
+{%-     set k8s_cluster.pod_mask_size = pod_subnet_parts[1] %}
+{%- endif %}
 {%- set cilium_east_west = namespace(address="", port="6443", subnet="") %}
 {%- if virtualmachine.interfaces %}
 {%-     for interface in virtualmachine.interfaces.all() %}
-{%-         set traffic_role = interface.cf.traffic_role if interface.cf.traffic_role is defined else none %}
-{%-         if not traffic_role and interface.custom_field_data is defined %}
-{%-             set traffic_role = interface.custom_field_data.get("traffic_role") %}
-{%-         endif %}
-{%-         if not traffic_role and interface.custom_fields is defined %}
-{%-             set traffic_role = interface.custom_fields.get("traffic_role") %}
-{%-         endif %}
-{%-         if traffic_role.value is defined %}
-{%-             set traffic_role = traffic_role.value %}
-{%-         endif %}
+{%-         set traffic_role = interface.custom_field_data.get("traffic_role", {}).get("value") %}
 {%-         if traffic_role == "east_west" and not cilium_east_west.address and interface.ip_addresses %}
 {%-             set east_west_ipv4_addresses = interface.ip_addresses.filter(address__family=4) %}
 {%-             if east_west_ipv4_addresses and east_west_ipv4_addresses.first() %}
@@ -277,24 +295,24 @@ ipam:
       default:
         ipv4:
           cidrs:
-          - 172.17.0.0/16
-          maskSize: 24
+          - {{ k8s_cluster.pod_network }}
+          maskSize: {{ k8s_cluster.pod_mask_size }}
 
       k8ssandra-1:
         ipv4:
           cidrs:
           - 172.20.0.1  # replication cidr
           maskSize: 32
-      k8ssandra-2:
-        ipv4:
-          cidrs:
-          - 172.20.0.2  # replication cidr
-          maskSize: 32
-      k8ssandra-3:
-        ipv4:
-          cidrs:
-          - 172.20.0.3  # replication cidr
-          maskSize: 32
+    #   k8ssandra-2:
+    #     ipv4:
+    #       cidrs:
+    #       - 172.20.0.2  # replication cidr
+    #       maskSize: 32
+    #   k8ssandra-3:
+    #     ipv4:
+    #       cidrs:
+    #       - 172.20.0.3  # replication cidr
+    #       maskSize: 32
 
 defaultLBServiceIPAM: lbipam
 nodeIPAM:
