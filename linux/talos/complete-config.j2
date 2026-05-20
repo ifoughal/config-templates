@@ -4,4 +4,5 @@ talos_patches: |
 {%- endif %}
 {%-     if virtualmachine.role.name == "control-plane"  %}
 cilium:
+{% filter indent(2, true) %}{% include "linux/talos/cilium.j2" %}{% endfilter %}
 {%- endif %}

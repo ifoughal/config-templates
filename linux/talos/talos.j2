@@ -13,15 +13,6 @@
 {%-         else %}
 {%-             set k8s_cluster.pod_subnet = k8s_cluster.object.pods_cidr | string %}
 {%-         endif %}
-{%-     elif k8s_cluster.object.custom_fields is defined and k8s_cluster.object.custom_fields.get("pods_cidr") %}
-{%-         set pods_cidr = k8s_cluster.object.custom_fields.get("pods_cidr") %}
-{%-         if pods_cidr.prefix is defined and pods_cidr.prefix %}
-{%-             set k8s_cluster.pod_subnet = pods_cidr.prefix | string %}
-{%-         elif pods_cidr.display is defined and pods_cidr.display %}
-{%-             set k8s_cluster.pod_subnet = pods_cidr.display | string %}
-{%-         else %}
-{%-             set k8s_cluster.pod_subnet = pods_cidr | string %}
-{%-         endif %}
 {%-     endif %}
 {%-     if k8s_cluster.object.service_cidr is defined and k8s_cluster.object.service_cidr %}
 {%-         if k8s_cluster.object.service_cidr.prefix is defined and k8s_cluster.object.service_cidr.prefix %}
@@ -30,15 +21,6 @@
 {%-             set k8s_cluster.service_subnet = k8s_cluster.object.service_cidr.display | string %}
 {%-         else %}
 {%-             set k8s_cluster.service_subnet = k8s_cluster.object.service_cidr | string %}
-{%-         endif %}
-{%-     elif k8s_cluster.object.custom_fields is defined and k8s_cluster.object.custom_fields.get("service_cidr") %}
-{%-         set service_cidr = k8s_cluster.object.custom_fields.get("service_cidr") %}
-{%-         if service_cidr.prefix is defined and service_cidr.prefix %}
-{%-             set k8s_cluster.service_subnet = service_cidr.prefix | string %}
-{%-         elif service_cidr.display is defined and service_cidr.display %}
-{%-             set k8s_cluster.service_subnet = service_cidr.display | string %}
-{%-         else %}
-{%-             set k8s_cluster.service_subnet = service_cidr | string %}
 {%-         endif %}
 {%-     endif %}
 {%- endif %}
