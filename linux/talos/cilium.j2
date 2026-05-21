@@ -257,13 +257,13 @@ ipam:
       default:
         ipv4:
           cidrs:
-          - {{ k8s_cluster.pod_network }}
+          - {{ k8s_cluster.pod_network }}/{{ k8s_cluster.pod_mask_size }}
           maskSize: {{ k8s_cluster.pod_mask_size }}
 
       k8ssandra-1:
         ipv4:
           cidrs:
-          - 172.20.0.1  # replication cidr
+          - 172.20.0.1/32  # replication cidr
           maskSize: 32
     #   k8ssandra-2:
     #     ipv4:
