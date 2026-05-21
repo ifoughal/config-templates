@@ -3,7 +3,7 @@
 {%- set k8s_cluster = namespace(object=none, pod_subnet="172.17.0.0/16", service_subnet="172.18.0.0/16") %}
 {%- set k8s_cluster.object = virtualmachine.custom_field_data.get("k8s_cluster") %}
 {%- set openstack_image = namespace(object=none, name="", version="latest") %}
-
+{%- set openstack_image.object = virtualmachine.custom_field_data.get("openstack_image") %}
 {%- if k8s_cluster.object %}
 {%-     if k8s_cluster.object.pods_cidr is defined and k8s_cluster.object.pods_cidr %}
 {%-         if k8s_cluster.object.pods_cidr.prefix is defined and k8s_cluster.object.pods_cidr.prefix %}
@@ -64,7 +64,7 @@ cluster:
 machine:
   install:
     disk: {{ install_disk.name }} {# eg: /dev/sda The disk used for installations. #}
-    image: ghcr.io/siderolabs/installer:v1.13.0    {# eg: v1.12.5 # Allows for supplying the image used to perform the installation. #}
+    image: ghcr.io/siderolabs/installer:v1.13.0  # {{ openstack_image.version }}  {{ openstack_image.object }}# eg: v1.12.5 # Allows for supplying the image used to perform the installation. #}
     wipe: true  {# Indicates if the installation disk should be wiped at installation time. #}
     grubUseUKICmdline: true  {# Indicates if legacy GRUB bootloader should use kernel cmdline from the UKI instead of building it on the host. #}
   certSANs: {{ cert_sans | tojson }}
