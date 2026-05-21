@@ -322,7 +322,7 @@ ipv4NativeRoutingCIDR: "{{ cilium_east_west.subnet }}"
 # -- Configure service load balancing
 loadBalancer:
   algorithm: maglev
-  mode: hybrid
+  mode: dsr
   acceleration: best-effort
   dsrDispatch: geneve
   serviceTopology: false
