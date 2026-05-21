@@ -296,7 +296,7 @@ ipv6:
   enabled: false
 
 k8s:
-  requireIPv4PodCIDR: true
+  requireIPv4PodCIDR: false
   requireIPv6PodCIDR: false
   apiServerURLs: "https://{{ cilium_east_west.address }}:{{ cilium_east_west.port }}"
 
