@@ -1,30 +1,26 @@
 {%- set cert_sans = ["127.0.0.1"] %}
 {%- set install_disk = namespace(name="") %}
 {%- set k8s_cluster = namespace(object=none, pod_subnet="test-1", service_subnet="test-2") %}
-{%- set k8s_cluster.object = virtualmachine.custom_field_data.get("k8s_cluster") %}
+{%- set k8s_cluster.object = virtualmachine.cf.get("k8s_cluster") %}
 {%- set openstack_image = namespace(object=none, name="", version="latest") %}
-{%- set openstack_image.object = virtualmachine.custom_field_data.get("openstack_image") %}
+{%- set openstack_image.object = virtualmachine.cf.get("openstack_image") %}
 {%- if openstack_image.object %}
 {%-     set openstack_image.name = openstack_image.object.name %}
 {%- endif %}
 {%- if k8s_cluster.object %}
-{%-     if k8s_cluster.object.pods_cidr is defined and k8s_cluster.object.pods_cidr %}
-{%-         if k8s_cluster.object.pods_cidr.prefix is defined and k8s_cluster.object.pods_cidr.prefix %}
-{%-             set k8s_cluster.pod_subnet = k8s_cluster.object.pods_cidr.prefix | string %}
-{%-         elif k8s_cluster.object.pods_cidr.display is defined and k8s_cluster.object.pods_cidr.display %}
-{%-             set k8s_cluster.pod_subnet = k8s_cluster.object.pods_cidr.display | string %}
-{%-         else %}
-{%-             set k8s_cluster.pod_subnet = k8s_cluster.object.pods_cidr | string %}
-{%-         endif %}
+{%-     if k8s_cluster.object.pods_cidr.prefix is defined and k8s_cluster.object.pods_cidr.prefix %}
+{%-         set k8s_cluster.pod_subnet = k8s_cluster.object.pods_cidr.prefix | string %}
+{%-     elif k8s_cluster.object.pods_cidr.display is defined and k8s_cluster.object.pods_cidr.display %}
+{%-         set k8s_cluster.pod_subnet = k8s_cluster.object.pods_cidr.display | string %}
+{%-     else %}
+{%-         set k8s_cluster.pod_subnet = k8s_cluster.object.pods_cidr | string %}
 {%-     endif %}
-{%-     if k8s_cluster.object.service_cidr is defined and k8s_cluster.object.service_cidr %}
-{%-         if k8s_cluster.object.service_cidr.prefix is defined and k8s_cluster.object.service_cidr.prefix %}
-{%-             set k8s_cluster.service_subnet = k8s_cluster.object.service_cidr.prefix | string %}
-{%-         elif k8s_cluster.object.service_cidr.display is defined and k8s_cluster.object.service_cidr.display %}
-{%-             set k8s_cluster.service_subnet = k8s_cluster.object.service_cidr.display | string %}
-{%-         else %}
-{%-             set k8s_cluster.service_subnet = k8s_cluster.object.service_cidr | string %}
-{%-         endif %}
+{%-     if k8s_cluster.object.service_cidr.prefix is defined and k8s_cluster.object.service_cidr.prefix %}
+{%-         set k8s_cluster.service_subnet = k8s_cluster.object.service_cidr.prefix | string %}
+{%-     elif k8s_cluster.object.service_cidr.display is defined and k8s_cluster.object.service_cidr.display %}
+{%-         set k8s_cluster.service_subnet = k8s_cluster.object.service_cidr.display | string %}
+{%-     else %}
+{%-         set k8s_cluster.service_subnet = k8s_cluster.object.service_cidr | string %}
 {%-     endif %}
 {%- endif %}
 {%- set openstack_image.version = openstack_image.name.split("-")[1] %}

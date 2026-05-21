@@ -1,5 +1,5 @@
 {%- set k8s_cluster = namespace(object=none, pod_subnet="172.17.0.0/16", pod_network="172.17.0.0", pod_mask_size="16") %}
-{%- set k8s_cluster.object = virtualmachine.custom_field_data.get("k8s_cluster") %}
+{%- set k8s_cluster.object = virtualmachine.cf.get("k8s_cluster") %}
 {%- if k8s_cluster.object %}
 {%-     if k8s_cluster.object.pods_cidr is defined and k8s_cluster.object.pods_cidr %}
 {%-         if k8s_cluster.object.pods_cidr.prefix is defined and k8s_cluster.object.pods_cidr.prefix %}
