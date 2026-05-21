@@ -10,17 +10,9 @@
 {%- if k8s_cluster.object %}
 {%-     if k8s_cluster.object.pods_cidr.prefix is defined and k8s_cluster.object.pods_cidr.prefix %}
 {%-         set k8s_cluster.pod_subnet = k8s_cluster.object.pods_cidr.prefix | string %}
-{%-     elif k8s_cluster.object.pods_cidr.display is defined and k8s_cluster.object.pods_cidr.display %}
-{%-         set k8s_cluster.pod_subnet = k8s_cluster.object.pods_cidr.display | string %}
-{%-     else %}
-{%-         set k8s_cluster.pod_subnet = k8s_cluster.object.pods_cidr | string %}
 {%-     endif %}
 {%-     if k8s_cluster.object.service_cidr.prefix is defined and k8s_cluster.object.service_cidr.prefix %}
 {%-         set k8s_cluster.service_subnet = k8s_cluster.object.service_cidr.prefix | string %}
-{%-     elif k8s_cluster.object.service_cidr.display is defined and k8s_cluster.object.service_cidr.display %}
-{%-         set k8s_cluster.service_subnet = k8s_cluster.object.service_cidr.display | string %}
-{%-     else %}
-{%-         set k8s_cluster.service_subnet = k8s_cluster.object.service_cidr | string %}
 {%-     endif %}
 {%- endif %}
 {%- set openstack_image.version = openstack_image.name.split("-")[1] %}
