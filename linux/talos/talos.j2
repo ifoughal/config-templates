@@ -76,7 +76,7 @@ cluster:
 machine:
   install:
     disk: {{ install_disk.name }} {# eg: /dev/sda The disk used for installations. #}
-    image: ghcr.io/siderolabs/installer:v{{ installer_version }}  {# eg: v1.12.5 # Allows for supplying the image used to perform the installation. #}
+    image: ghcr.io/siderolabs/installer:v1.13.0  # {{ installer_version }}  {# eg: v1.12.5 # Allows for supplying the image used to perform the installation. #}
     wipe: true  {# Indicates if the installation disk should be wiped at installation time. #}
     grubUseUKICmdline: true  {# Indicates if legacy GRUB bootloader should use kernel cmdline from the UKI instead of building it on the host. #}
   certSANs: {{ cert_sans | tojson }}
