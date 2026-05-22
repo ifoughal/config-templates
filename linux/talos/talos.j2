@@ -58,7 +58,7 @@ cluster:
       name: none
     podSubnets: {{ [k8s_cluster.pod_subnet] | tojson }}
     serviceSubnets: {{ [k8s_cluster.service_subnet] | tojson }}
-    domain: {{ k8s_cluster.domain }}
+    dnsDomain: {{ k8s_cluster.domain }}
   proxy:
     disabled: true
 machine:
