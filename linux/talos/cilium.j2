@@ -44,6 +44,9 @@
 k8sServiceHost: localhost   # {{ cilium_east_west.address }}
 k8sServicePort: 7445        # {{ cilium_east_west.port }}
 
+cleanState: true
+cleanBpfState: true
+
 rollOutCiliumPods: true
 dnsPolicy: "ClusterFirst"
 
@@ -213,22 +216,9 @@ encryption:
   wireguard:
     persistentKeepalive: 0s
 
-endpointHealthChecking:
-  enabled: true
-
 endpointRoutes:
   # -- Enable use of per endpoint routes instead of routing via
   # the cilium_host interface.
-  enabled: false
-
-k8sNetworkPolicy:
-  enabled: true
-
-healthChecking: true
-healthPort: 9879
-healthCheckICMPFailureThreshold: 3
-
-hostFirewall:
   enabled: false
 
 # -- Enable routing to a service that has zero endpoints
@@ -246,14 +236,15 @@ hubble:
   ui:
     enabled: true
 
-installNoConntrackIptablesRules: true
+installNoConntrackIptablesRules: false  # TODO: test with true
 
 ipam:
   # ref: https://docs.cilium.io/en/stable/network/concepts/ipam/
-  mode: kubernetes
+  mode: cluster-pool
   operator:
     clusterPoolIPv4PodCIDRList:
     - {{ k8s_cluster.pod_network }}/{{ k8s_cluster.pod_mask_size }}
+    clusterPoolIPv4MaskSize: 24
 
 defaultLBServiceIPAM: lbipam
 nodeIPAM:
@@ -261,18 +252,13 @@ nodeIPAM:
 
 ipMasqAgent:
   enabled: false
-  config:
-    masqLinkLocalIPv6: false
-    masqLinkLocal: true
-    nonMasqueradeCIDRs:
-    - 172.20.0.1/32   # DB subnets for example
-    - 172.20.0.2/32   # DB subnets for example
-    - 172.20.0.3/32   # DB subnets for example
-
-ipv4:
-  enabled: true
-ipv6:
-  enabled: false
+  # config:
+  #   masqLinkLocalIPv6: false
+  #   masqLinkLocal: true
+  #   nonMasqueradeCIDRs:
+  #   - 172.20.0.1/32   # DB subnets for example
+  #   - 172.20.0.2/32   # DB subnets for example
+  #   - 172.20.0.3/32   # DB subnets for example
 
 k8s:
   requireIPv4PodCIDR: true
@@ -280,10 +266,9 @@ k8s:
   apiServerURLs: "https://{{ cilium_east_west.address }}:{{ cilium_east_west.port }}"
 
 kubeProxyReplacement: true
-kubeProxyReplacementHealthzBindAddr: "0.0.0.0:10256"
 
 l2NeighDiscovery:
-  enabled: true
+  enabled: false
 
 l7Proxy: true
 
@@ -292,6 +277,7 @@ maglev:
   hashSeed: lcZ10lyASHpL/lK6
 
 enableIPv4Masquerade: true
+
 enableMasqueradeRouteSource: false  # TODO test with true
 
 egressGateway:
