@@ -1,0 +1,88 @@
+{%- set k8s_cluster = namespace(object=none, domain="domain.local") %}
+{%- set k8s_cluster.object = virtualmachine.cf.get("k8s_cluster") %}
+{%- if k8s_cluster.object.domain is defined and k8s_cluster.object.domain %}
+{%-     set k8s_cluster.domain = k8s_cluster.object.domain | string %}
+{%- endif %}
+
+
+storageClasses:
+  # This list can contain one or more StorageClass definitions.
+  # Minimal LVM StorageClass.
+  # Required fields are typically `name`, `storage`, and either `volgroup` or `vgpattern`.
+  - name: lvm-block
+    storage: "lvm"
+    volgroup: "8b816545-861c-49a9-b375-f60862d27ea3"
+    allowVolumeExpansion: true
+    reclaimPolicy: Retain
+    volumeBindingMode: WaitForFirstConsumer
+
+values:
+  openebs-crds:
+    csi:
+      volumeSnapshots:
+        # -- Enable/Disable installation of Volume Snapshot CRD's
+        enabled: true
+        keep: true
+
+  localpv-provisioner:
+    rbac:
+      create: true
+
+  zfs-localpv:
+    crds:
+      zfsLocalPv:
+        enabled: false
+      csi:
+        volumeSnapshots:
+          enabled: false
+
+  lvm-localpv:
+    crds:
+      lvmLocalPv:
+        enabled: true
+      csi:
+        volumeSnapshots:
+          enabled: false
+
+  rawfile-localpv:
+    crds:
+      csi:
+        volumeSnapshots:
+          enabled: false
+
+  mayastor:
+    csi:
+      node:
+        initContainers:
+          enabled: true
+    etcd:
+      clusterDomain: {{ k8s_cluster.domain }}
+    localpv-provisioner:
+      enabled: false
+    crds:
+      enabled: true
+    loki:
+      enabled: false
+    alloy:
+      enabled: false
+
+  preUpgradeHook:
+    enabled: false
+
+  engines:
+    local:
+      lvm:
+        enabled: true
+      zfs:
+        enabled: false
+      rawfile:
+        enabled: false
+    replicated:
+      mayastor:
+        enabled: false
+
+  loki:
+    enabled: false
+
+  alloy:
+    enabled: false
