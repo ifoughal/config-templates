@@ -66,7 +66,7 @@ machine:
 {#- ref: https://docs.siderolabs.com/kubernetes-guides/advanced-guides/node-labels -#}
   nodeLabels:
     node.kubernetes.io/exclude-from-external-load-balancers: ""
-{%- endif %}
+{% endif %}
   install:
     disk: /dev/{{ install_disk.name }} {# eg: /dev/sda The disk used for installations. #}
     image: ghcr.io/siderolabs/installer:v{{ openstack_image.version }}  {# eg: v1.12.5 # Allows for supplying the image used to perform the installation. #}
