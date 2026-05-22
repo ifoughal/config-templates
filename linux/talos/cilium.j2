@@ -126,7 +126,8 @@ l2podAnnouncements:
 
 # devices: ""
 
-# nodePort:
+nodePort:
+  enabled: false
 #   directRoutingDevice: eth0
 ################################################################################
 
@@ -282,7 +283,7 @@ nodeIPAM:
   enabled: true
 
 ipMasqAgent:
-  enabled: true
+  enabled: false
   config:
     masqLinkLocalIPv6: false
     masqLinkLocal: true
@@ -297,7 +298,7 @@ ipv6:
   enabled: false
 
 k8s:
-  requireIPv4PodCIDR: false
+  requireIPv4PodCIDR: true
   requireIPv6PodCIDR: false
   apiServerURLs: "https://{{ cilium_east_west.address }}:{{ cilium_east_west.port }}"
 
@@ -314,6 +315,7 @@ maglev:
   hashSeed: lcZ10lyASHpL/lK6
 
 enableIPv4Masquerade: true
+enableMasqueradeRouteSource: false  # TODO test with true
 
 egressGateway:
   enabled: false
