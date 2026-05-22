@@ -100,11 +100,16 @@ updateStrategy:
   rollingUpdate:
     maxUnavailable: 2
 
+# ipv4NativeRoutingCIDR: "{{ cilium_east_west.subnet }}"
+ipv4NativeRoutingCIDR: "{{ k8s_cluster.pod_subnet }}"
+
 # -- Enable installation of PodCIDR routes between worker nodes if worker nodes share a common L2 network segment.
-autoDirectNodeRoutes: false
+autoDirectNodeRoutes: true
+
 # -- Enable skipping of PodCIDR routes between worker
 # nodes if the worker nodes are in a different L2 network segment.
 directRoutingSkipUnreachable: false
+
 # -- Annotate k8s node upon initialization with Cilium's metadata.
 annotateK8sNode: true
 
@@ -283,9 +288,6 @@ enableMasqueradeRouteSource: false  # TODO test with true
 egressGateway:
   enabled: false
 
-# ipv4NativeRoutingCIDR: "{{ cilium_east_west.subnet }}"
-ipv4NativeRoutingCIDR: "{{ k8s_cluster.pod_subnet }}"
-
 # -- Configure service load balancing
 loadBalancer:
   algorithm: maglev
@@ -310,6 +312,11 @@ tls:
     create: true
     name: cilium-secrets
 
+# -- Tunneling protocol to use in tunneling mode and for ad-hoc tunnels.
+# Possible values:
+#   - ""
+#   - vxlan
+#   - geneve
 tunnelProtocol: ""
 
 underlayProtocol: "ipv4"
