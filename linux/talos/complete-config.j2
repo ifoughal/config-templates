@@ -5,7 +5,5 @@ talos_patches: |
 {%- if virtualmachine.role.name == "control-plane" %}
 cilium_values:
 {% filter indent(2, true) %}{% include "linux/talos/cilium.j2" %}{% endfilter %}
-openebs_values:
-{% filter indent(2, true) %}{% include "linux/talos/openebs.j2" %}{% endfilter %}
 {%- endif %}
 

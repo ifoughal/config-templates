@@ -4,11 +4,7 @@
 {%-     set k8s_cluster.domain = k8s_cluster.object.domain | string %}
 {%- endif %}
 
-
 storageClasses:
-  # This list can contain one or more StorageClass definitions.
-  # Minimal LVM StorageClass.
-  # Required fields are typically `name`, `storage`, and either `volgroup` or `vgpattern`.
   - name: lvm-block
     storage: "lvm"
     volgroup: "8b816545-861c-49a9-b375-f60862d27ea3"
