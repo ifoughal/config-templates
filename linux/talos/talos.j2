@@ -1,5 +1,6 @@
 {%- set cert_sans = ["127.0.0.1"] %}
-{%- set disks = namespace(install=namespace(name=""), storage=namespace(name="")) %}
+{%- set install_disk = namespace(name="") %}
+{%- set storage_disk = namespace(name="") %}
 {%- set k8s_cluster = namespace(object=none, pod_subnet="172.17.0.0/8", service_subnet="172.18.0.0/16", domain="domain.local") %}
 {%- set k8s_cluster.object = virtualmachine.cf.get("k8s_cluster") %}
 {%- set openstack_image = namespace(object=none, name="", version="latest") %}
@@ -34,11 +35,11 @@
 {%- if virtualmachine.virtualdisks %}
 {%-     for disk in virtualmachine.virtualdisks.all() %}
 {%-         set is_operating_system_disk = disk.custom_field_data.get("operating_system") %}
-{%-         if not disks.install.name and is_operating_system_disk == true %}
-{%-             set disks.install.name = disk.name %}
+{%-         if not install_disk.name and is_operating_system_disk == true %}
+{%-             set install_disk.name = disk.name %}
 {%-         endif %}
-{%-         if not disks.storage.name and is_operating_system_disk == false %}
-{%-             set disks.storage.name = disk.name %}
+{%-         if not storage_disk.name and is_operating_system_disk == false %}
+{%-             set storage_disk.name = disk.name %}
 {%-         endif %}
 {%-     endfor %}
 {%- endif -%}
@@ -65,10 +66,10 @@ machine:
     node.kubernetes.io/exclude-from-external-load-balancers: ""
     node-role.kubernetes.io/{{ virtualmachine.role.name }}: ""
 {%- if virtualmachine.role.name == "storage-worker" %}
-    openebs.io/lvm-disk: "{{ disks.storage.name }}"
+    openebs.io/lvm-disk: "{{ storage_disk.name }}"
 {%- endif %}
   install:
-    disk: /dev/{{ disks.install.name }} {# eg: /dev/sda The disk used for installations. #}
+    disk: /dev/{{ install_disk.name }} {# eg: /dev/sda The disk used for installations. #}
     image: ghcr.io/siderolabs/installer:v{{ openstack_image.version }}  {# eg: v1.12.5 # Allows for supplying the image used to perform the installation. #}
     wipe: true  {# Indicates if the installation disk should be wiped at installation time. #}
     grubUseUKICmdline: true  {# Indicates if legacy GRUB bootloader should use kernel cmdline from the UKI instead of building it on the host. #}
