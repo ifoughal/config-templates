@@ -252,7 +252,8 @@ ipam:
   # ref: https://docs.cilium.io/en/stable/network/concepts/ipam/
   mode: kubernetes
   operator:
-    clusterPoolIPv4PodCIDRList: [ {{ k8s_cluster.pod_network }}/{{ k8s_cluster.pod_mask_size }} ]
+    clusterPoolIPv4PodCIDRList:
+    - {{ k8s_cluster.pod_network }}/{{ k8s_cluster.pod_mask_size }}
 
 defaultLBServiceIPAM: lbipam
 nodeIPAM:
