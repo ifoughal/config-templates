@@ -6,7 +6,6 @@
 {%- set k8s_cluster.object = virtualmachine.cf.get("k8s_cluster") %}
 {%- set openstack_image = namespace(object=none, name="", version="latest") %}
 {%- set openstack_image.object = virtualmachine.cf.get("openstack_image") %}
-{}
 {%- if openstack_image.object %}
 {%-     set openstack_image.name = openstack_image.object.name %}
 {%- endif %}
