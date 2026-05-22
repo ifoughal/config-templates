@@ -1,7 +1,7 @@
 {%- set cert_sans = ["127.0.0.1"] %}
 {%- set install_disk = namespace(name="") %}
 {%- set storage_disk = namespace(name="") %}
-{%- set k8s_cluster = namespace(object=none, pod_subnet="172.17.0.0/8", service_subnet="172.18.0.0/16", domain="domain.local") %}
+{%- set k8s_cluster = namespace(object=none, pod_subnet="172.17.0.0/8", service_subnet="172.18.0.0/16", domain="cluster.local") %}
 {%- set k8s_cluster.object = virtualmachine.cf.get("k8s_cluster") %}
 {%- set openstack_image = namespace(object=none, name="", version="latest") %}
 {%- set openstack_image.object = virtualmachine.cf.get("openstack_image") %}
