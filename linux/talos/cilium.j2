@@ -248,34 +248,34 @@ hubble:
 
 installNoConntrackIptablesRules: true
 
-ipam:
-  # ref: https://docs.cilium.io/en/stable/network/concepts/ipam/
-  mode: multi-pool
-  operator:
-    # todo: generate this dynamically
-    # -- IP pools to auto-create in multi-pool IPAM mode.
-    autoCreateCiliumPodIPPools:
-      default:
-        ipv4:
-          cidrs:
-          - {{ k8s_cluster.pod_network }}/{{ k8s_cluster.pod_mask_size }}
-          maskSize: 24
+# ipam:
+#   # ref: https://docs.cilium.io/en/stable/network/concepts/ipam/
+#   mode: multi-pool
+#   operator:
+#     # todo: generate this dynamically
+#     # -- IP pools to auto-create in multi-pool IPAM mode.
+#     autoCreateCiliumPodIPPools:
+#       default:
+#         ipv4:
+#           cidrs:
+#           - {{ k8s_cluster.pod_network }}/{{ k8s_cluster.pod_mask_size }}
+#           maskSize: 24
 
-      k8ssandra-1:
-        ipv4:
-          cidrs:
-          - 172.20.0.0/16  # replication cidr
-          maskSize: 24
-    #   k8ssandra-2:
-    #     ipv4:
-    #       cidrs:
-    #       - 172.20.0.2  # replication cidr
-    #       maskSize: 32
-    #   k8ssandra-3:
-    #     ipv4:
-    #       cidrs:
-    #       - 172.20.0.3  # replication cidr
-    #       maskSize: 32
+#       k8ssandra-1:
+#         ipv4:
+#           cidrs:
+#           - 172.20.0.0/16  # replication cidr
+#           maskSize: 24
+#     #   k8ssandra-2:
+#     #     ipv4:
+#     #       cidrs:
+#     #       - 172.20.0.2  # replication cidr
+#     #       maskSize: 32
+#     #   k8ssandra-3:
+#     #     ipv4:
+#     #       cidrs:
+#     #       - 172.20.0.3  # replication cidr
+#     #       maskSize: 32
 
 defaultLBServiceIPAM: lbipam
 nodeIPAM:
