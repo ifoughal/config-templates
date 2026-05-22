@@ -1,21 +1,21 @@
-{%- if virtualmachine.platform.name == "Talos"  %}
 {%- set cert_sans = ["127.0.0.1"] %}
 {%- set install_disk = namespace(name="") %}
-{%- set cf_openstack_image = virtualmachine.cf.openstack_image if virtualmachine.cf.openstack_image is defined else none %}
-{%- set openstack_image = cf_openstack_image or virtualmachine.custom_field_data.get("openstack_image") %}
-{%- set openstack_image_name = namespace(value="") %}
-{%- if openstack_image %}
-{%-     if openstack_image.name is defined and openstack_image.name %}
-{%-         set openstack_image_name.value = openstack_image.name %}
-{%-     elif openstack_image.display is defined and openstack_image.display %}
-{%-         set openstack_image_name.value = openstack_image.display %}
-{%-     elif openstack_image.value is defined and openstack_image.value %}
-{%-         set openstack_image_name.value = openstack_image.value %}
-{%-     else %}
-{%-         set openstack_image_name.value = openstack_image | string %}
+{%- set k8s_cluster = namespace(object=none, pod_subnet="172.17.0.0/8", service_subnet="172.18.0.0/16") %}
+{%- set k8s_cluster.object = virtualmachine.cf.get("k8s_cluster") %}
+{%- set openstack_image = namespace(object=none, name="", version="latest") %}
+{%- set openstack_image.object = virtualmachine.cf.get("openstack_image") %}
+{%- if openstack_image.object %}
+{%-     set openstack_image.name = openstack_image.object.name %}
+{%- endif %}
+{%- if k8s_cluster.object %}
+{%-     if k8s_cluster.object.pods_cidr.prefix is defined and k8s_cluster.object.pods_cidr.prefix %}
+{%-         set k8s_cluster.pod_subnet = k8s_cluster.object.pods_cidr.prefix | string %}
+{%-     endif %}
+{%-     if k8s_cluster.object.service_cidr.prefix is defined and k8s_cluster.object.service_cidr.prefix %}
+{%-         set k8s_cluster.service_subnet = k8s_cluster.object.service_cidr.prefix | string %}
 {%-     endif %}
 {%- endif %}
-{%- set installer_version = openstack_image_name.value.split("-")[-1] if openstack_image_name.value else "latest" %}
+{%- set openstack_image.version = openstack_image.name.split("-")[1] %}
 {%- if virtualmachine.interfaces %}
 {%-     for interface in virtualmachine.interfaces.all() %}
 {%-         if interface.ip_addresses %}
@@ -30,14 +30,12 @@
 {%- endif %}
 {%- if virtualmachine.virtualdisks %}
 {%-     for disk in virtualmachine.virtualdisks.all() %}
-{%-         set is_operating_system_disk = disk.cf.operating_system if disk.cf.operating_system is defined else disk.custom_field_data.get("operating_system") %}
+{%-         set is_operating_system_disk = disk.custom_field_data.get("operating_system") %}
 {%-         if not install_disk.name and is_operating_system_disk == true %}
 {%-             set install_disk.name = disk.name %}
 {%-         endif %}
 {%-     endfor %}
-{%- endif %}
-
-
+{%- endif -%}
 ---
 apiVersion: v1alpha1
 kind: HostnameConfig
@@ -51,14 +49,14 @@ cluster:
   network:
     cni:
       name: none
-    podSubnets: ["172.17.0.0/16"]       {#- TODO: The pod subnet CIDRs should be dynamic. #}
-    serviceSubnets: ["172.18.0.0/16"]   {#- TODO: The pod subnet CIDRs should be dynamic. #}
+    podSubnets: {{ [k8s_cluster.pod_subnet] | tojson }}
+    serviceSubnets: {{ [k8s_cluster.service_subnet] | tojson }}
   proxy:
     disabled: true
 machine:
   install:
     disk: /dev/{{ install_disk.name }} {# eg: /dev/sda The disk used for installations. #}
-    image: ghcr.io/siderolabs/installer:v{{ installer_version }}  {# eg: v1.12.5 # Allows for supplying the image used to perform the installation. #}
+    image: ghcr.io/siderolabs/installer:v{{ openstack_image.version }}  {# eg: v1.12.5 # Allows for supplying the image used to perform the installation. #}
     wipe: true  {# Indicates if the installation disk should be wiped at installation time. #}
     grubUseUKICmdline: true  {# Indicates if legacy GRUB bootloader should use kernel cmdline from the UKI instead of building it on the host. #}
   certSANs: {{ cert_sans | tojson }}
@@ -77,4 +75,3 @@ machine:
       - bind
       - rshared
 {%-     endif %}
-{%- endif %}
