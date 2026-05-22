@@ -62,11 +62,10 @@ cluster:
   proxy:
     disabled: true
 machine:
+{%- if virtualmachine.role.name == "cntrol-plane" %}
+{## ref: https://docs.siderolabs.com/kubernetes-guides/advanced-guides/node-labels ##}
   nodeLabels:
     node.kubernetes.io/exclude-from-external-load-balancers: ""
-    node-role.kubernetes.io/{{ virtualmachine.role.name }}: ""
-{%- if virtualmachine.role.name == "storage-worker" %}
-    openebs.io/lvm-disk: "{{ storage_disk.name }}"
 {%- endif %}
   install:
     disk: /dev/{{ install_disk.name }} {# eg: /dev/sda The disk used for installations. #}
