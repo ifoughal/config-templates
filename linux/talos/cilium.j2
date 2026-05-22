@@ -283,7 +283,8 @@ enableMasqueradeRouteSource: false  # TODO test with true
 egressGateway:
   enabled: false
 
-ipv4NativeRoutingCIDR: "{{ cilium_east_west.subnet }}"
+# ipv4NativeRoutingCIDR: "{{ cilium_east_west.subnet }}"
+ipv4NativeRoutingCIDR: "{{ k8s_cluster.pod_subnet }}"
 
 # -- Configure service load balancing
 loadBalancer:
