@@ -200,7 +200,7 @@ gatewayAPI:
       matchLabels: {}
 
 encryption:
-  enabled: true
+  enabled: false
   type: wireguard
   nodeEncryption: true
   strictMode:
@@ -302,7 +302,7 @@ ipv4NativeRoutingCIDR: "{{ cilium_east_west.subnet }}"
 # -- Configure service load balancing
 loadBalancer:
   algorithm: maglev
-  mode: dsr
+  mode: snat
   acceleration: best-effort
   dsrDispatch: opt
   serviceTopology: false
