@@ -56,7 +56,6 @@ resources:
     memory: 512Mi
 
 securityContext:
-  # runAsUser: 0
   allowPrivilegeEscalation: false
   privileged: false
   seLinuxOptions:
@@ -99,7 +98,7 @@ updateStrategy:
     maxUnavailable: 2
 
 # -- Enable installation of PodCIDR routes between worker nodes if worker nodes share a common L2 network segment.
-autoDirectNodeRoutes: true
+autoDirectNodeRoutes: false
 # -- Enable skipping of PodCIDR routes between worker
 # nodes if the worker nodes are in a different L2 network segment.
 directRoutingSkipUnreachable: true
@@ -107,12 +106,12 @@ directRoutingSkipUnreachable: true
 annotateK8sNode: true
 
 l2announcements:
-  enabled: true
+  enabled: false
 
 # TODO: test pods announcement
 l2podAnnouncements:
   enabled: false
-  interface: "eth0"
+  # interface: "eth0"
   # interfacePattern: ""
 
 ################################################################################
@@ -251,32 +250,9 @@ installNoConntrackIptablesRules: true
 
 ipam:
   # ref: https://docs.cilium.io/en/stable/network/concepts/ipam/
-  mode: multi-pool
+  mode: kubernetes
   operator:
-    # todo: generate this dynamically
-    # -- IP pools to auto-create in multi-pool IPAM mode.
-    autoCreateCiliumPodIPPools:
-      default:
-        ipv4:
-          cidrs:
-          - {{ k8s_cluster.pod_network }}/{{ k8s_cluster.pod_mask_size }}
-          maskSize: 24
-
-      k8ssandra-1:
-        ipv4:
-          cidrs:
-          - 172.20.0.0/16  # replication cidr
-          maskSize: 24
-    #   k8ssandra-2:
-    #     ipv4:
-    #       cidrs:
-    #       - 172.20.0.2  # replication cidr
-    #       maskSize: 32
-    #   k8ssandra-3:
-    #     ipv4:
-    #       cidrs:
-    #       - 172.20.0.3  # replication cidr
-    #       maskSize: 32
+    clusterPoolIPv4PodCIDRList: [ {{ k8s_cluster.pod_network }}/{{ k8s_cluster.pod_mask_size }} ]
 
 defaultLBServiceIPAM: lbipam
 nodeIPAM:
