@@ -62,7 +62,7 @@ cluster:
   proxy:
     disabled: true
 machine:
-{%- if virtualmachine.role.name == "cntrol-plane" %}
+{%- if virtualmachine.role.name == "control-plane" %}
 {## ref: https://docs.siderolabs.com/kubernetes-guides/advanced-guides/node-labels ##}
   nodeLabels:
     node.kubernetes.io/exclude-from-external-load-balancers: ""
