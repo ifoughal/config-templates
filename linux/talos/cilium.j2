@@ -40,85 +40,118 @@
 {%-             endif %}
 {%-         endif %}
 {%-     endfor %}
-{%- endif -%}
-k8sServiceHost: localhost   # {{ cilium_east_west.address }}
-k8sServicePort: 7445        # {{ cilium_east_west.port }}
+{%- endif %}
+{#- Overrides from config context. Provide a `cilium` dict whose structure mirrors this file (e.g. `cilium.resources.limits.cpu`). #}
+{%- set cilium = cilium | default({}) %}
+{%- set _resources = cilium.get('resources', {}) %}
+{%- set _resources_limits = _resources.get('limits', {}) %}
+{%- set _resources_requests = _resources.get('requests', {}) %}
+{%- set _security = cilium.get('securityContext', {}) %}
+{%- set _security_selinux = _security.get('seLinuxOptions', {}) %}
+{%- set _security_caps = _security.get('capabilities', {}) %}
+{%- set _update = cilium.get('updateStrategy', {}) %}
+{%- set _update_rolling = _update.get('rollingUpdate', {}) %}
+{%- set _l2 = cilium.get('l2announcements', {}) %}
+{%- set _l2pod = cilium.get('l2podAnnouncements', {}) %}
+{%- set _nodeport = cilium.get('nodePort', {}) %}
+{%- set _bpf = cilium.get('bpf', {}) %}
+{%- set _bpf_lru = _bpf.get('distributedLRU', {}) %}
+{%- set _cni = cilium.get('cni', {}) %}
+{%- set _cni_resources = _cni.get('resources', {}) %}
+{%- set _cni_resources_requests = _cni_resources.get('requests', {}) %}
+{%- set _cni_resources_limits = _cni_resources.get('limits', {}) %}
+{%- set _envoy_config = cilium.get('envoyConfig', {}) %}
+{%- set _envoy_config_ns = _envoy_config.get('secretsNamespace', {}) %}
+{%- set _gateway = cilium.get('gatewayAPI', {}) %}
+{%- set _gateway_class = _gateway.get('gatewayClass', {}) %}
+{%- set _gateway_ns = _gateway.get('secretsNamespace', {}) %}
+{%- set _gateway_host = _gateway.get('hostNetwork', {}) %}
+{%- set _gateway_host_nodes = _gateway_host.get('nodes', {}) %}
+{%- set _encrypt = cilium.get('encryption', {}) %}
+{%- set _encrypt_strict = _encrypt.get('strictMode', {}) %}
+{%- set _encrypt_strict_egress = _encrypt_strict.get('egress', {}) %}
+{%- set _encrypt_strict_ingress = _encrypt_strict.get('ingress', {}) %}
+{%- set _encrypt_wireguard = _encrypt.get('wireguard', {}) %}
+{%- set _endpoint_routes = cilium.get('endpointRoutes', {}) %}
+{%- set _hubble = cilium.get('hubble', {}) %}
+{%- set _hubble_tls = _hubble.get('tls', {}) %}
+{%- set _hubble_tls_auto = _hubble_tls.get('auto', {}) %}
+{%- set _hubble_relay = _hubble.get('relay', {}) %}
+{%- set _hubble_ui = _hubble.get('ui', {}) %}
+{%- set _ipam = cilium.get('ipam', {}) %}
+{%- set _ipam_operator = _ipam.get('operator', {}) %}
+{%- set _node_ipam = cilium.get('nodeIPAM', {}) %}
+{%- set _masq = cilium.get('ipMasqAgent', {}) %}
+{%- set _k8s = cilium.get('k8s', {}) %}
+{%- set _l2nd = cilium.get('l2NeighDiscovery', {}) %}
+{%- set _maglev = cilium.get('maglev', {}) %}
+{%- set _egress = cilium.get('egressGateway', {}) %}
+{%- set _lb = cilium.get('loadBalancer', {}) %}
+{%- set _lb_l7 = _lb.get('l7', {}) %}
+{%- set _envoy = cilium.get('envoy', {}) %}
+{%- set _tls = cilium.get('tls', {}) %}
+{%- set _tls_ns = _tls.get('secretsNamespace', {}) %}
+{%- set _etcd = cilium.get('etcd', {}) %}
+{%- set _operator = cilium.get('operator', {}) %}
+{%- set _nodeinit = cilium.get('nodeinit', {}) %}
+{%- set _preflight = cilium.get('preflight', {}) %}
+{%- set _cgroup = cilium.get('cgroup', {}) %}
+{%- set _cgroup_automount = _cgroup.get('autoMount', {}) %}
+{%- set _auth = cilium.get('authentication', {}) %}
 
-cleanState: true
-cleanBpfState: true
+k8sServiceHost: {{ cilium.get('k8sServiceHost', 'localhost') }}   # {{ cilium_east_west.address }}
+k8sServicePort: {{ cilium.get('k8sServicePort', 7445) }}          # {{ cilium_east_west.port }}
 
-rollOutCiliumPods: true
-dnsPolicy: "ClusterFirst"
+cleanState: {{ cilium.get('cleanState', true) | tojson }}
+cleanBpfState: {{ cilium.get('cleanBpfState', true) | tojson }}
+
+rollOutCiliumPods: {{ cilium.get('rollOutCiliumPods', true) | tojson }}
+dnsPolicy: "{{ cilium.get('dnsPolicy', 'ClusterFirst') }}"
 
 resources:
   limits:
-    cpu: 4000m
-    memory: 4Gi
+    cpu: {{ _resources_limits.get('cpu', '4000m') }}
+    memory: {{ _resources_limits.get('memory', '4Gi') }}
   requests:
-    cpu: 100m
-    memory: 512Mi
+    cpu: {{ _resources_requests.get('cpu', '100m') }}
+    memory: {{ _resources_requests.get('memory', '512Mi') }}
 
 securityContext:
-  allowPrivilegeEscalation: false
-  privileged: false
+  allowPrivilegeEscalation: {{ _security.get('allowPrivilegeEscalation', false) | tojson }}
+  privileged: {{ _security.get('privileged', false) | tojson }}
   seLinuxOptions:
-    level: 's0'
-    type: 'spc_t'
+    level: '{{ _security_selinux.get('level', 's0') }}'
+    type: '{{ _security_selinux.get('type', 'spc_t') }}'
   capabilities:
-    ciliumAgent:
-      - CHOWN
-      - KILL
-      - NET_ADMIN
-      - NET_RAW
-      - IPC_LOCK
-      - SYS_ADMIN
-      - SYS_RESOURCE
-      - PERFMON
-      - BPF
-      - DAC_OVERRIDE
-      - FOWNER
-      - SETGID
-      - SETUID
-      - SYSLOG
-    mountCgroup:
-      - SYS_ADMIN
-      - SYS_CHROOT
-      - SYS_PTRACE
-    applySysctlOverwrites:
-      - SYS_ADMIN
-      - SYS_CHROOT
-      - SYS_PTRACE
-    cleanCiliumState:
-      - NET_ADMIN
-      - SYS_ADMIN
-      - SYS_RESOURCE
-      - PERFMON
-      - BPF
+    ciliumAgent: {{ _security_caps.get('ciliumAgent', ['CHOWN', 'KILL', 'NET_ADMIN', 'NET_RAW', 'IPC_LOCK', 'SYS_ADMIN', 'SYS_RESOURCE', 'PERFMON', 'BPF', 'DAC_OVERRIDE', 'FOWNER', 'SETGID', 'SETUID', 'SYSLOG']) | tojson }}
+    mountCgroup: {{ _security_caps.get('mountCgroup', ['SYS_ADMIN', 'SYS_CHROOT', 'SYS_PTRACE']) | tojson }}
+    applySysctlOverwrites: {{ _security_caps.get('applySysctlOverwrites', ['SYS_ADMIN', 'SYS_CHROOT', 'SYS_PTRACE']) | tojson }}
+    cleanCiliumState: {{ _security_caps.get('cleanCiliumState', ['NET_ADMIN', 'SYS_ADMIN', 'SYS_RESOURCE', 'PERFMON', 'BPF']) | tojson }}
 
 updateStrategy:
-  type: RollingUpdate
+  type: {{ _update.get('type', 'RollingUpdate') }}
   rollingUpdate:
-    maxUnavailable: 2
+    maxUnavailable: {{ _update_rolling.get('maxUnavailable', 2) }}
 
 # ipv4NativeRoutingCIDR: "{{ cilium_east_west.subnet }}"
-ipv4NativeRoutingCIDR: "{{ k8s_cluster.pod_subnet }}"
+ipv4NativeRoutingCIDR: "{{ cilium.get('ipv4NativeRoutingCIDR', k8s_cluster.pod_subnet) }}"
 
 # -- Enable installation of PodCIDR routes between worker nodes if worker nodes share a common L2 network segment.
-autoDirectNodeRoutes: true
+autoDirectNodeRoutes: {{ cilium.get('autoDirectNodeRoutes', true) | tojson }}
 
 # -- Enable skipping of PodCIDR routes between worker
 # nodes if the worker nodes are in a different L2 network segment.
-directRoutingSkipUnreachable: false
+directRoutingSkipUnreachable: {{ cilium.get('directRoutingSkipUnreachable', false) | tojson }}
 
 # -- Annotate k8s node upon initialization with Cilium's metadata.
-annotateK8sNode: true
+annotateK8sNode: {{ cilium.get('annotateK8sNode', true) | tojson }}
 
 l2announcements:
-  enabled: false
+  enabled: {{ _l2.get('enabled', false) | tojson }}
 
 # TODO: test pods announcement
 l2podAnnouncements:
-  enabled: false
+  enabled: {{ _l2pod.get('enabled', false) | tojson }}
   # interface: "eth0"
   # interfacePattern: ""
 
@@ -131,45 +164,45 @@ l2podAnnouncements:
 # program. When not specified, probing will automatically detect devices that have
 # a non-local route. This should be used only when autodetection is not suitable.
 
-devices: ""
+devices: "{{ cilium.get('devices', '') }}"
 
 nodePort:
-  enabled: false
+  enabled: {{ _nodeport.get('enabled', false) | tojson }}
 #   directRoutingDevice: eth0
 ################################################################################
 
-forceDeviceDetection: false
+forceDeviceDetection: {{ cilium.get('forceDeviceDetection', false) | tojson }}
 
 bpf:
-  preallocateMaps: true
+  preallocateMaps: {{ _bpf.get('preallocateMaps', true) | tojson }}
   distributedLRU:
-    enabled: true
-  policyMapMax: 16384
-  policyStatsMapMax: 65536
+    enabled: {{ _bpf_lru.get('enabled', true) | tojson }}
+  policyMapMax: {{ _bpf.get('policyMapMax', 16384) }}
+  policyStatsMapMax: {{ _bpf.get('policyStatsMapMax', 65536) }}
   # @schema
   # type: [null, number, string]
   # @schema
   # -- (float64) Configure auto-sizing for all BPF maps based on available memory.
   # ref: https://docs.cilium.io/en/stable/network/ebpf/maps/
   # @default -- `0.0025`
-  mapDynamicSizeRatio: ~
-  lbAlgorithmAnnotation: true
-  lbModeAnnotation: true
-  masquerade: true
+  mapDynamicSizeRatio: {{ _bpf.get('mapDynamicSizeRatio', '~') }}
+  lbAlgorithmAnnotation: {{ _bpf.get('lbAlgorithmAnnotation', true) | tojson }}
+  lbModeAnnotation: {{ _bpf.get('lbModeAnnotation', true) | tojson }}
+  masquerade: {{ _bpf.get('masquerade', true) | tojson }}
   # -- (string) Mode for Pod devices for the core datapath (veth, netkit, netkit-l2).
   # Note netkit is incompatible with TPROXY (`bpf.tproxy`).
-  datapathMode: veth
+  datapathMode: {{ _bpf.get('datapathMode', 'veth') }}
 
 cni:
-  install: true
-  exclusive: false
+  install: {{ _cni.get('install', true) | tojson }}
+  exclusive: {{ _cni.get('exclusive', false) | tojson }}
   resources:
     requests:
-      cpu: 100m
-      memory: 10Mi
+      cpu: {{ _cni_resources_requests.get('cpu', '100m') }}
+      memory: {{ _cni_resources_requests.get('memory', '10Mi') }}
     limits:
-      cpu: 1
-      memory: 1Gi
+      cpu: {{ _cni_resources_limits.get('cpu', 1) }}
+      memory: {{ _cni_resources_limits.get('memory', '1Gi') }}
 
 # -- Limit iptables-based egress masquerading to interface selector.
 # egressMasqueradeInterfaces: ""
@@ -178,25 +211,25 @@ cni:
 # enableIdentityMark: true
 
 envoyConfig:
-  enabled: true
+  enabled: {{ _envoy_config.get('enabled', true) | tojson }}
   secretsNamespace:
-    create: true
-    name: cilium-secrets
-  retryInterval: 15s
+    create: {{ _envoy_config_ns.get('create', true) | tojson }}
+    name: {{ _envoy_config_ns.get('name', 'cilium-secrets') }}
+  retryInterval: {{ _envoy_config.get('retryInterval', '15s') }}
 
 gatewayAPI:
-  enabled: true
-  enableAlpn: true
-  enableAppProtocol: true
-  externalTrafficPolicy: Cluster
+  enabled: {{ _gateway.get('enabled', true) | tojson }}
+  enableAlpn: {{ _gateway.get('enableAlpn', true) | tojson }}
+  enableAppProtocol: {{ _gateway.get('enableAppProtocol', true) | tojson }}
+  externalTrafficPolicy: {{ _gateway.get('externalTrafficPolicy', 'Cluster') }}
   gatewayClass:
-    create: 'true'
+    create: '{{ _gateway_class.get('create', 'true') }}'
   secretsNamespace:
-    create: true
-    name: cilium-secrets
-    sync: true
+    create: {{ _gateway_ns.get('create', true) | tojson }}
+    name: {{ _gateway_ns.get('name', 'cilium-secrets') }}
+    sync: {{ _gateway_ns.get('sync', true) | tojson }}
   hostNetwork:
-    enabled: false
+    enabled: {{ _gateway_host.get('enabled', false) | tojson }}
     # todo: test this
     # Specify the nodes where the Ingress listeners should be exposed
     nodes:
@@ -205,58 +238,57 @@ gatewayAPI:
       # matchLabels:
       #   kubernetes.io/os: linux
       #   kubernetes.io/hostname: kind-worker
-      matchLabels: {}
+      matchLabels: {{ _gateway_host_nodes.get('matchLabels', {}) | tojson }}
 
 encryption:
-  enabled: false
-  type: wireguard
-  nodeEncryption: true
+  enabled: {{ _encrypt.get('enabled', false) | tojson }}
+  type: {{ _encrypt.get('type', 'wireguard') }}
+  nodeEncryption: {{ _encrypt.get('nodeEncryption', true) | tojson }}
   strictMode:
     egress:
-      enabled: false
-      cidr: ""
-      allowRemoteNodeIdentities: false
+      enabled: {{ _encrypt_strict_egress.get('enabled', false) | tojson }}
+      cidr: "{{ _encrypt_strict_egress.get('cidr', '') }}"
+      allowRemoteNodeIdentities: {{ _encrypt_strict_egress.get('allowRemoteNodeIdentities', false) | tojson }}
     ingress:
-      enabled: false
+      enabled: {{ _encrypt_strict_ingress.get('enabled', false) | tojson }}
   wireguard:
-    persistentKeepalive: 0s
+    persistentKeepalive: {{ _encrypt_wireguard.get('persistentKeepalive', '0s') }}
 
 endpointRoutes:
   # -- Enable use of per endpoint routes instead of routing via
   # the cilium_host interface.
-  enabled: false
+  enabled: {{ _endpoint_routes.get('enabled', false) | tojson }}
 
 # -- Enable routing to a service that has zero endpoints
-enableNoServiceEndpointsRoutable: true
+enableNoServiceEndpointsRoutable: {{ cilium.get('enableNoServiceEndpointsRoutable', true) | tojson }}
 
 hubble:
-  enabled: true
+  enabled: {{ _hubble.get('enabled', true) | tojson }}
   tls:
-    enabled: true
+    enabled: {{ _hubble_tls.get('enabled', true) | tojson }}
     auto:
-      enabled: true
-      method: cronJob
+      enabled: {{ _hubble_tls_auto.get('enabled', true) | tojson }}
+      method: {{ _hubble_tls_auto.get('method', 'cronJob') }}
   relay:
-    enabled: true
+    enabled: {{ _hubble_relay.get('enabled', true) | tojson }}
   ui:
-    enabled: true
+    enabled: {{ _hubble_ui.get('enabled', true) | tojson }}
 
-installNoConntrackIptablesRules: false  # TODO: test with true
+installNoConntrackIptablesRules: {{ cilium.get('installNoConntrackIptablesRules', false) | tojson }}  # TODO: test with true
 
 ipam:
   # ref: https://docs.cilium.io/en/stable/network/concepts/ipam/
-  mode: cluster-pool
+  mode: {{ _ipam.get('mode', 'cluster-pool') }}
   operator:
-    clusterPoolIPv4PodCIDRList:
-    - {{ k8s_cluster.pod_network }}/{{ k8s_cluster.pod_mask_size }}
-    clusterPoolIPv4MaskSize: 24
+    clusterPoolIPv4PodCIDRList: {{ _ipam_operator.get('clusterPoolIPv4PodCIDRList', [k8s_cluster.pod_network ~ '/' ~ k8s_cluster.pod_mask_size]) | tojson }}
+    clusterPoolIPv4MaskSize: {{ _ipam_operator.get('clusterPoolIPv4MaskSize', 24) }}
 
-defaultLBServiceIPAM: lbipam
+defaultLBServiceIPAM: {{ cilium.get('defaultLBServiceIPAM', 'lbipam') }}
 nodeIPAM:
-  enabled: true
+  enabled: {{ _node_ipam.get('enabled', true) | tojson }}
 
 ipMasqAgent:
-  enabled: false
+  enabled: {{ _masq.get('enabled', false) | tojson }}
   # config:
   #   masqLinkLocalIPv6: false
   #   masqLinkLocal: true
@@ -266,94 +298,130 @@ ipMasqAgent:
   #   - 172.20.0.3/32   # DB subnets for example
 
 k8s:
-  requireIPv4PodCIDR: true
-  requireIPv6PodCIDR: false
-  apiServerURLs: "https://{{ cilium_east_west.address }}:{{ cilium_east_west.port }}"
+  requireIPv4PodCIDR: {{ _k8s.get('requireIPv4PodCIDR', true) | tojson }}
+  requireIPv6PodCIDR: {{ _k8s.get('requireIPv6PodCIDR', false) | tojson }}
+  apiServerURLs: "{{ _k8s.get('apiServerURLs', 'https://' ~ cilium_east_west.address ~ ':' ~ cilium_east_west.port) }}"
 
-kubeProxyReplacement: true
+kubeProxyReplacement: {{ cilium.get('kubeProxyReplacement', true) | tojson }}
 
 l2NeighDiscovery:
-  enabled: false
+  enabled: {{ _l2nd.get('enabled', false) | tojson }}
 
-l7Proxy: true
+l7Proxy: {{ cilium.get('l7Proxy', true) | tojson }}
 
 maglev:
-  tableSize: 65521
-  hashSeed: lcZ10lyASHpL/lK6
+  tableSize: {{ _maglev.get('tableSize', 65521) }}
+  hashSeed: {{ _maglev.get('hashSeed', 'lcZ10lyASHpL/lK6') }}
 
-enableIPv4Masquerade: true
+enableIPv4Masquerade: {{ cilium.get('enableIPv4Masquerade', true) | tojson }}
 
-enableMasqueradeRouteSource: false  # TODO test with true
+enableMasqueradeRouteSource: {{ cilium.get('enableMasqueradeRouteSource', false) | tojson }}  # TODO test with true
 
 egressGateway:
-  enabled: false
+  enabled: {{ _egress.get('enabled', false) | tojson }}
 
 # -- Configure service load balancing
 loadBalancer:
-  algorithm: maglev
-  mode: snat
-  acceleration: best-effort
-  dsrDispatch: opt
-  serviceTopology: false
+  algorithm: {{ _lb.get('algorithm', 'maglev') }}
+  mode: {{ _lb.get('mode', 'snat') }}
+  acceleration: {{ _lb.get('acceleration', 'best-effort') }}
+  dsrDispatch: {{ _lb.get('dsrDispatch', 'opt') }}
+  serviceTopology: {{ _lb.get('serviceTopology', false) | tojson }}
   l7:
-    backend: disabled
-    ports: []
-    algorithm: round_robin
+    backend: {{ _lb_l7.get('backend', 'disabled') }}
+    ports: {{ _lb_l7.get('ports', []) | tojson }}
+    algorithm: {{ _lb_l7.get('algorithm', 'round_robin') }}
 
 envoy:
-  enabled: true
-  baseID: 0
+  enabled: {{ _envoy.get('enabled', true) | tojson }}
+  baseID: {{ _envoy.get('baseID', 0) }}
   # -- For cases when CiliumEnvoyConfig is not used directly (Ingress, Gateway), configures Cilium BPF Metadata listener filter
   # to use the original source address when extracting the metadata for a request.
-  useOriginalSourceAddress: true
+  useOriginalSourceAddress: {{ _envoy.get('useOriginalSourceAddress', true) | tojson }}
 
 tls:
   secretsNamespace:
-    create: true
-    name: cilium-secrets
+    create: {{ _tls_ns.get('create', true) | tojson }}
+    name: {{ _tls_ns.get('name', 'cilium-secrets') }}
 
 # -- Tunneling protocol to use in tunneling mode and for ad-hoc tunnels.
 # Possible values:
 #   - ""
 #   - vxlan
 #   - geneve
-tunnelProtocol: ""
+tunnelProtocol: "{{ cilium.get('tunnelProtocol', '') }}"
 
-underlayProtocol: "ipv4"
+underlayProtocol: "{{ cilium.get('underlayProtocol', 'ipv4') }}"
 
-routingMode: "native"
+routingMode: "{{ cilium.get('routingMode', 'native') }}"
 
 # todo: add etcd later...
 etcd:
-  enabled: false
+  enabled: {{ _etcd.get('enabled', false) | tojson }}
   # -- List of etcd endpoints
-  endpoints:
-    - https://CHANGE-ME:2379
-  ssl: false
+  endpoints: {{ _etcd.get('endpoints', ['https://CHANGE-ME:2379']) | tojson }}
+  ssl: {{ _etcd.get('ssl', false) | tojson }}
 
 operator:
-  enabled: true
-  rollOutPods: false
-  replicas: 2
+  enabled: {{ _operator.get('enabled', true) | tojson }}
+  rollOutPods: {{ _operator.get('rollOutPods', false) | tojson }}
+  replicas: {{ _operator.get('replicas', 2) }}
 
 # todo: might be necessary with talos?
 nodeinit:
-  enabled: false
+  enabled: {{ _nodeinit.get('enabled', false) | tojson }}
 
 # todo: must be used during upgrades...
 preflight:
   # -- Enable Cilium pre-flight resources (required for upgrade)
-  enabled: false
+  enabled: {{ _preflight.get('enabled', false) | tojson }}
 
 # -- Configure cgroup related configuration
 cgroup:
   autoMount:
-    enabled: false
-  hostRoot: /sys/fs/cgroup
+    enabled: {{ _cgroup_automount.get('enabled', false) | tojson }}
+  hostRoot: {{ _cgroup.get('hostRoot', '/sys/fs/cgroup') }}
 
 authentication:
-  enabled: true
+  enabled: {{ _auth.get('enabled', true) | tojson }}
 
-enableInternalTrafficPolicy: true
+enableInternalTrafficPolicy: {{ cilium.get('enableInternalTrafficPolicy', true) | tojson }}
 
-enableLBIPAM: true
+enableLBIPAM: {{ cilium.get('enableLBIPAM', true) | tojson }}
+
+{#- Pass through any top-level keys from the `cilium` config context not handled above.
+    This allows adding arbitrary Helm values (e.g. clustermesh, kvstoremesh) without
+    modifying this template — just add them to the VM's cilium config context dict. -#}
+{%- set _handled = [
+  'k8sServiceHost', 'k8sServicePort',
+  'cleanState', 'cleanBpfState',
+  'rollOutCiliumPods', 'dnsPolicy',
+  'resources', 'securityContext', 'updateStrategy',
+  'ipv4NativeRoutingCIDR',
+  'autoDirectNodeRoutes', 'directRoutingSkipUnreachable', 'annotateK8sNode',
+  'l2announcements', 'l2podAnnouncements',
+  'devices', 'nodePort', 'forceDeviceDetection',
+  'bpf', 'cni',
+  'envoyConfig', 'gatewayAPI',
+  'encryption', 'endpointRoutes', 'enableNoServiceEndpointsRoutable',
+  'hubble', 'installNoConntrackIptablesRules',
+  'ipam', 'defaultLBServiceIPAM', 'nodeIPAM', 'ipMasqAgent',
+  'k8s', 'kubeProxyReplacement',
+  'l2NeighDiscovery', 'l7Proxy',
+  'maglev', 'enableIPv4Masquerade', 'enableMasqueradeRouteSource',
+  'egressGateway', 'loadBalancer',
+  'envoy', 'tls',
+  'tunnelProtocol', 'underlayProtocol', 'routingMode',
+  'etcd', 'operator', 'nodeinit', 'preflight', 'cgroup',
+  'authentication', 'enableInternalTrafficPolicy', 'enableLBIPAM',
+] %}
+{%- for key, val in cilium.items() %}
+{%-   if key not in _handled %}
+{%-     if val is mapping or (val is iterable and val is not string) %}
+{{ key }}:
+{{ val | toyaml | indent(2, first=True) }}
+{%-     else %}
+{{ key }}: {{ val | toyaml }}
+{%-     endif %}
+{%-   endif %}
+{%- endfor %}
