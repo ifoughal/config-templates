@@ -42,7 +42,9 @@
 {%-     endfor %}
 {%- endif %}
 {#- Overrides from config context. Provide a `cilium` dict whose structure mirrors this file (e.g. `cilium.resources.limits.cpu`). #}
-{%- set cilium = cilium | default({}) %}
+{%- if cilium is not defined %}
+{%-   set cilium = {} %}
+{%- endif %}
 {%- set _resources = cilium.get('resources', {}) %}
 {%- set _resources_limits = _resources.get('limits', {}) %}
 {%- set _resources_requests = _resources.get('requests', {}) %}
