@@ -1,3 +1,22 @@
+{%- set k8s_cluster = namespace(object=none, pod_subnet="172.17.0.0/16", pod_network="172.17.0.0", pod_mask_size="16") %}
+{%- set k8s_cluster.object = virtualmachine.cf.get("k8s_cluster") %}
+{%- if k8s_cluster.object %}
+{%-     if k8s_cluster.object.pods_cidr is defined and k8s_cluster.object.pods_cidr %}
+{%-         if k8s_cluster.object.pods_cidr.prefix is defined and k8s_cluster.object.pods_cidr.prefix %}
+{%-             set k8s_cluster.pod_subnet = k8s_cluster.object.pods_cidr.prefix | string %}
+{%-         elif k8s_cluster.object.pods_cidr.display is defined and k8s_cluster.object.pods_cidr.display %}
+{%-             set k8s_cluster.pod_subnet = k8s_cluster.object.pods_cidr.display | string %}
+{%-         else %}
+{%-             set k8s_cluster.pod_subnet = k8s_cluster.object.pods_cidr | string %}
+{%-         endif %}
+{%-     endif %}
+{%- endif %}
+{%- if "/" in k8s_cluster.pod_subnet %}
+{%-     set pod_subnet_parts = k8s_cluster.pod_subnet.split("/") %}
+{%-     set k8s_cluster.pod_network = pod_subnet_parts[0] %}
+{%-     set k8s_cluster.pod_mask_size = pod_subnet_parts[1] %}
+{%- endif %}
+
 {%- set cilium_east_west = namespace(address="", port="6443", subnet="", interface="") %}
 {%- if virtualmachine.interfaces %}
 {%-     for interface in virtualmachine.interfaces.all() %}
@@ -32,7 +51,14 @@
 {%- set _security_caps = _security.get('capabilities', {}) %}
 {%- set _cgroup = cilium.get('cgroup', {}) %}
 {%- set _cgroup_automount = _cgroup.get('autoMount', {}) %}
+{%- set _bpf = cilium.get('bpf', {}) %}
+{%- set _bpf_lru = _bpf.get('distributedLRU', {}) %}
+{%- set _cni = cilium.get('cni', {}) %}
+{%- set _cni_resources = _cni.get('resources', {}) %}
+{%- set _cni_resources_requests = _cni_resources.get('requests', {}) %}
+{%- set _cni_resources_limits = _cni_resources.get('limits', {}) %}
 {%- set _ipam = cilium.get('ipam', {}) %}
+
 
 k8sServiceHost: {{ cilium.get('k8sServiceHost', 'localhost') }}
 k8sServicePort: {{ cilium.get('k8sServicePort', 7445) }}
@@ -51,3 +77,88 @@ cgroup:
 
 ipam:
   mode: {{ _ipam.get('mode', 'kubernetes') }}
+
+
+routingMode: "{{ cilium.get('routingMode', 'native') }}"
+
+ipv4NativeRoutingCIDR: "{{ cilium.get('ipv4NativeRoutingCIDR', k8s_cluster.pod_subnet) }}"
+
+
+autoDirectNodeRoutes: {{ cilium.get('autoDirectNodeRoutes', true) | tojson }}
+directRoutingSkipUnreachable: {{ cilium.get('directRoutingSkipUnreachable', false) | tojson }}
+
+
+annotateK8sNode: {{ cilium.get('annotateK8sNode', true) | tojson }}
+
+
+cni:
+  install: {{ _cni.get('install', true) | tojson }}
+  exclusive: {{ _cni.get('exclusive', false) | tojson }}
+  resources:
+    requests:
+      cpu: {{ _cni_resources_requests.get('cpu', '100m') }}
+      memory: {{ _cni_resources_requests.get('memory', '10Mi') }}
+    limits:
+      cpu: {{ _cni_resources_limits.get('cpu', 1) }}
+      memory: {{ _cni_resources_limits.get('memory', '1Gi') }}
+
+
+bpf:
+  preallocateMaps: {{ _bpf.get('preallocateMaps', true) | tojson }}
+  distributedLRU:
+    enabled: {{ _bpf_lru.get('enabled', true) | tojson }}
+  policyMapMax: {{ _bpf.get('policyMapMax', 16384) }}
+  policyStatsMapMax: {{ _bpf.get('policyStatsMapMax', 65536) }}
+  # @schema
+  # type: [null, number, string]
+  # @schema
+  # -- (float64) Configure auto-sizing for all BPF maps based on available memory.
+  # ref: https://docs.cilium.io/en/stable/network/ebpf/maps/
+  # @default -- `0.0025`
+  mapDynamicSizeRatio: {{ _bpf.get('mapDynamicSizeRatio', '~') }}
+  lbAlgorithmAnnotation: {{ _bpf.get('lbAlgorithmAnnotation', true) | tojson }}
+  lbModeAnnotation: {{ _bpf.get('lbModeAnnotation', true) | tojson }}
+  masquerade: {{ _bpf.get('masquerade', true) | tojson }}
+  # -- (string) Mode for Pod devices for the core datapath (veth, netkit, netkit-l2).
+  # Note netkit is incompatible with TPROXY (`bpf.tproxy`).
+  datapathMode: {{ _bpf.get('datapathMode', 'veth') }}
+
+
+
+{#- Pass through any top-level keys from the `cilium` config context not handled above.
+    This allows adding arbitrary Helm values (e.g. clustermesh, kvstoremesh) without
+    modifying this template — just add them to the VM's cilium config context dict. -#}
+{%- set _handled = [
+  'k8sServiceHost', 'k8sServicePort',
+  'cleanState', 'cleanBpfState',
+  'rollOutCiliumPods', 'dnsPolicy',
+  'resources', 'securityContext', 'updateStrategy',
+  'ipv4NativeRoutingCIDR',
+  'autoDirectNodeRoutes', 'directRoutingSkipUnreachable', 'annotateK8sNode',
+  'l2announcements', 'l2podAnnouncements',
+  'devices', 'nodePort', 'forceDeviceDetection',
+  'bpf', 'cni',
+  'envoyConfig', 'gatewayAPI',
+  'encryption', 'endpointRoutes', 'enableNoServiceEndpointsRoutable',
+  'hubble', 'installNoConntrackIptablesRules',
+  'ipam', 'defaultLBServiceIPAM', 'nodeIPAM', 'ipMasqAgent',
+  'k8s', 'kubeProxyReplacement',
+  'l2NeighDiscovery', 'l7Proxy',
+  'maglev', 'enableIPv4Masquerade', 'enableMasqueradeRouteSource',
+  'egressGateway', 'loadBalancer',
+  'envoy', 'tls',
+  'tunnelProtocol', 'underlayProtocol', 'routingMode',
+  'etcd', 'operator', 'nodeinit', 'preflight', 'cgroup',
+  'authentication', 'enableInternalTrafficPolicy', 'enableLBIPAM',
+  'staticRoutes',
+] %}
+{%- for key, val in cilium.items() %}
+{%-   if key not in _handled %}
+{%-     if val is mapping or (val is iterable and val is not string) %}
+{{ key }}:
+{{ val | toyaml | indent(2, first=True) }}
+{%-     else %}
+{{ key }}: {{ val | toyaml }}
+{%-     endif %}
+{%-   endif %}
+{%- endfor %}
