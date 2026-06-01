@@ -124,7 +124,6 @@ machine:
     wipe: true  {# Indicates if the installation disk should be wiped at installation time. #}
     grubUseUKICmdline: true  {# Indicates if legacy GRUB bootloader should use kernel cmdline from the UKI instead of building it on the host. #}
   certSANs: {{ cert_sans | tojson }}
-  kubelet:
 {%- if virtualmachine.role.name == "storage-worker" %}
   kernel:
     modules:
