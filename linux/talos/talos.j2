@@ -68,13 +68,14 @@ cluster:
     podSubnets: {{ [k8s_cluster.pod_subnet] | tojson }}
     serviceSubnets: {{ [k8s_cluster.service_subnet] | tojson }}
     dnsDomain: {{ k8s_cluster.domain }}
-    interfaces:
+{#-     interfaces:
     - interface: {{ east_west.name if east_west.name else "ens3" }}
       routes:
 {%-     for route in _static_routes %}
       - network: {{ route.get("network", "") }}
         gateway: {{ route.get("gateway", "") }}
 {%-     endfor %}
+-#}
   proxy:
     disabled: true
 machine:
