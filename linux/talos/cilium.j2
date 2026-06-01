@@ -16,7 +16,7 @@
 {%-     set k8s_cluster.pod_network = pod_subnet_parts[0] %}
 {%-     set k8s_cluster.pod_mask_size = pod_subnet_parts[1] %}
 {%- endif %}
-{%- set cilium_east_west = namespace(address="", port="6443", subnet="") %}
+{%- set cilium_east_west = namespace(address="", port="6443", subnet="", interface="") %}
 {%- if virtualmachine.interfaces %}
 {%-     for interface in virtualmachine.interfaces.all() %}
 {%-         set traffic_role = interface.custom_field_data.get("traffic_role", "") %}
@@ -26,6 +26,7 @@
 {%-                 set east_west_ip = east_west_ipv4_addresses.first() %}
 {%-                 set east_west_address = east_west_ip.address %}
 {%-                 set cilium_east_west.address = east_west_address.ip | string %}
+{%-                 set cilium_east_west.interface = interface.name %}
 {%-                 if east_west_address.cidr is defined %}
 {%-                     set cilium_east_west.subnet = east_west_address.cidr | string %}
 {%-                 elif east_west_address.network is defined and east_west_address.prefixlen is defined %}
@@ -357,6 +358,21 @@ underlayProtocol: "{{ cilium.get('underlayProtocol', 'ipv4') }}"
 
 routingMode: "{{ cilium.get('routingMode', 'native') }}"
 
+{%- set _static_routes = cilium.get('staticRoutes', []) %}
+{%- if _static_routes %}
+staticRoutes:
+{%-   for route in _static_routes %}
+  - prefix: "{{ route.get('prefix', '') }}"
+    nexthop: "{{ route.get('nexthop', '') }}"
+{%-     set _route_iface = route.get('interface', '') | replace('ens3', cilium_east_west.interface) if cilium_east_west.interface else route.get('interface', '') %}
+{%-     if _route_iface %}
+    interface: "{{ _route_iface }}"
+{%-     elif cilium_east_west.interface %}
+    interface: "{{ cilium_east_west.interface }}"
+{%-     endif %}
+{%-   endfor %}
+{%- endif %}
+
 # todo: add etcd later...
 etcd:
   enabled: {{ _etcd.get('enabled', false) | tojson }}
@@ -416,6 +432,7 @@ enableLBIPAM: {{ cilium.get('enableLBIPAM', true) | tojson }}
   'tunnelProtocol', 'underlayProtocol', 'routingMode',
   'etcd', 'operator', 'nodeinit', 'preflight', 'cgroup',
   'authentication', 'enableInternalTrafficPolicy', 'enableLBIPAM',
+  'staticRoutes',
 ] %}
 {%- for key, val in cilium.items() %}
 {%-   if key not in _handled %}
