@@ -1,6 +1,7 @@
 {%- set cert_sans = ["127.0.0.1"] %}
 {%- set install_disk = namespace(name="") %}
-{%- set k8s_cluster = namespace(object=none, pod_subnet="172.17.0.0/8", service_subnet="172.18.0.0/16") %}
+{%- set storage_disk = namespace(name="") %}
+{%- set k8s_cluster = namespace(object=none, pod_subnet="172.17.0.0/8", service_subnet="172.18.0.0/16", domain="cluster.local") %}
 {%- set k8s_cluster.object = virtualmachine.cf.get("k8s_cluster") %}
 {%- set openstack_image = namespace(object=none, name="", version="latest") %}
 {%- set openstack_image.object = virtualmachine.cf.get("openstack_image") %}
@@ -13,6 +14,9 @@
 {%-     endif %}
 {%-     if k8s_cluster.object.service_cidr.prefix is defined and k8s_cluster.object.service_cidr.prefix %}
 {%-         set k8s_cluster.service_subnet = k8s_cluster.object.service_cidr.prefix | string %}
+{%-     endif %}
+{%-     if k8s_cluster.object.domain is defined and k8s_cluster.object.domain %}
+{%-         set k8s_cluster.domain = k8s_cluster.object.domain | string %}
 {%-     endif %}
 {%- endif %}
 {%- set openstack_image.version = openstack_image.name.split("-")[1] %}
@@ -34,6 +38,9 @@
 {%-         if not install_disk.name and is_operating_system_disk == true %}
 {%-             set install_disk.name = disk.name %}
 {%-         endif %}
+{%-         if not storage_disk.name and is_operating_system_disk == false %}
+{%-             set storage_disk.name = disk.name %}
+{%-         endif %}
 {%-     endfor %}
 {%- endif -%}
 ---
@@ -51,16 +58,22 @@ cluster:
       name: none
     podSubnets: {{ [k8s_cluster.pod_subnet] | tojson }}
     serviceSubnets: {{ [k8s_cluster.service_subnet] | tojson }}
+    dnsDomain: {{ k8s_cluster.domain }}
   proxy:
     disabled: true
 machine:
+{%- if virtualmachine.role.name == "control-plane" %}
+  {#- ref: https://docs.siderolabs.com/kubernetes-guides/advanced-guides/node-labels #}
+  nodeLabels:
+    node.kubernetes.io/exclude-from-external-load-balancers: ""
+{%- endif %}
   install:
     disk: /dev/{{ install_disk.name }} {# eg: /dev/sda The disk used for installations. #}
     image: ghcr.io/siderolabs/installer:v{{ openstack_image.version }}  {# eg: v1.12.5 # Allows for supplying the image used to perform the installation. #}
     wipe: true  {# Indicates if the installation disk should be wiped at installation time. #}
     grubUseUKICmdline: true  {# Indicates if legacy GRUB bootloader should use kernel cmdline from the UKI instead of building it on the host. #}
   certSANs: {{ cert_sans | tojson }}
-{%-     if virtualmachine.role.name == "storage-worker"  %}
+{%- if virtualmachine.role.name == "storage-worker" %}
   kernel:
     modules:
     - name: dm_mod
@@ -74,4 +87,4 @@ machine:
       options:
       - bind
       - rshared
-{%-     endif %}
+{%- endif %}
