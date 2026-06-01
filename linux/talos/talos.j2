@@ -1,7 +1,7 @@
 {%- set cert_sans = ["127.0.0.1"] %}
 {%- set install_disk = namespace(name="") %}
 {%- set storage_disk = namespace(name="") %}
-{%- set east_west = namespace(name="", gateway="") %}
+{%- set east_west = namespace(name="", gateway="", subnet="") %}
 {%- set k8s_cluster = namespace(object=none, pod_subnet="172.17.0.0/8", service_subnet="172.18.0.0/16", domain="cluster.local") %}
 {%- set k8s_cluster.object = virtualmachine.cf.get("k8s_cluster") %}
 {%- set openstack_image = namespace(object=none, name="", version="latest") %}
@@ -27,6 +27,40 @@
 {%-         if traffic_role == "east_west" and not east_west.name %}
 {%-             set east_west.name = interface.name %}
 {%-             set east_west.gateway = interface.custom_field_data.get("gateway", "") %}
+{%-             if interface.ip_addresses %}
+{%-                 set _ew_ipv4 = interface.ip_addresses.filter(address__family=4) %}
+{%-                 if _ew_ipv4 and _ew_ipv4.first() %}
+{%-                     set _ew_ip = _ew_ipv4.first() %}
+{%-                     set _ew_addr = _ew_ip.address %}
+{%-                     if _ew_addr.cidr is defined %}
+{%-                         set east_west.subnet = _ew_addr.cidr | string %}
+{%-                     elif _ew_addr.network is defined and _ew_addr.prefixlen is defined %}
+{%-                         set east_west.subnet = (_ew_addr.network | string) ~ "/" ~ (_ew_addr.prefixlen | string) %}
+{%-                     elif _ew_ip.parent is defined and _ew_ip.parent %}
+{%-                         if _ew_ip.parent.prefix is defined %}
+{%-                             set east_west.subnet = _ew_ip.parent.prefix | string %}
+{%-                         else %}
+{%-                             set east_west.subnet = _ew_ip.parent | string %}
+{%-                         endif %}
+{%-                     endif %}
+{%-                     if not east_west.subnet %}
+{%-                         set _ew_str = _ew_addr | string %}
+{%-                         if "/" in _ew_str %}
+{%-                             set _ew_parts = _ew_str.split("/") %}
+{%-                             set _prefix = _ew_parts[1] | int %}
+{%-                             set _octets = _ew_parts[0].split(".") %}
+{%-                             set _ip_int = (_octets[0] | int) * 16777216 + (_octets[1] | int) * 65536 + (_octets[2] | int) * 256 + (_octets[3] | int) %}
+{%-                             set _host_size = 2 ** (32 - _prefix) %}
+{%-                             set _net_int = _ip_int - (_ip_int % _host_size) %}
+{%-                             set _o1 = (_net_int // 16777216) | string %}
+{%-                             set _o2 = ((_net_int % 16777216) // 65536) | string %}
+{%-                             set _o3 = ((_net_int % 65536) // 256) | string %}
+{%-                             set _o4 = (_net_int % 256) | string %}
+{%-                             set east_west.subnet = _o1 ~ "." ~ _o2 ~ "." ~ _o3 ~ "." ~ _o4 ~ "/" ~ _ew_parts[1] %}
+{%-                         endif %}
+{%-                     endif %}
+{%-                 endif %}
+{%-             endif %}
 {%-         endif %}
 {%-         if interface.ip_addresses %}
 {%-             for ip in interface.ip_addresses.all() %}
@@ -90,13 +124,19 @@ machine:
     wipe: true  {# Indicates if the installation disk should be wiped at installation time. #}
     grubUseUKICmdline: true  {# Indicates if legacy GRUB bootloader should use kernel cmdline from the UKI instead of building it on the host. #}
   certSANs: {{ cert_sans | tojson }}
+  kubelet:
 {%- if virtualmachine.role.name == "storage-worker" %}
   kernel:
     modules:
     - name: dm_mod
     - name: dm_snapshot
     - name: dm_thin_pool
+{%- endif %}
   kubelet:
+    nodeIP:
+      validSubnets:
+      - {{ east_west.subnet if east_west.subnet else "10.64.3.0/20" }}
+{%- if virtualmachine.role.name == "storage-worker" %}
     extraMounts:
     - destination: /var/openebs/local
       type: bind
