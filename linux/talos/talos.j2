@@ -85,7 +85,10 @@
 {%- endif %}
 {%- set _talos = virtualmachine.cf.get("talos", {}) %}
 {%- set _net = _talos.get("network", {}) %}
-{%- set _static_routes = _net.get("routes", [{"network": "0.0.0.0/0", "gateway": east_west.gateway if east_west.gateway else "10.64.0.1"}]) -%}
+{%- set _static_routes = _net.get("routes", [{"network": "0.0.0.0/0", "gateway": east_west.gateway if east_west.gateway else "10.64.0.1"}]) %}
+{%- set _kubelet = _talos.get("kubelet", {}) %}
+{%- set _nodeip = _kubelet.get("nodeIP", {}) %}
+{%- set _valid_subnets = _nodeip.get("validSubnets", [east_west.subnet if east_west.subnet else "10.64.3.0/20"]) -%}
 ---
 apiVersion: v1alpha1
 kind: HostnameConfig
@@ -141,7 +144,9 @@ machine:
   kubelet:
     nodeIP:
       validSubnets:
-      - {{ east_west.subnet if east_west.subnet else "10.64.3.0/20" }}
+{%- for subnet in _valid_subnets %}
+      - {{ subnet }}
+{%- endfor %}
 {%- if virtualmachine.role.name == "storage-worker" %}
     extraMounts:
     - destination: /var/openebs/local
