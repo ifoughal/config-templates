@@ -87,9 +87,14 @@
 {%-   set talos = {} %}
 {%- endif %}
 {%- set _talos = talos %}
+{%- set _machine = _talos.get("machine", {}) %}
+{%- set _talos_cluster = _talos.get("cluster", {}) %}
+{%- set _etcd = _talos_cluster.get("etcd", {}) %}
+{%- set _etcd_advertised = _etcd.get("advertisedSubnets", [east_west.subnet if east_west.subnet else "10.64.16.0/22"]) %}
+{%- set _etcd_advertised = [_etcd_advertised] if _etcd_advertised is string else _etcd_advertised %}
 {%- set _net = _talos.get("network", {}) %}
 {%- set _static_routes = _net.get("routes", [{"network": "0.0.0.0/0", "gateway": east_west.gateway if east_west.gateway else "10.64.0.1"}]) %}
-{%- set _kubelet = _talos.get("kubelet", {}) %}
+{%- set _kubelet = _machine.get("kubelet", {}) %}
 {%- set _nodeip = _kubelet.get("nodeIP", {}) %}
 {%- set _valid_subnets = _nodeip.get("validSubnets", [east_west.subnet if east_west.subnet else "10.64.3.0/20"]) %}
 {%- set _valid_subnets = [_valid_subnets] if _valid_subnets is string else _valid_subnets -%}
@@ -117,6 +122,11 @@ cluster:
         gateway: {{ route.get("gateway", "") }}
 {%-     endfor %}
 #}
+  etcd:
+    advertisedSubnets:
+{%- for subnet in _etcd_advertised %}
+    - {{ subnet }}
+{%- endfor %}
   proxy:
     disabled: true
 machine:
