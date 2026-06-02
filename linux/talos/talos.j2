@@ -122,11 +122,13 @@ cluster:
         gateway: {{ route.get("gateway", "") }}
 {%-     endfor %}
 #}
+{%- if virtualmachine.role.name == "control-plane" %}
   etcd:
     advertisedSubnets:
-{%- for subnet in _etcd_advertised %}
+{%-   for subnet in _etcd_advertised %}
     - {{ subnet }}
-{%- endfor %}
+{%-   endfor %}
+{%- endif %}
   proxy:
     disabled: true
 machine:
