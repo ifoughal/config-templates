@@ -159,6 +159,7 @@ annotateK8sNode: {{ cilium.get('annotateK8sNode', true) | tojson }}
 {%- set _cm_api_service = _cm_api.get('service', {}) %}
 {%- set _cm_api_tls = _cm_api.get('tls', {}) %}
 {%- set _cm_api_tls_auto = _cm_api_tls.get('auto', {}) %}
+{%- set _cm_api_tls_server = _cm_api_tls.get('server', {}) %}
 {%- set _cm_kvstore = _cm.get('kvstoremesh', {}) %}
 {%- set _cm_config = _cm.get('config', {}) %}
 {%- set _cm_port = _cm_api_service.get('nodePort', 32379) %}
@@ -178,6 +179,9 @@ clustermesh:
       auto:
         enabled: {{ _cm_api_tls_auto.get('enabled', true) | tojson }}
         method: {{ _cm_api_tls_auto.get('method', 'cronJob') }}
+      server:
+        extraDnsNames: {{ _cm_api_tls_server.get('extraDnsNames', []) | tojson }}
+        extraIpAddresses: {{ _cm_api_tls_server.get('extraIpAddresses', []) | tojson }}
   kvstoremesh:
     enabled: {{ _cm_kvstore.get('enabled', true) | tojson }}
   config:
