@@ -47,6 +47,8 @@
 {%- if cilium is not defined %}
 {%-   set cilium = {} %}
 {%- endif %}
+{%- set _cluster = cilium.get('cluster', {}) %}
+{%- set _cluster_id = _cluster.get('id', k8s_cluster.pod_subnet.split("/")[1]) %}
 {%- set _security = cilium.get('securityContext', {}) %}
 {%- set _security_caps = _security.get('capabilities', {}) %}
 {%- set _cgroup = cilium.get('cgroup', {}) %}
@@ -59,6 +61,9 @@
 {%- set _cni_resources_limits = _cni_resources.get('limits', {}) %}
 {%- set _ipam = cilium.get('ipam', {}) %}
 
+cluster:
+  name: {{ _cluster.get('name', 'talos-cluster-' + _cluster_id) }}
+  id: {{ _cluster.get('id', _cluster_id) }}
 
 k8sServiceHost: {{ cilium.get('k8sServiceHost', 'localhost') }}
 k8sServicePort: {{ cilium.get('k8sServicePort', 7445) }}
@@ -150,7 +155,7 @@ bpf:
   'tunnelProtocol', 'underlayProtocol', 'routingMode',
   'etcd', 'operator', 'nodeinit', 'preflight', 'cgroup',
   'authentication', 'enableInternalTrafficPolicy', 'enableLBIPAM',
-  'staticRoutes',
+  'staticRoutes', 'hashSeed', 'tableSize', 'MTU', 'cluster'
 ] %}
 {%- for key, val in cilium.items() %}
 {%-   if key not in _handled %}
