@@ -48,7 +48,7 @@
 {%-   set cilium = {} %}
 {%- endif %}
 {%- set _cluster = cilium.get('cluster', {}) %}
-{%- set _cluster_id = _cluster.get('id', k8s_cluster.pod_subnet.split("/")[1]) %}
+{%- set _cluster_id = _cluster.get('id', k8s_cluster.pod_subnet.split(".")[1]) %}
 {%- set _security = cilium.get('securityContext', {}) %}
 {%- set _security_caps = _security.get('capabilities', {}) %}
 {%- set _cgroup = cilium.get('cgroup', {}) %}
