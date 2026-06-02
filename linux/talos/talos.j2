@@ -113,6 +113,10 @@ cluster:
   proxy:
     disabled: true
 machine:
+  features:
+    hostDNS:
+      enabled: true
+      forwardKubeDNSToHost: false
 {%- if virtualmachine.role.name == "control-plane" %}
   {#- ref: https://docs.siderolabs.com/kubernetes-guides/advanced-guides/node-labels #}
   nodeLabels:
