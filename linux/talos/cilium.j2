@@ -67,6 +67,7 @@
 {%- set _k8s = cilium.get('k8s', {}) %}
 {%- set _maglev = cilium.get('maglev', {}) %}
 {%- set _ipam_operator = _ipam.get('operator', {}) %}
+{%- set _ipam_nodespec = _ipam.get('nodeSpec', {}) %}
 {%- set _lb = cilium.get('loadBalancer', {}) %}
 {%- set _lb_l7 = _lb.get('l7', {}) %}
 
@@ -127,9 +128,22 @@ cgroup:
 
 ipam:
   mode: {{ _ipam.get('mode', 'kubernetes') }}
+  ciliumNodeUpdateRate: "{{ _ipam.get('ciliumNodeUpdateRate', '15s') }}"
+  multiPoolPreAllocation: "{{ _ipam.get('multiPoolPreAllocation', '') }}"
+  installUplinkRoutesForDelegatedIPAM: {{ _ipam.get('installUplinkRoutesForDelegatedIPAM', false) | tojson }}
   operator:
     clusterPoolIPv4PodCIDRList: {{ _ipam_operator.get('clusterPoolIPv4PodCIDRList', [k8s_cluster.pod_network ~ '/' ~ k8s_cluster.pod_mask_size]) | tojson }}
     clusterPoolIPv4MaskSize: {{ _ipam_operator.get('clusterPoolIPv4MaskSize', 24) }}
+    clusterPoolIPv6PodCIDRList: {{ _ipam_operator.get('clusterPoolIPv6PodCIDRList', ['fd00::/104']) | tojson }}
+    clusterPoolIPv6MaskSize: {{ _ipam_operator.get('clusterPoolIPv6MaskSize', 120) }}
+    autoCreateCiliumPodIPPools: {{ _ipam_operator.get('autoCreateCiliumPodIPPools', {}) | tojson }}
+    externalAPILimitBurstSize: {{ _ipam_operator.get('externalAPILimitBurstSize', '~') }}
+    externalAPILimitQPS: {{ _ipam_operator.get('externalAPILimitQPS', '~') }}
+  nodeSpec:
+    ipamMinAllocate: {{ _ipam_nodespec.get('ipamMinAllocate', '~') }}
+    ipamPreAllocate: {{ _ipam_nodespec.get('ipamPreAllocate', '~') }}
+    ipamMaxAllocate: {{ _ipam_nodespec.get('ipamMaxAllocate', '~') }}
+    ipamStaticIPTags: {{ _ipam_nodespec.get('ipamStaticIPTags', []) | tojson }}
 
 defaultLBServiceIPAM: {{ cilium.get('defaultLBServiceIPAM', 'lbipam') }}
 nodeIPAM:
