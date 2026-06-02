@@ -117,6 +117,9 @@ machine:
     hostDNS:
       enabled: true
       forwardKubeDNSToHost: false
+    kubePrism:
+      enabled: true
+      port: 7445
 {%- if virtualmachine.role.name == "control-plane" %}
   {#- ref: https://docs.siderolabs.com/kubernetes-guides/advanced-guides/node-labels #}
   nodeLabels:
