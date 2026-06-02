@@ -154,7 +154,6 @@ directRoutingSkipUnreachable: {{ cilium.get('directRoutingSkipUnreachable', fals
 
 annotateK8sNode: {{ cilium.get('annotateK8sNode', true) | tojson }}
 
-{%- if clustermesh_peers is defined and clustermesh_peers %}
 {%- set _cm = cilium.get('clustermesh', {}) %}
 {%- set _cm_api = _cm.get('apiserver', {}) %}
 {%- set _cm_api_service = _cm_api.get('service', {}) %}
@@ -163,6 +162,11 @@ annotateK8sNode: {{ cilium.get('annotateK8sNode', true) | tojson }}
 {%- set _cm_kvstore = _cm.get('kvstoremesh', {}) %}
 {%- set _cm_config = _cm.get('config', {}) %}
 {%- set _cm_port = _cm_api_service.get('nodePort', 32379) %}
+{%- set _cm_manual_clusters = _cm_config.get('clusters', []) %}
+{%- set _cm_auto_peers = clustermesh_peers if clustermesh_peers is defined else [] %}
+{%- set _cm_clusters = _cm_manual_clusters if _cm_manual_clusters else _cm_auto_peers %}
+{%- set _cm_enabled = _cm.get('enabled', _cm_clusters | length > 0) %}
+{%- if _cm_enabled %}
 clustermesh:
   useAPIServer: {{ _cm.get('useAPIServer', true) | tojson }}
   apiserver:
@@ -178,15 +182,19 @@ clustermesh:
     enabled: {{ _cm_kvstore.get('enabled', true) | tojson }}
   config:
     enabled: {{ _cm_config.get('enabled', true) | tojson }}
+{%-   if _cm_clusters %}
     clusters:
-{%-   for peer in clustermesh_peers %}
-    - name: {{ peer.name }}
-      port: {{ _cm_port }}
+{%-     for peer in _cm_clusters %}
+    - name: {{ peer.get('name', '') }}
+      port: {{ peer.get('port', _cm_port) }}
       ips:
-{%-     for ip in peer.ips %}
+{%-       for ip in peer.get('ips', []) %}
       - {{ ip }}
+{%-       endfor %}
 {%-     endfor %}
-{%-   endfor %}
+{%-   else %}
+    clusters: []
+{%-   endif %}
 {%- endif %}
 
 cni:
