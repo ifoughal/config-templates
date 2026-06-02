@@ -67,8 +67,22 @@
 {%- set _k8s = cilium.get('k8s', {}) %}
 {%- set _maglev = cilium.get('maglev', {}) %}
 {%- set _ipam_operator = _ipam.get('operator', {}) %}
-{%- set _apiServerURLs = _k8s.get('apiServerURLs', 'https://' ~ cilium_east_west.address ~ ':' ~ cilium_east_west.port)   %}
-{%- set _additional_apiServerURLs = _k8s.get('additional_apiServerURLs', '')   %}
+{%- set _apiServerURLs = _k8s.get('apiServerURLs', 'https://' ~ cilium_east_west.address ~ ':' ~ cilium_east_west.port) %}
+{%- set _extra_api_ifaces = _k8s.get('extraApiInterfaces', []) %}
+{%- set _extra_api_urls = [] %}
+{%- if _extra_api_ifaces and virtualmachine.interfaces %}
+{%-     for interface in virtualmachine.interfaces.all() %}
+{%-         if interface.name in _extra_api_ifaces and interface.ip_addresses %}
+{%-             set _iface_ipv4 = interface.ip_addresses.filter(address__family=4) %}
+{%-             if _iface_ipv4 and _iface_ipv4.first() %}
+{%-                 set _dummy = _extra_api_urls.append('https://' ~ (_iface_ipv4.first().address.ip | string) ~ ':' ~ cilium_east_west.port) %}
+{%-             endif %}
+{%-         endif %}
+{%-     endfor %}
+{%- endif %}
+{%- set _additional_apiServerURLs = _extra_api_urls | join(' ') %}
+
+
 
 cluster:
   name: {{ _cluster.get('name', 'talos-cluster-' ~ _cluster_id) }}
