@@ -72,11 +72,26 @@
 {%- set _extra_api_urls = [] %}
 {%- if _extra_api_ifaces and virtualmachine.interfaces %}
 {%-     for interface in virtualmachine.interfaces.all() %}
-{%-         if interface.name in _extra_api_ifaces and interface.ip_addresses %}
+{%-         if interface.ip_addresses %}
 {%-             set _iface_ipv4 = interface.ip_addresses.filter(address__family=4) %}
 {%-             if _iface_ipv4 %}
-{%-                 for _iface_ip in _iface_ipv4 %}
-{%-                     set _dummy = _extra_api_urls.append('https://' ~ (_iface_ip.address.ip | string) ~ ':' ~ cilium_east_west.port) %}
+{%-                 for pattern in _extra_api_ifaces %}
+{%-                     set _m = namespace(match=false) %}
+{%-                     if '*' in pattern or '+' in pattern %}
+{%-                         if interface.name.startswith(pattern.rstrip('*+')) %}
+{%-                             set _m.match = true %}
+{%-                         endif %}
+{%-                     elif interface.name == pattern %}
+{%-                         set _m.match = true %}
+{%-                     endif %}
+{%-                     if _m.match %}
+{%-                         for _iface_ip in _iface_ipv4 %}
+{%-                             set _url = 'https://' ~ (_iface_ip.address.ip | string) ~ ':' ~ cilium_east_west.port %}
+{%-                             if _url not in _extra_api_urls and _url not in _apiServerURLs %}
+{%-                                 set _dummy = _extra_api_urls.append(_url) %}
+{%-                             endif %}
+{%-                         endfor %}
+{%-                     endif %}
 {%-                 endfor %}
 {%-             endif %}
 {%-         endif %}
