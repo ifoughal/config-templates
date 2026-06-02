@@ -113,6 +113,8 @@ k8sServicePort: {{ cilium.get('k8sServicePort', 7445) }}
 
 kubeProxyReplacement: {{ cilium.get('kubeProxyReplacement', true) | tojson }}
 
+devices: "{{ cilium.get('devices', '') }}"
+
 securityContext:
   capabilities:
     ciliumAgent: {{ _security_caps.get('ciliumAgent', ['CHOWN', 'KILL', 'NET_ADMIN', 'NET_RAW', 'IPC_LOCK', 'SYS_ADMIN', 'SYS_RESOURCE', 'DAC_OVERRIDE', 'FOWNER', 'SETGID', 'SETUID']) | tojson }}
