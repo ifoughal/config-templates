@@ -74,8 +74,10 @@
 {%-     for interface in virtualmachine.interfaces.all() %}
 {%-         if interface.name in _extra_api_ifaces and interface.ip_addresses %}
 {%-             set _iface_ipv4 = interface.ip_addresses.filter(address__family=4) %}
-{%-             if _iface_ipv4 and _iface_ipv4.first() %}
-{%-                 set _dummy = _extra_api_urls.append('https://' ~ (_iface_ipv4.first().address.ip | string) ~ ':' ~ cilium_east_west.port) %}
+{%-             if _iface_ipv4 %}
+{%-                 for _iface_ip in _iface_ipv4 %}
+{%-                     set _dummy = _extra_api_urls.append('https://' ~ (_iface_ip.address.ip | string) ~ ':' ~ cilium_east_west.port) %}
+{%-                 endfor %}
 {%-             endif %}
 {%-         endif %}
 {%-     endfor %}
