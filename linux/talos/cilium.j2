@@ -154,6 +154,40 @@ directRoutingSkipUnreachable: {{ cilium.get('directRoutingSkipUnreachable', fals
 
 annotateK8sNode: {{ cilium.get('annotateK8sNode', true) | tojson }}
 
+{%- if clustermesh_peers is defined and clustermesh_peers %}
+{%- set _cm = cilium.get('clustermesh', {}) %}
+{%- set _cm_api = _cm.get('apiserver', {}) %}
+{%- set _cm_api_service = _cm_api.get('service', {}) %}
+{%- set _cm_api_tls = _cm_api.get('tls', {}) %}
+{%- set _cm_api_tls_auto = _cm_api_tls.get('auto', {}) %}
+{%- set _cm_kvstore = _cm.get('kvstoremesh', {}) %}
+{%- set _cm_config = _cm.get('config', {}) %}
+{%- set _cm_port = _cm_api_service.get('nodePort', 32379) %}
+clustermesh:
+  useAPIServer: {{ _cm.get('useAPIServer', true) | tojson }}
+  apiserver:
+    service:
+      type: {{ _cm_api_service.get('type', 'NodePort') }}
+      nodePort: {{ _cm_port }}
+    tls:
+      authMode: {{ _cm_api_tls.get('authMode', 'cluster') }}
+      auto:
+        enabled: {{ _cm_api_tls_auto.get('enabled', true) | tojson }}
+        method: {{ _cm_api_tls_auto.get('method', 'cronJob') }}
+  kvstoremesh:
+    enabled: {{ _cm_kvstore.get('enabled', true) | tojson }}
+  config:
+    enabled: {{ _cm_config.get('enabled', true) | tojson }}
+    clusters:
+{%-   for peer in clustermesh_peers %}
+    - name: {{ peer.name }}
+      port: {{ _cm_port }}
+      ips:
+{%-     for ip in peer.ips %}
+      - {{ ip }}
+{%-     endfor %}
+{%-   endfor %}
+{%- endif %}
 
 cni:
   install: {{ _cni.get('install', true) | tojson }}
@@ -254,7 +288,7 @@ enableIPv6Masquerade: {{ cilium.get('enableIPv6Masquerade', false) | tojson }}
   'tunnelProtocol', 'underlayProtocol', 'routingMode',
   'etcd', 'operator', 'nodeinit', 'preflight', 'cgroup',
   'authentication', 'enableInternalTrafficPolicy', 'enableLBIPAM',
-  'staticRoutes', 'hashSeed', 'tableSize', 'MTU', 'cluster'
+  'staticRoutes', 'hashSeed', 'tableSize', 'MTU', 'cluster', 'clustermesh'
 ] %}
 {%- for key, val in cilium.items() %}
 {%-   if key not in _handled %}
