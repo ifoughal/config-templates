@@ -66,9 +66,6 @@
 {%- set _node_ipam = cilium.get('nodeIPAM', {}) %}
 {%- set _k8s = cilium.get('k8s', {}) %}
 {%- set _maglev = cilium.get('maglev', {}) %}
-{%- set _ipam_operator = _ipam.get('operator', {}) %}
-{%- set _ipam_nodespec = _ipam.get('nodeSpec', {}) %}
-{%- set _auto_pools_default = {"default": {"ipv4": {"cidrs": [k8s_cluster.pod_network ~ "/" ~ k8s_cluster.pod_mask_size], "maskSize": 24}}} %}
 {%- set _lb = cilium.get('loadBalancer', {}) %}
 {%- set _lb_l7 = _lb.get('l7', {}) %}
 
@@ -128,7 +125,7 @@ cgroup:
   hostRoot: {{ _cgroup.get('hostRoot', '/sys/fs/cgroup') }}
 
 ipam:
-  mode: {{ _ipam.get('mode', 'multi-pool') }}
+  mode: {{ _ipam.get('mode', 'kubernetes') }}
   ciliumNodeUpdateRate: "{{ _ipam.get('ciliumNodeUpdateRate', '15s') }}"
   multiPoolPreAllocation: "{{ _ipam.get('multiPoolPreAllocation', '') }}"
   installUplinkRoutesForDelegatedIPAM: {{ _ipam.get('installUplinkRoutesForDelegatedIPAM', false) | tojson }}
