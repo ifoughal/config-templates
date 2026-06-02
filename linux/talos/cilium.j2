@@ -60,6 +60,12 @@
 {%- set _cni_resources_requests = _cni_resources.get('requests', {}) %}
 {%- set _cni_resources_limits = _cni_resources.get('limits', {}) %}
 {%- set _ipam = cilium.get('ipam', {}) %}
+{%- set _envoy_config = cilium.get('envoyConfig', {}) %}
+{%- set _envoy_config_ns = _envoy_config.get('secretsNamespace', {}) %}
+{%- set _node_ipam = cilium.get('nodeIPAM', {}) %}
+{%- set _k8s = cilium.get('k8s', {}) %}
+{%- set _maglev = cilium.get('maglev', {}) %}
+
 
 cluster:
   name: {{ _cluster.get('name', 'talos-cluster-' + _cluster_id) }}
@@ -82,6 +88,18 @@ cgroup:
 
 ipam:
   mode: {{ _ipam.get('mode', 'kubernetes') }}
+  operator:
+    clusterPoolIPv4PodCIDRList: {{ _ipam_operator.get('clusterPoolIPv4PodCIDRList', [k8s_cluster.pod_network ~ '/' ~ k8s_cluster.pod_mask_size]) | tojson }}
+    clusterPoolIPv4MaskSize: {{ _ipam_operator.get('clusterPoolIPv4MaskSize', 24) }}
+
+defaultLBServiceIPAM: {{ cilium.get('defaultLBServiceIPAM', 'lbipam') }}
+nodeIPAM:
+  enabled: {{ _node_ipam.get('enabled', true) | tojson }}
+
+k8s:
+  requireIPv4PodCIDR: {{ _k8s.get('requireIPv4PodCIDR', true) | tojson }}
+  requireIPv6PodCIDR: {{ _k8s.get('requireIPv6PodCIDR', false) | tojson }}
+  apiServerURLs: "{{ _k8s.get('apiServerURLs', 'https://' ~ cilium_east_west.address ~ ':' ~ cilium_east_west.port) }}"
 
 
 routingMode: "{{ cilium.get('routingMode', 'native') }}"
@@ -98,7 +116,7 @@ annotateK8sNode: {{ cilium.get('annotateK8sNode', true) | tojson }}
 
 cni:
   install: {{ _cni.get('install', true) | tojson }}
-  exclusive: {{ _cni.get('exclusive', false) | tojson }}
+  exclusive: {{ _cni.get('exclusive', true) | tojson }}
   resources:
     requests:
       cpu: {{ _cni_resources_requests.get('cpu', '100m') }}
@@ -107,6 +125,20 @@ cni:
       cpu: {{ _cni_resources_limits.get('cpu', 1) }}
       memory: {{ _cni_resources_limits.get('memory', '1Gi') }}
 
+
+envoy:
+  enabled: {{ _envoy.get('enabled', true) | tojson }}
+  baseID: {{ _envoy.get('baseID', 0) }}
+  # -- For cases when CiliumEnvoyConfig is not used directly (Ingress, Gateway), configures Cilium BPF Metadata listener filter
+  # to use the original source address when extracting the metadata for a request.
+  useOriginalSourceAddress: {{ _envoy.get('useOriginalSourceAddress', true) | tojson }}
+
+envoyConfig:
+  enabled: {{ _envoy_config.get('enabled', true) | tojson }}
+  secretsNamespace:
+    create: {{ _envoy_config_ns.get('create', true) | tojson }}
+    name: {{ _envoy_config_ns.get('name', 'cilium-secrets') }}
+  retryInterval: {{ _envoy_config.get('retryInterval', '15s') }}
 
 bpf:
   preallocateMaps: {{ _bpf.get('preallocateMaps', true) | tojson }}
@@ -129,6 +161,12 @@ bpf:
   datapathMode: {{ _bpf.get('datapathMode', 'veth') }}
 
 
+maglev:
+  tableSize: {{ _maglev.get('tableSize', 65521) }}
+  hashSeed: {{ _maglev.get('hashSeed', 'lcZ10lyASHpL/lK6') }}
+
+enableIPv4Masquerade: {{ cilium.get('enableIPv4Masquerade', false) | tojson }}
+enableIPv6Masquerade: {{ cilium.get('enableIPv6Masquerade', false) | tojson }}
 
 {#- Pass through any top-level keys from the `cilium` config context not handled above.
     This allows adding arbitrary Helm values (e.g. clustermesh, kvstoremesh) without
