@@ -118,7 +118,7 @@ bpf:
   mapDynamicSizeRatio: {{ _bpf.get('mapDynamicSizeRatio', '~') }}
   lbAlgorithmAnnotation: {{ _bpf.get('lbAlgorithmAnnotation', true) | tojson }}
   lbModeAnnotation: {{ _bpf.get('lbModeAnnotation', true) | tojson }}
-  masquerade: {{ _bpf.get('masquerade', true) | tojson }}
+  masquerade: {{ _bpf.get('masquerade', false) | tojson }}
   # -- (string) Mode for Pod devices for the core datapath (veth, netkit, netkit-l2).
   # Note netkit is incompatible with TPROXY (`bpf.tproxy`).
   datapathMode: {{ _bpf.get('datapathMode', 'veth') }}
