@@ -102,7 +102,7 @@ nodeIPAM:
 k8s:
   requireIPv4PodCIDR: {{ _k8s.get('requireIPv4PodCIDR', true) | tojson }}
   requireIPv6PodCIDR: {{ _k8s.get('requireIPv6PodCIDR', false) | tojson }}
-  apiServerURLs: "{{ _apiServerURLs }} {% if _additional_apiServerURLs %} {{ _additional_apiServerURLs }}{% endif %}"
+  apiServerURLs: "{{ _apiServerURLs }}{% if _additional_apiServerURLs %} {{ _additional_apiServerURLs }}{% endif %}"
 
 routingMode: "{{ cilium.get('routingMode', 'native') }}"
 
