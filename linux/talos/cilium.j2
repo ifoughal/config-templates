@@ -142,6 +142,8 @@ k8s:
   apiServerURLs: "{{ _apiServerURLs }}{% if _additional_apiServerURLs %} {{ _additional_apiServerURLs }}{% endif %}"
 
 routingMode: "{{ cilium.get('routingMode', 'native') }}"
+tunnelProtocol: "{{ cilium.get('tunnelProtocol', 'geneve') }}"
+underlayProtocol: "{{ cilium.get('underlayProtocol', 'ipv4') }}"
 
 ipv4NativeRoutingCIDR: "{{ cilium.get('ipv4NativeRoutingCIDR', k8s_cluster.pod_subnet) }}"
 
@@ -203,15 +205,22 @@ bpf:
 
 # -- Configure service load balancing
 loadBalancer:
-  algorithm: {{ _lb.get('algorithm', 'maglev') }}
-  mode: {{ _lb.get('mode', 'snat') }}
   acceleration: {{ _lb.get('acceleration', 'disabled') }}
-  dsrDispatch: {{ _lb.get('dsrDispatch', 'opt') }}
   serviceTopology: {{ _lb.get('serviceTopology', false) | tojson }}
+{%- for key, val in _lb.items() %}
+{%-   if key not in ['acceleration', 'serviceTopology', 'l7'] %}
+  {{ key }}: {{ val | tojson }}
+{%-   endif %}
+{%- endfor %}
   l7:
     backend: {{ _lb_l7.get('backend', 'disabled') }}
     ports: {{ _lb_l7.get('ports', []) | tojson }}
     algorithm: {{ _lb_l7.get('algorithm', 'round_robin') }}
+{%- for key, val in _lb_l7.items() %}
+{%-   if key not in ['backend', 'ports', 'algorithm'] %}
+    {{ key }}: {{ val | tojson }}
+{%-   endif %}
+{%- endfor %}
 
 maglev:
   tableSize: {{ _maglev.get('tableSize', 65521) }}
