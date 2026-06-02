@@ -138,7 +138,7 @@ ipam:
     clusterPoolIPv6PodCIDRList: {{ _ipam_operator.get('clusterPoolIPv6PodCIDRList', ['fd00::/104']) | tojson }}
     clusterPoolIPv6MaskSize: {{ _ipam_operator.get('clusterPoolIPv6MaskSize', 120) }}
     autoCreateCiliumPodIPPools:
-{{ _ipam_operator.get('autoCreateCiliumPodIPPools', _auto_pools_default) | toyaml | indent(6, first=True) }}
+{{ _ipam_operator.get('autoCreateCiliumPodIPPools', _auto_pools_default) | tojson | indent(6, first=True) }}
     externalAPILimitBurstSize: {{ _ipam_operator.get('externalAPILimitBurstSize', '~') }}
     externalAPILimitQPS: {{ _ipam_operator.get('externalAPILimitQPS', '~') }}
   nodeSpec:
