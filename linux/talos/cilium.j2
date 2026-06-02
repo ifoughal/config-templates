@@ -201,7 +201,7 @@ bpf:
 # -- Configure service load balancing
 loadBalancer:
   algorithm: {{ _lb.get('algorithm', 'maglev') }}
-  mode: {{ _lb.get('mode', 'dsr') }}
+  mode: {{ _lb.get('mode', 'snat') }}
   acceleration: {{ _lb.get('acceleration', 'disabled') }}
   dsrDispatch: {{ _lb.get('dsrDispatch', 'opt') }}
   serviceTopology: {{ _lb.get('serviceTopology', false) | tojson }}
