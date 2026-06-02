@@ -60,6 +60,7 @@
 {%- set _cni_resources_requests = _cni_resources.get('requests', {}) %}
 {%- set _cni_resources_limits = _cni_resources.get('limits', {}) %}
 {%- set _ipam = cilium.get('ipam', {}) %}
+{%- set _envoy = cilium.get('envoy', {}) %}
 {%- set _envoy_config = cilium.get('envoyConfig', {}) %}
 {%- set _envoy_config_ns = _envoy_config.get('secretsNamespace', {}) %}
 {%- set _node_ipam = cilium.get('nodeIPAM', {}) %}
