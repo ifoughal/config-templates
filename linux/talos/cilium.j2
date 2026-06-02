@@ -65,6 +65,7 @@
 {%- set _node_ipam = cilium.get('nodeIPAM', {}) %}
 {%- set _k8s = cilium.get('k8s', {}) %}
 {%- set _maglev = cilium.get('maglev', {}) %}
+{%- set _ipam_operator = _ipam.get('operator', {}) %}
 
 
 cluster:
