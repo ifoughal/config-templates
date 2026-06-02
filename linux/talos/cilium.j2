@@ -67,6 +67,9 @@
 {%- set _k8s = cilium.get('k8s', {}) %}
 {%- set _maglev = cilium.get('maglev', {}) %}
 {%- set _ipam_operator = _ipam.get('operator', {}) %}
+{%- set _lb = cilium.get('loadBalancer', {}) %}
+{%- set _lb_l7 = _lb.get('l7', {}) %}
+
 {%- set _apiServerURLs = _k8s.get('apiServerURLs', 'https://' ~ cilium_east_west.address ~ ':' ~ cilium_east_west.port) %}
 {%- set _extra_api_ifaces = _k8s.get('extraApiInterfaces', []) %}
 {%- set _extra_api_urls = [] %}
@@ -193,6 +196,19 @@ bpf:
   # Note netkit is incompatible with TPROXY (`bpf.tproxy`).
   datapathMode: {{ _bpf.get('datapathMode', 'veth') }}
 
+
+
+# -- Configure service load balancing
+loadBalancer:
+  algorithm: {{ _lb.get('algorithm', 'maglev') }}
+  mode: {{ _lb.get('mode', 'dsr') }}
+  acceleration: {{ _lb.get('acceleration', 'disabled') }}
+  dsrDispatch: {{ _lb.get('dsrDispatch', 'opt') }}
+  serviceTopology: {{ _lb.get('serviceTopology', false) | tojson }}
+  l7:
+    backend: {{ _lb_l7.get('backend', 'disabled') }}
+    ports: {{ _lb_l7.get('ports', []) | tojson }}
+    algorithm: {{ _lb_l7.get('algorithm', 'round_robin') }}
 
 maglev:
   tableSize: {{ _maglev.get('tableSize', 65521) }}
