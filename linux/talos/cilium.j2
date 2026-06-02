@@ -137,8 +137,7 @@ ipam:
     clusterPoolIPv4MaskSize: {{ _ipam_operator.get('clusterPoolIPv4MaskSize', 24) }}
     clusterPoolIPv6PodCIDRList: {{ _ipam_operator.get('clusterPoolIPv6PodCIDRList', ['fd00::/104']) | tojson }}
     clusterPoolIPv6MaskSize: {{ _ipam_operator.get('clusterPoolIPv6MaskSize', 120) }}
-    autoCreateCiliumPodIPPools:
-{{ _ipam_operator.get('autoCreateCiliumPodIPPools', _auto_pools_default) | tojson | indent(6, first=True) }}
+    autoCreateCiliumPodIPPools: {{ _ipam_operator.get('autoCreateCiliumPodIPPools', _auto_pools_default) | tojson }}
     externalAPILimitBurstSize: {{ _ipam_operator.get('externalAPILimitBurstSize', '~') }}
     externalAPILimitQPS: {{ _ipam_operator.get('externalAPILimitQPS', '~') }}
   nodeSpec:
@@ -265,10 +264,9 @@ enableIPv6Masquerade: {{ cilium.get('enableIPv6Masquerade', false) | tojson }}
 {%- for key, val in cilium.items() %}
 {%-   if key not in _handled %}
 {%-     if val is mapping or (val is iterable and val is not string) %}
-{{ key }}:
-{{ val | toyaml | indent(2, first=True) }}
+{{ key }}: {{ val | tojson }}
 {%-     else %}
-{{ key }}: {{ val | toyaml }}
+{{ key }}: {{ val | tojson }}
 {%-     endif %}
 {%-   endif %}
 {%- endfor %}
