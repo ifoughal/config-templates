@@ -83,7 +83,10 @@
 {%-         endif %}
 {%-     endfor %}
 {%- endif %}
-{%- set _talos = virtualmachine.cf.get("talos", {}) %}
+{%- if talos is not defined %}
+{%-   set talos = {} %}
+{%- endif %}
+{%- set _talos = talos %}
 {%- set _net = _talos.get("network", {}) %}
 {%- set _static_routes = _net.get("routes", [{"network": "0.0.0.0/0", "gateway": east_west.gateway if east_west.gateway else "10.64.0.1"}]) %}
 {%- set _kubelet = _talos.get("kubelet", {}) %}
