@@ -88,7 +88,8 @@
 {%- set _static_routes = _net.get("routes", [{"network": "0.0.0.0/0", "gateway": east_west.gateway if east_west.gateway else "10.64.0.1"}]) %}
 {%- set _kubelet = _talos.get("kubelet", {}) %}
 {%- set _nodeip = _kubelet.get("nodeIP", {}) %}
-{%- set _valid_subnets = _nodeip.get("validSubnets", [east_west.subnet if east_west.subnet else "10.64.3.0/20"]) -%}
+{%- set _valid_subnets = _nodeip.get("validSubnets", [east_west.subnet if east_west.subnet else "10.64.3.0/20"]) %}
+{%- set _valid_subnets = [_valid_subnets] if _valid_subnets is string else _valid_subnets -%}
 ---
 apiVersion: v1alpha1
 kind: HostnameConfig
