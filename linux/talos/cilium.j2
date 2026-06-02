@@ -67,7 +67,8 @@
 {%- set _k8s = cilium.get('k8s', {}) %}
 {%- set _maglev = cilium.get('maglev', {}) %}
 {%- set _ipam_operator = _ipam.get('operator', {}) %}
-
+{%- set _apiServerURLs = _k8s.get('apiServerURLs', 'https://' ~ cilium_east_west.address ~ ':' ~ cilium_east_west.port)   %}
+{%- set _additional_apiServerURLs = _k8s.get('additional_apiServerURLs', '')   %}
 
 cluster:
   name: {{ _cluster.get('name', 'talos-cluster-' + _cluster_id) }}
@@ -101,8 +102,7 @@ nodeIPAM:
 k8s:
   requireIPv4PodCIDR: {{ _k8s.get('requireIPv4PodCIDR', true) | tojson }}
   requireIPv6PodCIDR: {{ _k8s.get('requireIPv6PodCIDR', false) | tojson }}
-  apiServerURLs: "{{ _k8s.get('apiServerURLs', 'https://' ~ cilium_east_west.address ~ ':' ~ cilium_east_west.port) }}"
-
+  apiServerURLs: "{{ _apiServerURLs }} {% if _additional_apiServerURLs %} {{ _additional_apiServerURLs }}{% endif %}"
 
 routingMode: "{{ cilium.get('routingMode', 'native') }}"
 
