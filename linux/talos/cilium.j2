@@ -71,7 +71,7 @@
 {%- set _additional_apiServerURLs = _k8s.get('additional_apiServerURLs', '')   %}
 
 cluster:
-  name: {{ _cluster.get('name', 'talos-cluster-' + _cluster_id) }}
+  name: {{ _cluster.get('name', 'talos-cluster-' ~ _cluster_id) }}
   id: {{ _cluster.get('id', _cluster_id) }}
 
 k8sServiceHost: {{ cilium.get('k8sServiceHost', 'localhost') }}
