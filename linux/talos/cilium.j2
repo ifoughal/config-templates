@@ -160,6 +160,8 @@ annotateK8sNode: {{ cilium.get('annotateK8sNode', true) | tojson }}
 {%- set _cm_api_tls = _cm_api.get('tls', {}) %}
 {%- set _cm_api_tls_auto = _cm_api_tls.get('auto', {}) %}
 {%- set _cm_api_tls_server = _cm_api_tls.get('server', {}) %}
+{%- set _tls = cilium.get('tls', {}) %}
+{%- set _tls_ca = _tls.get('ca', none) %}
 {%- set _cm_kvstore = _cm.get('kvstoremesh', {}) %}
 {%- set _cm_config = _cm.get('config', {}) %}
 {%- set _cm_port = _cm_api_service.get('nodePort', 32379) %}
@@ -199,6 +201,13 @@ clustermesh:
 {%-   else %}
     clusters: []
 {%-   endif %}
+{%- endif %}
+
+{%- if _tls_ca is not none %}
+tls:
+  ca:
+    cert: {{ _tls_ca.get('cert', '') | tojson }}
+    key: {{ _tls_ca.get('key', '') | tojson }}
 {%- endif %}
 
 cni:
