@@ -206,8 +206,10 @@ clustermesh:
 {%- if _tls_ca is not none %}
 tls:
   ca:
-    cert: {{ _tls_ca.get('cert', '') | tojson }}
-    key: {{ _tls_ca.get('key', '') | tojson }}
+    cert: |
+{{ _tls_ca.get('cert', '') | indent(6, first=True) }}
+    key: |
+{{ _tls_ca.get('key', '') | indent(6, first=True) }}
 {%- endif %}
 
 cni:
