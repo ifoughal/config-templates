@@ -104,7 +104,7 @@
 
 
 cluster:
-  name: {{ _cluster.get('name', 'talos-cluster-' ~ _cluster_id) }}
+  name: {{ _cluster.get('name', k8s_cluster.object.name if k8s_cluster.object else ('talos-cluster-' ~ _cluster_id)) }}
   id: {{ _cluster.get('id', _cluster_id) }}
 
 k8sServiceHost: {{ cilium.get('k8sServiceHost', 'localhost') }}
@@ -162,6 +162,7 @@ annotateK8sNode: {{ cilium.get('annotateK8sNode', true) | tojson }}
 {%- set _cm_api_tls_server = _cm_api_tls.get('server', {}) %}
 {%- set _tls = cilium.get('tls', {}) %}
 {%- set _tls_ca = _tls.get('ca', none) %}
+{%- set _tls_cabundle = _tls.get('caBundle', none) %}
 {%- set _cm_kvstore = _cm.get('kvstoremesh', {}) %}
 {%- set _cm_config = _cm.get('config', {}) %}
 {%- set _cm_port = _cm_api_service.get('nodePort', 32379) %}
@@ -203,13 +204,25 @@ clustermesh:
 {%-   endif %}
 {%- endif %}
 
-{%- if _tls_ca is not none %}
+{%- if _tls_ca is not none or _tls_cabundle is not none %}
 tls:
+{%-   if _tls_ca is not none %}
   ca:
-    cert: |
-{{ _tls_ca.get('cert', '') | indent(6, first=True) }}
-    key: |
-{{ _tls_ca.get('key', '') | indent(6, first=True) }}
+    cert: {{ _tls_ca.get('cert', '') | tojson }}
+    key: {{ _tls_ca.get('key', '') | tojson }}
+    certValidityDuration: {{ _tls_ca.get('certValidityDuration', 1095) }}
+{%-   endif %}
+{%-   if _tls_cabundle is not none %}
+  caBundle:
+    enabled: {{ _tls_cabundle.get('enabled', false) | tojson }}
+    name: {{ _tls_cabundle.get('name', 'cilium-root-ca.crt') }}
+    key: {{ _tls_cabundle.get('key', 'ca.crt') }}
+    useSecret: {{ _tls_cabundle.get('useSecret', false) | tojson }}
+{%-     if _tls_cabundle.get('content') %}
+    content: |
+{{ _tls_cabundle.get('content', '') | indent(6, first=True) }}
+{%-     endif %}
+{%-   endif %}
 {%- endif %}
 
 cni:
