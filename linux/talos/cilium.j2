@@ -174,21 +174,25 @@ annotateK8sNode: {{ cilium.get('annotateK8sNode', true) | tojson }}
 {%-     set _peer_ips = [] %}
 {%-     if _peer.kubernetes_cluster_nodes %}
 {%-       for _peer_node in _peer.kubernetes_cluster_nodes.all() %}
-{%-         if _peer_node.interfaces %}
-{%-           for _iface in _peer_node.interfaces.all() %}
-{%-             if _iface.custom_field_data.get("traffic_role") == "east_west" %}
-{%-               for _ip in _iface.ip_addresses.filter(address__family=4) %}
-{%-                 set _ip_str = _ip.address.ip | string %}
-{%-                 if _ip_str not in _peer_ips %}
-{%-                   set _ = _peer_ips.append(_ip_str) %}
-{%-                 endif %}
-{%-               endfor %}
-{%-             endif %}
-{%-           endfor %}
+{%-         if _peer_node.status and _peer_node.status.value == "active" %}
+{%-           if _peer_node.interfaces %}
+{%-             for _iface in _peer_node.interfaces.all() %}
+{%-               if _iface.custom_field_data.get("traffic_role") == "east_west" %}
+{%-                 for _ip in _iface.ip_addresses.filter(address__family=4) %}
+{%-                   set _ip_str = _ip.address.ip | string %}
+{%-                   if _ip_str not in _peer_ips %}
+{%-                     set _ = _peer_ips.append(_ip_str) %}
+{%-                   endif %}
+{%-                 endfor %}
+{%-               endif %}
+{%-             endfor %}
+{%-           endif %}
 {%-         endif %}
 {%-       endfor %}
 {%-     endif %}
-{%-     set _ = _cm_auto_peers.list.append({"name": _peer.name, "ips": _peer_ips}) %}
+{%-     if _peer_ips %}
+{%-       set _ = _cm_auto_peers.list.append({"name": _peer.name, "ips": _peer_ips}) %}
+{%-     endif %}
 {%-   endfor %}
 {%- endif %}
 {%- set _cm_clusters = _cm_manual_clusters if _cm_manual_clusters else _cm_auto_peers.list %}
