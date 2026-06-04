@@ -168,9 +168,8 @@ annotateK8sNode: {{ cilium.get('annotateK8sNode', true) | tojson }}
 {%- set _cm_port = _cm_api_service.get('nodePort', 32379) %}
 {%- set _cm_manual_clusters = _cm_config.get('clusters', []) %}
 {%- set _cm_auto_peers = namespace(list=[]) %}
-{%- if k8s_cluster.object and k8s_cluster.object.clustermesh %}
-{%-   set _mesh = k8s_cluster.object.clustermesh %}
-{%-   for _peer in k8s_cluster.object.__class__.objects.filter(clustermesh=_mesh).exclude(pk=k8s_cluster.object.pk) %}
+{%- if clustermesh_peer_clusters is defined %}
+{%-   for _peer in clustermesh_peer_clusters %}
 {%-     set _peer_ips = [] %}
 {%-     if _peer.kubernetes_cluster_nodes %}
 {%-       for _peer_node in _peer.kubernetes_cluster_nodes.all() %}
