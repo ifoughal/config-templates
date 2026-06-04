@@ -167,6 +167,7 @@ annotateK8sNode: {{ cilium.get('annotateK8sNode', true) | tojson }}
 {%- set _cm_config = _cm.get('config', {}) %}
 {%- set _mesh_nodeport = k8s_cluster.object.clustermesh.nodeport if (k8s_cluster.object and k8s_cluster.object.clustermesh and k8s_cluster.object.clustermesh.nodeport) else 32379 %}
 {%- set _cm_port = _cm_api_service.get('nodePort', _mesh_nodeport) %}
+{%- set _mesh_iface_role = k8s_cluster.object.clustermesh.peer_ip_interface_role if (k8s_cluster.object and k8s_cluster.object.clustermesh and k8s_cluster.object.clustermesh.peer_ip_interface_role) else "east_west" %}
 {%- set _cm_manual_clusters = _cm_config.get('clusters', []) %}
 {%- set _cm_auto_peers = namespace(list=[]) %}
 {%- if clustermesh_peer_clusters is defined %}
@@ -174,10 +175,10 @@ annotateK8sNode: {{ cilium.get('annotateK8sNode', true) | tojson }}
 {%-     set _peer_ips = [] %}
 {%-     if _peer.kubernetes_cluster_nodes %}
 {%-       for _peer_node in _peer.kubernetes_cluster_nodes.all() %}
-{%-         if _peer_node.status and _peer_node.status.value == "active" %}
+{%-         if _peer_node.status and _peer_node.status.value in ["active", "planned", "staged"] %}
 {%-           if _peer_node.interfaces %}
 {%-             for _iface in _peer_node.interfaces.all() %}
-{%-               if _iface.custom_field_data.get("traffic_role") == "east_west" %}
+{%-               if _iface.custom_field_data.get("traffic_role") == _mesh_iface_role %}
 {%-                 for _ip in _iface.ip_addresses.filter(address__family=4) %}
 {%-                   set _ip_str = _ip.address.ip | string %}
 {%-                   if _ip_str not in _peer_ips %}
