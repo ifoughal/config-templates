@@ -102,7 +102,8 @@
 {%- set _dhcp_client_id = _dhcp.get("clientIdentifier", "mac") %}
 {%- set _install = _machine.get("install", {}) %}
 {%- set _extra_kernel_args = _install.get("extraKernelArgs", ["net.ifnames=0"]) %}
-{%- set _extra_kernel_args = [_extra_kernel_args] if _extra_kernel_args is string else _extra_kernel_args -%}
+{%- set _extra_kernel_args = [_extra_kernel_args] if _extra_kernel_args is string else _extra_kernel_args %}
+{%- set _kubespan = KubeSpanConfig if KubeSpanConfig is defined else _talos.get("KubeSpanConfig", false) -%}
 {%- if virtualmachine.interfaces %}
 {%-     for interface in virtualmachine.interfaces.all() %}
 {%-         set _mac = interface.mac_address or (interface.mac_addresses.all().first() if interface.mac_addresses else none) %}
@@ -130,6 +131,12 @@ name: {{ interface.name }}
 clientIdentifier: {{ _dhcp_client_id }}  {# override via talos.dhcp.clientIdentifier in local context #}
 {%-         endif %}
 {%-     endfor %}
+{%- endif %}
+{%- if _kubespan %}
+---
+apiVersion: v1alpha1
+kind: KubeSpanConfig
+enabled: true  {# Enable the KubeSpan feature; set KubeSpanConfig: true in local context #}
 {%- endif %}
 ---
 apiVersion: v1alpha1
