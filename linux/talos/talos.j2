@@ -92,6 +92,9 @@
 {%- set _etcd = _talos_cluster.get("etcd", {}) %}
 {%- set _etcd_advertised = _etcd.get("advertisedSubnets", [east_west.subnet if east_west.subnet else "10.64.16.0/22"]) %}
 {%- set _etcd_advertised = [_etcd_advertised] if _etcd_advertised is string else _etcd_advertised %}
+{%- set _discovery = _talos_cluster.get("discovery", none) %}
+{%- set _disc_registries = _discovery.get("registries", {}) if _discovery is mapping else {} %}
+{%- set _disc_k8s = _disc_registries.get("kubernetes", {"disabled": true}) %}
 {%- set _net = _talos.get("network", {}) %}
 {%- set _static_routes = _net.get("routes", [{"network": "0.0.0.0/0", "gateway": east_west.gateway if east_west.gateway else "10.64.0.1"}]) %}
 {%- set _kubelet = _machine.get("kubelet", {}) %}
@@ -154,6 +157,15 @@ cluster:
     podSubnets: {{ [k8s_cluster.pod_subnet] | tojson }}
     serviceSubnets: {{ [k8s_cluster.service_subnet] | tojson }}
     dnsDomain: {{ k8s_cluster.domain }}
+{%- if _discovery is not none %}
+  discovery:
+    enabled: {{ _discovery.get("enabled", true) | tojson if _discovery is mapping else "true" }}
+    {#- Configure registries used for cluster member discovery. #}
+    registries:
+      kubernetes: {#- Kubernetes registry is problematic with KubeSpan, if the control plane endpoint is routable itself via KubeSpan. #}
+        disabled: {{ _disc_k8s.get("disabled", true) | tojson }}
+      service: {{ _disc_registries.get("service", {}) | tojson }}
+{%- endif %}
 {#-     interfaces:
     - interface: {{ east_west.name if east_west.name else "ens3" }}
       routes:
