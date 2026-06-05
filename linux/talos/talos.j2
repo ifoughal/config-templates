@@ -105,6 +105,15 @@
 {%- set _extra_kernel_args = [_extra_kernel_args] if _extra_kernel_args is string else _extra_kernel_args -%}
 {%- if virtualmachine.interfaces %}
 {%-     for interface in virtualmachine.interfaces.all() %}
+{%-         set _mac = interface.mac_address or (interface.mac_addresses.all().first() if interface.mac_addresses else none) %}
+{%-         if _mac %}
+---
+apiVersion: v1alpha1
+kind: LinkAliasConfig
+name: {{ interface.name }}
+selector:
+    match: mac(link.permanent_addr) == "{{ _mac | string | lower }}"
+{%-         endif %}
 ---
 apiVersion: v1alpha1
 kind: LinkConfig
