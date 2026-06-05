@@ -327,6 +327,8 @@ maglev:
 enableIPv4Masquerade: {{ cilium.get('enableIPv4Masquerade', false) | tojson }}
 enableIPv6Masquerade: {{ cilium.get('enableIPv6Masquerade', false) | tojson }}
 
+MTU: {{ cilium.get('MTU', 1100) }}
+
 {#- Pass through any top-level keys from the `cilium` config context not handled above.
     This allows adding arbitrary Helm values (e.g. clustermesh, kvstoremesh) without
     modifying this template — just add them to the VM's cilium config context dict. -#}
