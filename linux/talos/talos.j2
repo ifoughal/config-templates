@@ -97,7 +97,9 @@
 {%- set _kubelet = _machine.get("kubelet", {}) %}
 {%- set _nodeip = _kubelet.get("nodeIP", {}) %}
 {%- set _valid_subnets = _nodeip.get("validSubnets", [east_west.subnet if east_west.subnet else "10.64.3.0/20"]) %}
-{%- set _valid_subnets = [_valid_subnets] if _valid_subnets is string else _valid_subnets -%}
+{%- set _valid_subnets = [_valid_subnets] if _valid_subnets is string else _valid_subnets %}
+{%- set _dhcp = _talos.get("dhcp", {}) %}
+{%- set _dhcp_client_id = _dhcp.get("clientIdentifier", "mac") -%}
 {%- if virtualmachine.interfaces %}
 {%-     for interface in virtualmachine.interfaces.all() %}
 ---
@@ -107,6 +109,13 @@ name: {{ interface.name }}
 up: {{ "true" if interface.enabled else "false" }}  {# depends on the interface state on netbox #}
 {%-         if interface.mtu %}
 mtu: {{ interface.mtu }}  {# depends on the interface mtu on netbox; omitted when null #}
+{%-         endif %}
+{%-         if interface.custom_field_data.get("dhcp_configured") == true %}
+---
+apiVersion: v1alpha1
+kind: DHCPv4Config
+name: {{ interface.name }}
+clientIdentifier: {{ _dhcp_client_id }}  {# override via talos.dhcp.clientIdentifier in local context #}
 {%-         endif %}
 {%-     endfor %}
 {%- endif %}
