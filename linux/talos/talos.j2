@@ -99,7 +99,10 @@
 {%- set _valid_subnets = _nodeip.get("validSubnets", [east_west.subnet if east_west.subnet else "10.64.3.0/20"]) %}
 {%- set _valid_subnets = [_valid_subnets] if _valid_subnets is string else _valid_subnets %}
 {%- set _dhcp = _talos.get("dhcp", {}) %}
-{%- set _dhcp_client_id = _dhcp.get("clientIdentifier", "mac") -%}
+{%- set _dhcp_client_id = _dhcp.get("clientIdentifier", "mac") %}
+{%- set _install = _machine.get("install", {}) %}
+{%- set _extra_kernel_args = _install.get("extraKernelArgs", ["net.ifnames=0"]) %}
+{%- set _extra_kernel_args = [_extra_kernel_args] if _extra_kernel_args is string else _extra_kernel_args -%}
 {%- if virtualmachine.interfaces %}
 {%-     for interface in virtualmachine.interfaces.all() %}
 ---
@@ -170,6 +173,10 @@ machine:
     image: ghcr.io/siderolabs/installer:v{{ openstack_image.version }}  {# eg: v1.12.5 # Allows for supplying the image used to perform the installation. #}
     wipe: true  {# Indicates if the installation disk should be wiped at installation time. #}
     grubUseUKICmdline: true  {# Indicates if legacy GRUB bootloader should use kernel cmdline from the UKI instead of building it on the host. #}
+    extraKernelArgs:  {# override via talos.machine.install.extraKernelArgs in local context #}
+{%- for arg in _extra_kernel_args %}
+    - {{ arg }}
+{%- endfor %}
   certSANs: {{ cert_sans | tojson }}
 {%- if virtualmachine.role.name == "storage-worker" %}
   kernel:
