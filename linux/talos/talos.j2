@@ -106,7 +106,10 @@
 {%- set _install = _machine.get("install", {}) %}
 {%- set _extra_kernel_args = _install.get("extraKernelArgs", ["net.ifnames=0"]) %}
 {%- set _extra_kernel_args = [_extra_kernel_args] if _extra_kernel_args is string else _extra_kernel_args %}
-{%- set _kubespan = KubeSpanConfig if KubeSpanConfig is defined else _talos.get("KubeSpanConfig", false) -%}
+{%- set _kubespan_ctx = KubeSpanConfig if KubeSpanConfig is defined else _talos.get("KubeSpanConfig", false) %}
+{%- set _kubespan = _kubespan_ctx if _kubespan_ctx else false %}
+{%- set _kubespan_opts = _kubespan_ctx if _kubespan_ctx is mapping else {} %}
+{%- set _ks_filters = _kubespan_opts.get("filters", {}) -%}
 {%- if virtualmachine.interfaces %}
 {%-     for interface in virtualmachine.interfaces.all() %}
 {%-         set _mac = interface.mac_address or (interface.mac_addresses.all().first() if interface.mac_addresses else none) %}
@@ -139,7 +142,19 @@ clientIdentifier: {{ _dhcp_client_id }}  {# override via talos.dhcp.clientIdenti
 ---
 apiVersion: v1alpha1
 kind: KubeSpanConfig
-enabled: true  {# Enable the KubeSpan feature; set KubeSpanConfig: true in local context #}
+enabled: {{ _kubespan_opts.get("enabled", true) | tojson }}  {# Enable the KubeSpan feature; set KubeSpanConfig: true in local context #}
+advertiseKubernetesNetworks: {{ _kubespan_opts.get("advertiseKubernetesNetworks", false) | tojson }}
+allowDownPeerBypass: {{ _kubespan_opts.get("allowDownPeerBypass", false) | tojson }}
+mtu: {{ _kubespan_opts.get("mtu", 1420) }}
+filters:
+    endpoints:
+{%-   for ep in _ks_filters.get("endpoints", ["0.0.0.0/0", "::/0"]) %}
+      - {{ ep }}
+{%-   endfor %}
+    excludeAdvertisedNetworks:
+{%-   for net in _ks_filters.get("excludeAdvertisedNetworks", ["2007::/64"]) %}
+        - {{ net }}
+{%-   endfor %}
 {%- endif %}
 ---
 apiVersion: v1alpha1
