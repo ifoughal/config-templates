@@ -109,7 +109,10 @@
 {%- set _kubespan_ctx = KubeSpanConfig if KubeSpanConfig is defined else _talos.get("KubeSpanConfig", false) %}
 {%- set _kubespan = _kubespan_ctx if _kubespan_ctx else false %}
 {%- set _kubespan_opts = _kubespan_ctx if _kubespan_ctx is mapping else {} %}
-{%- set _ks_filters = _kubespan_opts.get("filters", {}) -%}
+{%- set _ks_filters = _kubespan_opts.get("filters", {}) %}
+{%- set _ethernet_ctx = _talos.get("EthernetConfig", none) %}
+{%- set _ethernet_list = _ethernet_ctx if (_ethernet_ctx is iterable and _ethernet_ctx is not mapping and _ethernet_ctx is not string) else ([_ethernet_ctx] if _ethernet_ctx else []) %}
+{%- set _eth_default_features = {"rx-gro": false, "rx-gro-hw": false, "tx-tcp-segmentation": false, "tx-tcp6-segmentation": false, "tx-generic-segmentation": false} -%}
 {%- if virtualmachine.interfaces %}
 {%-     for interface in virtualmachine.interfaces.all() %}
 {%-         set _mac = interface.mac_address or (interface.mac_addresses.all().first() if interface.mac_addresses else none) %}
@@ -156,6 +159,17 @@ filters:
         - {{ net }}
 {%-   endfor %}
 {%- endif %}
+{%- for _eth in _ethernet_list %}
+{%-   set _eth_opts = _eth if _eth is mapping else {} %}
+---
+apiVersion: v1alpha1
+kind: EthernetConfig
+name: {{ _eth_opts.get("name", "ens4") }}
+features:
+{%-   for _fk, _fv in _eth_opts.get("features", _eth_default_features).items() %}
+  {{ _fk }}: {{ _fv | tojson }}
+{%-   endfor %}
+{%- endfor %}
 ---
 apiVersion: v1alpha1
 kind: HostnameConfig
